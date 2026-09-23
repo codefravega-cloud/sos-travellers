@@ -196,7 +196,6 @@ export default function MapExplorer() {
   }
 
   return <>
-    <WeatherBackdrop locale={locale}/>
     <header className="topbar">
       <a className="brand" href="#top" aria-label="SOS Travellers inicio">
         <img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy" />
@@ -206,6 +205,7 @@ export default function MapExplorer() {
     </header>
 
     <main id="top">
+      <WeatherBackdrop locale={locale}/>
       <section className="map-hero">
         <div><p className="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p className="lede">{t.lede}</p></div>
         <div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><p role="status">{locationStatus||t.locationHint}</p></div>
