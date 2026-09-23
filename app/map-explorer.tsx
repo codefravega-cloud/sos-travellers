@@ -7,6 +7,14 @@ import { Category, Locale, Place, places } from "./places";
 
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
+type UserLocation = { coords:[number,number]; accuracy:number; nearest:Place; distanceKm:number };
+
+const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; accuracy:string; recenter:string; denied:string; unavailable:string}> = {
+  es:{locating:"Buscando tu ubicación actual…",here:"Tu ubicación actual",nearest:"Más cerca",accuracy:"Precisión",recenter:"Volver a mi ubicación",denied:"No pudimos acceder a tu ubicación. Activa el permiso de ubicación del navegador y vuelve a intentarlo.",unavailable:"Tu navegador no permite usar la ubicación."},
+  en:{locating:"Finding your current location…",here:"Your current location",nearest:"Nearest place",accuracy:"Accuracy",recenter:"Return to my location",denied:"We could not access your location. Enable browser location permission and try again.",unavailable:"Your browser does not support location."},
+  pt:{locating:"Buscando sua localização atual…",here:"Sua localização atual",nearest:"Mais próximo",accuracy:"Precisão",recenter:"Voltar à minha localização",denied:"Não foi possível acessar sua localização. Ative a permissão no navegador e tente novamente.",unavailable:"Seu navegador não permite usar a localização."},
+  fr:{locating:"Recherche de votre position actuelle…",here:"Votre position actuelle",nearest:"Le plus proche",accuracy:"Précision",recenter:"Revenir à ma position",denied:"Impossible d’accéder à votre position. Activez l’autorisation dans le navigateur puis réessayez.",unavailable:"Votre navigateur ne prend pas en charge la localisation."},
+};
 
 const copy = {
   es:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BIEN SELECCIONADO", title:"Lugares que sí suman", lede:"Un solo mapa para decidir mejor: lugares bien valorados, información práctica y opiniones reales de otros viajeros.", locate:"Usar mi ubicación", locationHint:"Encuentra qué recomendación está más cerca de ti.", all:"Todos", museum:"Museos", coffee:"Cafeterías", food:"Comida chilena", view:"Paseos y vistas", stay:"Hoteles", useful:"Útiles", market:"Mercados", shop:"Compras", experience:"Experiencias", growshop:"Growshops", search:"Buscar por nombre o comuna…", selected:"lugares seleccionados", google:"Fotos, reseñas y ruta en Google Maps", neighborhood:"Barrio", time:"Tiempo sugerido", languages:"Idiomas / información", googleRating:"Referencia Google", community:"Opinión SOS", opinions:"Opiniones de viajeros", noOpinions:"Todavía no hay opiniones. Sé la primera persona en contar cómo fue.", write:"Comparte tu experiencia", name:"Tu nombre", comment:"¿Qué debería saber otro viajero?", send:"Publicar opinión", sending:"Publicando…", success:"¡Gracias! Tu opinión ya está publicada.", choose:"Selecciona una calificación", source:"Referencias y valoraciones de Google Maps revisadas el 23 de septiembre de 2026; pueden cambiar. Las imágenes mostradas provienen de fuentes oficiales acreditadas. Verifica horarios, idiomas y tarifas antes de salir.", mapHelp:"Toca un marcador o una ficha para ver todos los detalles.", detail:"Información del lugar", reviewsCount:"opiniones", official:"Sitio oficial", error:"No pudimos cargar las opiniones ahora.", footer:"Tu copiloto local, ciudad por ciudad." },
@@ -22,6 +30,16 @@ function mapsUrl(place:Place) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery??`${place.name} Santiago Chile`)}`;
 }
 
+function distanceKm(a:[number,number],b:[number,number]) {
+  const toRad=(value:number)=>value*Math.PI/180;
+  const earth=6371;
+  const dLat=toRad(b[0]-a[0]),dLon=toRad(b[1]-a[1]);
+  const value=Math.sin(dLat/2)**2+Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*Math.sin(dLon/2)**2;
+  return 2*earth*Math.asin(Math.sqrt(value));
+}
+
+function displayDistance(km:number) { return km<1?`${Math.max(1,Math.round(km*1000))} m`:`${km.toFixed(1)} km`; }
+
 export default function MapExplorer() {
   const [locale,setLocale]=useState<Locale>(()=>{
     if(typeof window==="undefined") return "es";
@@ -33,6 +51,8 @@ export default function MapExplorer() {
   const [selectedId,setSelectedId]=useState("precolombino");
   const [mapReady,setMapReady]=useState(false);
   const [locationStatus,setLocationStatus]=useState("");
+  const [locating,setLocating]=useState(false);
+  const [userLocation,setUserLocation]=useState<UserLocation|null>(null);
   const [reviews,setReviews]=useState<Review[]>([]);
   const [summary,setSummary]=useState<ReviewSummary>({count:0,average:null});
   const [reviewsError,setReviewsError]=useState(false);
@@ -44,8 +64,10 @@ export default function MapExplorer() {
   const mapRef=useRef<any>(null);
   const markersRef=useRef<any[]>([]);
   const userMarkerRef=useRef<any>(null);
+  const userAccuracyRef=useRef<any>(null);
+  const watchIdRef=useRef<number|null>(null);
   const detailRef=useRef<HTMLElement>(null);
-  const t=copy[locale];
+  const t=copy[locale],lt=locationCopy[locale];
   const shown=useMemo(()=>{
     const needle=query.trim().toLocaleLowerCase(locale);
     return places.filter((place)=>(category==="all"||place.category===category)&&(!needle||`${place.name} ${place.neighborhood}`.toLocaleLowerCase(locale).includes(needle)));
@@ -54,6 +76,7 @@ export default function MapExplorer() {
 
   useEffect(()=>{ localStorage.setItem("sos-language",locale); document.documentElement.lang=locale; },[locale]);
   useEffect(()=>{ import("leaflet").then((module)=>{leafletRef.current=module.default;setMapReady(true)}).catch(()=>setMapReady(false)); },[]);
+  useEffect(()=>()=>{ if(watchIdRef.current!==null) navigator.geolocation?.clearWatch(watchIdRef.current); },[]);
 
   useEffect(()=>{
     if(!mapReady||!mapNode.current||mapRef.current) return;
@@ -102,17 +125,28 @@ export default function MapExplorer() {
     if(window.innerWidth<980) setTimeout(()=>detailRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),150);
   }
 
+  function centerOnUser(location=userLocation) {
+    if(!location||!mapRef.current) return;
+    mapRef.current.setView(location.coords,16,{animate:true});
+    userMarkerRef.current?.openTooltip();
+  }
+
   function locate() {
-    if(!navigator.geolocation) { setLocationStatus("Tu navegador no permite usar la ubicación."); return; }
-    setLocationStatus("Buscando tu ubicación…");
-    navigator.geolocation.getCurrentPosition((position)=>{
+    if(!navigator.geolocation) { setLocationStatus(lt.unavailable); return; }
+    if(!leafletRef.current||!mapRef.current) { setLocationStatus(lt.locating); return; }
+    setLocating(true); setLocationStatus(lt.locating);
+    if(watchIdRef.current!==null) navigator.geolocation.clearWatch(watchIdRef.current);
+    watchIdRef.current=navigator.geolocation.watchPosition((position)=>{
       const L=leafletRef.current,map=mapRef.current,here:[number,number]=[position.coords.latitude,position.coords.longitude];
-      const nearest=places.reduce((best,place)=>Math.hypot(place.coords[0]-here[0],place.coords[1]-here[1])<Math.hypot(best.coords[0]-here[0],best.coords[1]-here[1])?place:best,places[0]);
-      if(userMarkerRef.current) userMarkerRef.current.remove();
-      userMarkerRef.current=L.circleMarker(here,{radius:8,color:"#081a36",fillColor:"#ffd21f",fillOpacity:1,weight:4}).addTo(map);
-      map.fitBounds(L.latLngBounds([here,nearest.coords]),{padding:[60,60],maxZoom:14});
-      setCategory("all"); setSelectedId(nearest.id); setLocationStatus(`${nearest.name} está cerca de ti.`);
-    },()=>setLocationStatus("No pudimos acceder a tu ubicación. Revisa el permiso del navegador."),{enableHighAccuracy:true,timeout:10000});
+      const nearest=places.reduce((best,place)=>distanceKm(here,place.coords)<distanceKm(here,best.coords)?place:best,places[0]);
+      const next={coords:here,accuracy:position.coords.accuracy,nearest,distanceKm:distanceKm(here,nearest.coords)};
+      userMarkerRef.current?.remove(); userAccuracyRef.current?.remove();
+      userAccuracyRef.current=L.circle(here,{radius:Math.max(position.coords.accuracy,20),color:"#2468b4",fillColor:"#6aa9f4",fillOpacity:.12,weight:1}).addTo(map);
+      userMarkerRef.current=L.circleMarker(here,{radius:10,color:"#081a36",fillColor:"#ffd21f",fillOpacity:1,weight:4}).addTo(map).bindTooltip(lt.here,{permanent:true,direction:"top",offset:[0,-12],className:"user-location-label"});
+      setUserLocation(next); setCategory("all"); setSelectedId(nearest.id); setLocating(false);
+      setLocationStatus(`${lt.nearest}: ${nearest.name} · ${displayDistance(next.distanceKm)}`);
+      setTimeout(()=>map.fitBounds(L.latLngBounds([here,nearest.coords]),{padding:[70,70],maxZoom:15}),120);
+    },()=>{setLocating(false);setLocationStatus(lt.denied);},{enableHighAccuracy:true,timeout:12000,maximumAge:5000});
   }
 
   async function submitReview(event:FormEvent<HTMLFormElement>) {
@@ -138,7 +172,7 @@ export default function MapExplorer() {
     <main id="top">
       <section className="map-hero">
         <div><p className="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p className="lede">{t.lede}</p></div>
-        <div className="locate-box"><button type="button" onClick={locate}><span>⌖</span>{t.locate}</button><p role="status">{locationStatus||t.locationHint}</p></div>
+        <div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><p role="status">{locationStatus||t.locationHint}</p></div>
       </section>
 
       <section className="explorer" aria-label={t.title}>
@@ -151,6 +185,7 @@ export default function MapExplorer() {
           <div className="map-column">
             <div className="map-wrap">
               <div className="map-count"><b>{shown.length}</b> {t.selected}</div>
+              {userLocation&&<div className="location-card"><div><strong><i/> {lt.here}</strong><small>{userLocation.coords[0].toFixed(4)}, {userLocation.coords[1].toFixed(4)} · {lt.accuracy} ±{Math.round(userLocation.accuracy)} m</small><span>{lt.nearest}: <b>{userLocation.nearest.name}</b> · {displayDistance(userLocation.distanceKm)}</span></div><button type="button" onClick={()=>centerOnUser()} aria-label={lt.recenter}>⌖</button></div>}
               <div ref={mapNode} className="places-map" aria-label="Mapa de lugares recomendados en Santiago" />
               {!mapReady&&<div className="map-loading">Cargando mapa…</div>}
             </div>
