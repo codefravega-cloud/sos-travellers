@@ -9,23 +9,25 @@ import WeatherBackdrop from "./weather-backdrop";
 import TripPlanner from "./trip-planner";
 import SafetyHub from "./safety-hub";
 import BusinessSignup from "./business-signup";
+import TransportGuide from "./transport-guide";
+import { currencyOptions } from "./travel-money";
 
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
 type UserLocation = { coords:[number,number]; accuracy:number; nearest:Place; distanceKm:number };
 
-const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; accuracy:string; recenter:string; denied:string; unavailable:string}> = {
-  es:{locating:"Buscando tu ubicación actual…",here:"Tu ubicación actual",nearest:"Más cerca",accuracy:"Precisión",recenter:"Volver a mi ubicación",denied:"No pudimos acceder a tu ubicación. Activa el permiso de ubicación del navegador y vuelve a intentarlo.",unavailable:"Tu navegador no permite usar la ubicación."},
-  en:{locating:"Finding your current location…",here:"Your current location",nearest:"Nearest place",accuracy:"Accuracy",recenter:"Return to my location",denied:"We could not access your location. Enable browser location permission and try again.",unavailable:"Your browser does not support location."},
-  pt:{locating:"Buscando sua localização atual…",here:"Sua localização atual",nearest:"Mais próximo",accuracy:"Precisão",recenter:"Voltar à minha localização",denied:"Não foi possível acessar sua localização. Ative a permissão no navegador e tente novamente.",unavailable:"Seu navegador não permite usar a localização."},
-  fr:{locating:"Recherche de votre position actuelle…",here:"Votre position actuelle",nearest:"Le plus proche",accuracy:"Précision",recenter:"Revenir à ma position",denied:"Impossible d’accéder à votre position. Activez l’autorisation dans le navigateur puis réessayez.",unavailable:"Votre navigateur ne prend pas en charge la localisation."},
+const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; accuracy:string; recenter:string; denied:string; unavailable:string;manual:string;manualHint:string;manualSet:string}> = {
+  es:{locating:"Buscando tu ubicación actual…",here:"Tu ubicación actual",nearest:"Más cerca",accuracy:"Precisión",recenter:"Volver a mi ubicación",denied:"El teléfono bloqueó la ubicación. En Safari/Chrome activa Ubicación para este sitio o usa “Marcar en el mapa”.",unavailable:"Tu navegador no permite usar la ubicación.",manual:"Marcar en el mapa",manualHint:"Toca el mapa en el punto donde estás. No necesitas dar permiso al teléfono.",manualSet:"Ubicación aproximada marcada"},
+  en:{locating:"Finding your current location…",here:"Your current location",nearest:"Nearest place",accuracy:"Accuracy",recenter:"Return to my location",denied:"Your phone blocked location. Enable Location for this site in Safari/Chrome or use “Mark on map”.",unavailable:"Your browser does not support location.",manual:"Mark on map",manualHint:"Tap the map where you are. No phone permission is needed.",manualSet:"Approximate location marked"},
+  pt:{locating:"Buscando sua localização atual…",here:"Sua localização atual",nearest:"Mais próximo",accuracy:"Precisão",recenter:"Voltar à minha localização",denied:"O telefone bloqueou a localização. Ative a permissão no Safari/Chrome ou use “Marcar no mapa”.",unavailable:"Seu navegador não permite usar a localização.",manual:"Marcar no mapa",manualHint:"Toque no mapa onde você está. Não precisa dar permissão ao telefone.",manualSet:"Localização aproximada marcada"},
+  fr:{locating:"Recherche de votre position actuelle…",here:"Votre position actuelle",nearest:"Le plus proche",accuracy:"Précision",recenter:"Revenir à ma position",denied:"Le téléphone a bloqué la position. Autorisez-la dans Safari/Chrome ou utilisez « Marquer sur la carte ».",unavailable:"Votre navigateur ne prend pas en charge la localisation.",manual:"Marquer sur la carte",manualHint:"Touchez la carte à votre position. Aucune autorisation du téléphone requise.",manualSet:"Position approximative marquée"},
 };
 
-const actionCopy:Record<Locale,{plan:string;map:string;sos:string;business:string;practical:string;directions:string;walk:string;transit:string;drive:string;save:string;saved:string}>={
-  es:{plan:"Planificar",map:"Mapa",sos:"SOS",business:"Negocios",practical:"Ficha práctica",directions:"Cómo llegar",walk:"Caminando",transit:"Transporte público",drive:"En auto",save:"Guardar en mi viaje",saved:"Guardado en mi viaje"},
-  en:{plan:"Plan",map:"Map",sos:"SOS",business:"Businesses",practical:"Practical details",directions:"Get there",walk:"Walking",transit:"Public transport",drive:"Driving",save:"Save to my trip",saved:"Saved to my trip"},
-  pt:{plan:"Planejar",map:"Mapa",sos:"SOS",business:"Negócios",practical:"Ficha prática",directions:"Como chegar",walk:"Caminhando",transit:"Transporte público",drive:"De carro",save:"Salvar na viagem",saved:"Salvo na viagem"},
-  fr:{plan:"Planifier",map:"Carte",sos:"SOS",business:"Entreprises",practical:"Infos pratiques",directions:"S’y rendre",walk:"À pied",transit:"Transport public",drive:"En voiture",save:"Enregistrer",saved:"Enregistré"},
+const actionCopy:Record<Locale,{plan:string;transport:string;map:string;sos:string;business:string;practical:string;directions:string;walk:string;transit:string;drive:string;save:string;saved:string;currency:string}>={
+  es:{plan:"Planificar",transport:"Precios transporte",map:"Mapa",sos:"SOS",business:"Negocios",practical:"Ficha práctica",directions:"Cómo llegar",walk:"Caminando",transit:"Transporte público",drive:"En auto",save:"Guardar en mi viaje",saved:"Guardado en mi viaje",currency:"Moneda"},
+  en:{plan:"Plan",transport:"Transport prices",map:"Map",sos:"SOS",business:"Businesses",practical:"Practical details",directions:"Get there",walk:"Walking",transit:"Public transport",drive:"Driving",save:"Save to my trip",saved:"Saved to my trip",currency:"Currency"},
+  pt:{plan:"Planejar",transport:"Preços transporte",map:"Mapa",sos:"SOS",business:"Negócios",practical:"Ficha prática",directions:"Como chegar",walk:"Caminhando",transit:"Transporte público",drive:"De carro",save:"Salvar na viagem",saved:"Salvo na viagem",currency:"Moeda"},
+  fr:{plan:"Planifier",transport:"Prix transport",map:"Carte",sos:"SOS",business:"Entreprises",practical:"Infos pratiques",directions:"S’y rendre",walk:"À pied",transit:"Transport public",drive:"En voiture",save:"Enregistrer",saved:"Enregistré",currency:"Devise"},
 };
 
 const extraCopy:Record<Locale,Record<"park"|"themed"|"winery"|"snow"|"nightlife"|"hours"|"access",string>>={
@@ -83,6 +85,8 @@ export default function MapExplorer() {
   const [formStatus,setFormStatus]=useState("");
   const [submitting,setSubmitting]=useState(false);
   const [favoriteIds,setFavoriteIds]=useState<string[]>([]);
+  const [displayCurrency,setDisplayCurrency]=useState(()=>typeof window==="undefined"?"CLP":localStorage.getItem("sos-currency")??"CLP");
+  const [manualPicking,setManualPicking]=useState(false);
   const mapNode=useRef<HTMLDivElement>(null);
   const leafletRef=useRef<any>(null);
   const mapRef=useRef<any>(null);
@@ -100,6 +104,7 @@ export default function MapExplorer() {
   const selected=places.find((place)=>place.id===selectedId) ?? places[0];
 
   useEffect(()=>{ localStorage.setItem("sos-language",locale); document.documentElement.lang=locale; },[locale]);
+  useEffect(()=>{ localStorage.setItem("sos-currency",displayCurrency); },[displayCurrency]);
   useEffect(()=>{ try{setFavoriteIds(JSON.parse(localStorage.getItem("sos-favorites")??"[]"))}catch{setFavoriteIds([])} },[]);
   useEffect(()=>{ import("leaflet").then((module)=>{leafletRef.current=module.default;setMapReady(true)}).catch(()=>setMapReady(false)); },[]);
   useEffect(()=>()=>{ if(watchIdRef.current!==null) navigator.geolocation?.clearWatch(watchIdRef.current); },[]);
@@ -135,6 +140,16 @@ export default function MapExplorer() {
     }
   },[selectedId,shown]);
 
+  useEffect(()=>{
+    const map=mapRef.current;
+    if(!map||!manualPicking) return;
+    map.getContainer().classList.add("manual-location-mode");
+    const handler=(event:any)=>{applyUserLocation([event.latlng.lat,event.latlng.lng],0,true);setManualPicking(false)};
+    map.on("click",handler);
+    return()=>{map.off("click",handler);map.getContainer().classList.remove("manual-location-mode")};
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[manualPicking,mapReady]);
+
   async function loadReviews(placeId:string) {
     setReviewsError(false);
     try {
@@ -165,22 +180,28 @@ export default function MapExplorer() {
     userMarkerRef.current?.openTooltip();
   }
 
-  function locate() {
+  function applyUserLocation(here:[number,number],accuracy:number,manual=false) {
+    const L=leafletRef.current,map=mapRef.current;if(!L||!map)return;
+    const nearest=places.reduce((best,place)=>distanceKm(here,place.coords)<distanceKm(here,best.coords)?place:best,places[0]);
+    const next={coords:here,accuracy,nearest,distanceKm:distanceKm(here,nearest.coords)};
+    userMarkerRef.current?.remove(); userAccuracyRef.current?.remove();
+    if(accuracy>0) userAccuracyRef.current=L.circle(here,{radius:Math.max(accuracy,20),color:"#2468b4",fillColor:"#6aa9f4",fillOpacity:.12,weight:1}).addTo(map);
+    userMarkerRef.current=L.circleMarker(here,{radius:10,color:"#081a36",fillColor:"#ffd21f",fillOpacity:1,weight:4}).addTo(map).bindTooltip(manual?lt.manualSet:lt.here,{permanent:true,direction:"top",offset:[0,-12],className:"user-location-label"});
+    setUserLocation(next);setCategory("all");setSelectedId(nearest.id);setLocating(false);
+    setLocationStatus(`${manual?lt.manualSet:lt.nearest}: ${nearest.name} · ${displayDistance(next.distanceKm)}`);
+    setTimeout(()=>map.fitBounds(L.latLngBounds([here,nearest.coords]),{padding:[70,70],maxZoom:15}),120);
+  }
+
+  async function locate() {
     if(!navigator.geolocation) { setLocationStatus(lt.unavailable); return; }
     if(!leafletRef.current||!mapRef.current) { setLocationStatus(lt.locating); return; }
-    setLocating(true); setLocationStatus(lt.locating);
+    setManualPicking(false);setLocating(true); setLocationStatus(lt.locating);
     if(watchIdRef.current!==null) navigator.geolocation.clearWatch(watchIdRef.current);
-    watchIdRef.current=navigator.geolocation.watchPosition((position)=>{
-      const L=leafletRef.current,map=mapRef.current,here:[number,number]=[position.coords.latitude,position.coords.longitude];
-      const nearest=places.reduce((best,place)=>distanceKm(here,place.coords)<distanceKm(here,best.coords)?place:best,places[0]);
-      const next={coords:here,accuracy:position.coords.accuracy,nearest,distanceKm:distanceKm(here,nearest.coords)};
-      userMarkerRef.current?.remove(); userAccuracyRef.current?.remove();
-      userAccuracyRef.current=L.circle(here,{radius:Math.max(position.coords.accuracy,20),color:"#2468b4",fillColor:"#6aa9f4",fillOpacity:.12,weight:1}).addTo(map);
-      userMarkerRef.current=L.circleMarker(here,{radius:10,color:"#081a36",fillColor:"#ffd21f",fillOpacity:1,weight:4}).addTo(map).bindTooltip(lt.here,{permanent:true,direction:"top",offset:[0,-12],className:"user-location-label"});
-      setUserLocation(next); setCategory("all"); setSelectedId(nearest.id); setLocating(false);
-      setLocationStatus(`${lt.nearest}: ${nearest.name} · ${displayDistance(next.distanceKm)}`);
-      setTimeout(()=>map.fitBounds(L.latLngBounds([here,nearest.coords]),{padding:[70,70],maxZoom:15}),120);
-    },()=>{setLocating(false);setLocationStatus(lt.denied);},{enableHighAccuracy:true,timeout:12000,maximumAge:5000});
+    try{const permission=await navigator.permissions?.query({name:"geolocation"});if(permission?.state==="denied"){setLocating(false);setLocationStatus(lt.denied);return}}catch{}
+    navigator.geolocation.getCurrentPosition((position)=>{
+      applyUserLocation([position.coords.latitude,position.coords.longitude],position.coords.accuracy);
+      watchIdRef.current=navigator.geolocation.watchPosition(update=>applyUserLocation([update.coords.latitude,update.coords.longitude],update.coords.accuracy),()=>{}, {enableHighAccuracy:true,timeout:25000,maximumAge:10000});
+    },()=>{setLocating(false);setLocationStatus(lt.denied);},{enableHighAccuracy:false,timeout:18000,maximumAge:60000});
   }
 
   async function submitReview(event:FormEvent<HTMLFormElement>) {
@@ -200,20 +221,21 @@ export default function MapExplorer() {
       <a className="brand" href="#top" aria-label="SOS Travellers inicio">
         <img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy" />
       </a>
-      <nav className="quick-nav" aria-label="Navegación"><a href="#planificar">{at.plan}</a><a href="#mapa">{at.map}</a><a href="#sos">{at.sos}</a><a href="#negocios">{at.business}</a></nav>
-      <div className="top-actions"><span className="city">● {t.city}</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select></div>
+      <nav className="quick-nav" aria-label="Navegación"><a href="#planificar">{at.plan}</a><a href="#transporte">{at.transport}</a><a href="#mapa">{at.map}</a><a href="#sos">{at.sos}</a></nav>
+      <div className="top-actions"><span className="city">● {t.city}</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select><select className="header-currency" aria-label={at.currency} value={displayCurrency} onChange={event=>setDisplayCurrency(event.target.value)}>{currencyOptions.map(([code])=><option key={code} value={code}>{code}</option>)}</select></div>
     </header>
 
     <main id="top">
       <WeatherBackdrop locale={locale}/>
       <section className="map-hero">
         <div><p className="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p className="lede">{t.lede}</p></div>
-        <div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><p role="status">{locationStatus||t.locationHint}</p></div>
+        <div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><button className={`manual-location ${manualPicking?"active":""}`} type="button" onClick={()=>{setManualPicking(value=>!value);setLocationStatus(lt.manualHint)}}>＋ {lt.manual}</button><p role="status">{locationStatus||t.locationHint}</p></div>
       </section>
 
-      <CurrencyConverter locale={locale}/>
+      <CurrencyConverter locale={locale} selectedCurrency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>
 
-      <TripPlanner locale={locale} favoriteIds={favoriteIds} onSelectPlace={selectPlace} onToggleFavorite={toggleFavorite}/>
+      <TripPlanner locale={locale} favoriteIds={favoriteIds} onSelectPlace={selectPlace} onToggleFavorite={toggleFavorite} currency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>
+      <TransportGuide locale={locale} currency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>
 
       <section className="explorer" id="mapa" aria-label={t.title}>
         <div className="filters" role="group" aria-label="Filtrar lugares">
@@ -225,7 +247,7 @@ export default function MapExplorer() {
           <div className="map-column">
             <div className="map-wrap">
               <div className="map-count"><b>{shown.length}</b> {t.selected}</div>
-              {userLocation&&<div className="location-card"><div><strong><i/> {lt.here}</strong><small>{userLocation.coords[0].toFixed(4)}, {userLocation.coords[1].toFixed(4)} · {lt.accuracy} ±{Math.round(userLocation.accuracy)} m</small><span>{lt.nearest}: <b>{userLocation.nearest.name}</b> · {displayDistance(userLocation.distanceKm)}</span></div><button type="button" onClick={()=>centerOnUser()} aria-label={lt.recenter}>⌖</button></div>}
+              {userLocation&&<div className="location-card"><div><strong><i/> {userLocation.accuracy?lt.here:lt.manualSet}</strong><small>{userLocation.coords[0].toFixed(4)}, {userLocation.coords[1].toFixed(4)}{userLocation.accuracy?` · ${lt.accuracy} ±${Math.round(userLocation.accuracy)} m`:""}</small><span>{lt.nearest}: <b>{userLocation.nearest.name}</b> · {displayDistance(userLocation.distanceKm)}</span></div><button type="button" onClick={()=>centerOnUser()} aria-label={lt.recenter}>⌖</button></div>}
               <div ref={mapNode} className="places-map" aria-label="Mapa de lugares recomendados en Santiago" />
               {!mapReady&&<div className="map-loading">Cargando mapa…</div>}
             </div>
