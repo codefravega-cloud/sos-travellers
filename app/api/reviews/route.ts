@@ -1,40 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getD1 } from "../../../db/d1";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-type ReviewRow = {
-  id: number;
-  author_name: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-};
+const validPlaceId = /^[a-z0-9-]{2,64}$/;
 
-const validPlaceId = /^[a-z0-9-]{2,48}$/;
+function getSupabase() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("Supabase environment variables are unavailable.");
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
 
 export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get("placeId") ?? "";
   if (!validPlaceId.test(placeId)) return NextResponse.json({ error: "Lugar inválido." }, { status: 400 });
 
   try {
-    const db = getD1();
-    const [reviewsResult, summaryResult] = await db.batch([
-      db.prepare(
-        `SELECT id, author_name, rating, comment, created_at
-         FROM reviews
-         WHERE place_id = ? AND status = 'published'
-         ORDER BY created_at DESC, id DESC
-         LIMIT 30`,
-      ).bind(placeId),
-      db.prepare(
-        `SELECT COUNT(*) AS count, ROUND(AVG(rating), 1) AS average
-         FROM reviews
-         WHERE place_id = ? AND status = 'published'`,
-      ).bind(placeId),
-    ]);
-    const summary = (summaryResult.results[0] ?? { count: 0, average: null }) as { count: number; average: number | null };
-    return NextResponse.json({ reviews: reviewsResult.results as ReviewRow[], summary });
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("id, author_name, rating, comment, created_at")
+      .eq("place_id", placeId)
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error) throw error;
+
+    const reviews = data ?? [];
+    const average = reviews.length
+      ? Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10
+      : null;
+    return NextResponse.json({ reviews, summary: { count: reviews.length, average } });
   } catch (error) {
     console.error("Unable to load reviews", error);
     return NextResponse.json({ error: "Las opiniones no están disponibles por ahora." }, { status: 503 });
@@ -56,13 +53,14 @@ export async function POST(request: NextRequest) {
     if (!Number.isInteger(rating) || rating < 1 || rating > 5) return NextResponse.json({ error: "Selecciona de 1 a 5 estrellas." }, { status: 400 });
     if (comment.length < 5 || comment.length > 400) return NextResponse.json({ error: "La opinión debe tener entre 5 y 400 caracteres." }, { status: 400 });
 
-    const db = getD1();
-    const result = await db.prepare(
-      `INSERT INTO reviews (place_id, author_name, rating, comment)
-       VALUES (?, ?, ?, ?)`,
-    ).bind(placeId, authorName, rating, comment).run();
-
-    return NextResponse.json({ ok: true, id: result.meta.last_row_id }, { status: 201 });
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("reviews")
+      .insert({ place_id: placeId, author_name: authorName, rating, comment, status: "published" })
+      .select("id")
+      .single();
+    if (error) throw error;
+    return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
   } catch (error) {
     console.error("Unable to save review", error);
     return NextResponse.json({ error: "No pudimos guardar tu opinión. Intenta nuevamente." }, { status: 503 });

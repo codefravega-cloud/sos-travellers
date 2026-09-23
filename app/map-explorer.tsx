@@ -5,37 +5,21 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Category, Locale, Place, places } from "./places";
 
-declare global {
-  interface Window { L?: any }
-}
-
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
 
 const copy = {
-  es:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BIEN SELECCIONADO", title:"Lugares que sí suman", lede:"Un solo mapa para decidir mejor: lugares bien valorados, información práctica y opiniones reales de otros viajeros.", locate:"Usar mi ubicación", locationHint:"Encuentra qué recomendación está más cerca de ti.", all:"Todos", museum:"Museos", coffee:"Cafeterías", food:"Comida chilena", view:"Paseos y vistas", stay:"Hoteles", useful:"Útiles", selected:"lugares seleccionados", google:"Abrir en Google Maps", neighborhood:"Barrio", time:"Tiempo sugerido", googleRating:"Valoración en Google", community:"Opinión SOS", opinions:"Opiniones de viajeros", noOpinions:"Todavía no hay opiniones. Sé la primera persona en contar cómo fue.", write:"Comparte tu experiencia", name:"Tu nombre", comment:"¿Qué debería saber otro viajero?", send:"Publicar opinión", sending:"Publicando…", success:"¡Gracias! Tu opinión ya está publicada.", choose:"Selecciona una calificación", source:"Valoraciones de Google Maps observadas el 23 de septiembre de 2026; pueden cambiar. Verifica horarios y tarifas antes de salir.", mapHelp:"Toca un marcador o una ficha para ver todos los detalles.", detail:"Información del lugar", reviewsCount:"opiniones", official:"Información oficial", error:"No pudimos cargar las opiniones ahora.", footer:"Tu copiloto local, ciudad por ciudad." },
-  en:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, WELL CHOSEN", title:"Places worth your time", lede:"One map to decide better: well-rated places, practical information and real comments from fellow travellers.", locate:"Use my location", locationHint:"Find the closest recommendation to you.", all:"All", museum:"Museums", coffee:"Coffee", food:"Chilean food", view:"Walks & views", stay:"Hotels", useful:"Useful", selected:"selected places", google:"Open in Google Maps", neighborhood:"Neighborhood", time:"Suggested time", googleRating:"Google rating", community:"SOS community", opinions:"Traveller reviews", noOpinions:"No reviews yet. Be the first to share what it was like.", write:"Share your experience", name:"Your name", comment:"What should another traveller know?", send:"Post review", sending:"Posting…", success:"Thank you! Your review is now live.", choose:"Choose a rating", source:"Google Maps ratings observed on September 23, 2026 and may change. Confirm hours and fares before leaving.", mapHelp:"Tap a marker or card to see full details.", detail:"Place information", reviewsCount:"reviews", official:"Official information", error:"We could not load reviews right now.", footer:"Your local co-pilot, city by city." },
-  pt:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BEM SELECIONADA", title:"Lugares que valem a pena", lede:"Um só mapa para decidir melhor: lugares bem avaliados, informações práticas e opiniões reais de viajantes.", locate:"Usar minha localização", locationHint:"Encontre a recomendação mais próxima.", all:"Todos", museum:"Museus", coffee:"Cafeterias", food:"Comida chilena", view:"Passeios e vistas", stay:"Hotéis", useful:"Úteis", selected:"lugares selecionados", google:"Abrir no Google Maps", neighborhood:"Bairro", time:"Tempo sugerido", googleRating:"Avaliação no Google", community:"Comunidade SOS", opinions:"Opiniões de viajantes", noOpinions:"Ainda não há opiniões. Seja a primeira pessoa a contar como foi.", write:"Compartilhe sua experiência", name:"Seu nome", comment:"O que outro viajante deveria saber?", send:"Publicar opinião", sending:"Publicando…", success:"Obrigado! Sua opinião já foi publicada.", choose:"Escolha uma avaliação", source:"Avaliações do Google Maps observadas em 23 de setembro de 2026; podem mudar. Confirme horários e tarifas.", mapHelp:"Toque em um marcador ou ficha para ver todos os detalhes.", detail:"Informações do lugar", reviewsCount:"opiniões", official:"Informação oficial", error:"Não foi possível carregar as opiniões agora.", footer:"Seu copiloto local, cidade por cidade." },
-  fr:{ city:"Santiago, Chili", eyebrow:"SANTIAGO, BIEN CHOISI", title:"Les lieux qui valent le détour", lede:"Une seule carte pour mieux choisir : lieux bien notés, informations pratiques et avis de voyageurs.", locate:"Utiliser ma position", locationHint:"Trouvez la recommandation la plus proche.", all:"Tous", museum:"Musées", coffee:"Cafés", food:"Cuisine chilienne", view:"Balades et vues", stay:"Hôtels", useful:"Pratique", selected:"lieux sélectionnés", google:"Ouvrir dans Google Maps", neighborhood:"Quartier", time:"Durée suggérée", googleRating:"Note Google", community:"Communauté SOS", opinions:"Avis des voyageurs", noOpinions:"Aucun avis pour le moment. Soyez la première personne à partager votre expérience.", write:"Partagez votre expérience", name:"Votre nom", comment:"Que devrait savoir un autre voyageur ?", send:"Publier l’avis", sending:"Publication…", success:"Merci ! Votre avis est maintenant publié.", choose:"Choisissez une note", source:"Notes Google Maps observées le 23 septembre 2026 ; elles peuvent changer. Vérifiez horaires et tarifs.", mapHelp:"Touchez un marqueur ou une fiche pour voir tous les détails.", detail:"Informations sur le lieu", reviewsCount:"avis", official:"Information officielle", error:"Impossible de charger les avis pour le moment.", footer:"Votre copilote local, ville après ville." },
+  es:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BIEN SELECCIONADO", title:"Lugares que sí suman", lede:"Un solo mapa para decidir mejor: lugares bien valorados, información práctica y opiniones reales de otros viajeros.", locate:"Usar mi ubicación", locationHint:"Encuentra qué recomendación está más cerca de ti.", all:"Todos", museum:"Museos", coffee:"Cafeterías", food:"Comida chilena", view:"Paseos y vistas", stay:"Hoteles", useful:"Útiles", market:"Mercados", shop:"Compras", experience:"Experiencias", growshop:"Growshops", search:"Buscar por nombre o comuna…", selected:"lugares seleccionados", google:"Abrir en Google Maps", neighborhood:"Barrio", time:"Tiempo sugerido", googleRating:"Valoración en Google", community:"Opinión SOS", opinions:"Opiniones de viajeros", noOpinions:"Todavía no hay opiniones. Sé la primera persona en contar cómo fue.", write:"Comparte tu experiencia", name:"Tu nombre", comment:"¿Qué debería saber otro viajero?", send:"Publicar opinión", sending:"Publicando…", success:"¡Gracias! Tu opinión ya está publicada.", choose:"Selecciona una calificación", source:"Valoraciones de Google Maps observadas el 23 de septiembre de 2026; pueden cambiar. Verifica horarios y tarifas antes de salir.", mapHelp:"Toca un marcador o una ficha para ver todos los detalles.", detail:"Información del lugar", reviewsCount:"opiniones", official:"Información oficial", error:"No pudimos cargar las opiniones ahora.", footer:"Tu copiloto local, ciudad por ciudad." },
+  en:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, WELL CHOSEN", title:"Places worth your time", lede:"One map to decide better: well-rated places, practical information and real comments from fellow travellers.", locate:"Use my location", locationHint:"Find the closest recommendation to you.", all:"All", museum:"Museums", coffee:"Coffee", food:"Chilean food", view:"Walks & views", stay:"Hotels", useful:"Useful", market:"Markets", shop:"Shopping", experience:"Experiences", growshop:"Grow shops", search:"Search by name or district…", selected:"selected places", google:"Open in Google Maps", neighborhood:"Neighborhood", time:"Suggested time", googleRating:"Google rating", community:"SOS community", opinions:"Traveller reviews", noOpinions:"No reviews yet. Be the first to share what it was like.", write:"Share your experience", name:"Your name", comment:"What should another traveller know?", send:"Post review", sending:"Posting…", success:"Thank you! Your review is now live.", choose:"Choose a rating", source:"Google Maps ratings observed on September 23, 2026 and may change. Confirm hours and fares before leaving.", mapHelp:"Tap a marker or card to see full details.", detail:"Place information", reviewsCount:"reviews", official:"Official information", error:"We could not load reviews right now.", footer:"Your local co-pilot, city by city." },
+  pt:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BEM SELECIONADA", title:"Lugares que valem a pena", lede:"Um só mapa para decidir melhor: lugares bem avaliados, informações práticas e opiniões reais de viajantes.", locate:"Usar minha localização", locationHint:"Encontre a recomendação mais próxima.", all:"Todos", museum:"Museus", coffee:"Cafeterias", food:"Comida chilena", view:"Passeios e vistas", stay:"Hotéis", useful:"Úteis", market:"Mercados", shop:"Compras", experience:"Experiências", growshop:"Growshops", search:"Buscar por nome ou bairro…", selected:"lugares selecionados", google:"Abrir no Google Maps", neighborhood:"Bairro", time:"Tempo sugerido", googleRating:"Avaliação no Google", community:"Comunidade SOS", opinions:"Opiniões de viajantes", noOpinions:"Ainda não há opiniões. Seja a primeira pessoa a contar como foi.", write:"Compartilhe sua experiência", name:"Seu nome", comment:"O que outro viajante deveria saber?", send:"Publicar opinião", sending:"Publicando…", success:"Obrigado! Sua opinião já foi publicada.", choose:"Escolha uma avaliação", source:"Avaliações do Google Maps observadas em 23 de setembro de 2026; podem mudar. Confirme horários e tarifas.", mapHelp:"Toque em um marcador ou ficha para ver todos os detalhes.", detail:"Informações do lugar", reviewsCount:"opiniões", official:"Informação oficial", error:"Não foi possível carregar as opiniões agora.", footer:"Seu copiloto local, cidade por cidade." },
+  fr:{ city:"Santiago, Chili", eyebrow:"SANTIAGO, BIEN CHOISI", title:"Les lieux qui valent le détour", lede:"Une seule carte pour mieux choisir : lieux bien notés, informations pratiques et avis de voyageurs.", locate:"Utiliser ma position", locationHint:"Trouvez la recommandation la plus proche.", all:"Tous", museum:"Musées", coffee:"Cafés", food:"Cuisine chilienne", view:"Balades et vues", stay:"Hôtels", useful:"Pratique", market:"Marchés", shop:"Shopping", experience:"Expériences", growshop:"Growshops", search:"Rechercher par nom ou quartier…", selected:"lieux sélectionnés", google:"Ouvrir dans Google Maps", neighborhood:"Quartier", time:"Durée suggérée", googleRating:"Note Google", community:"Communauté SOS", opinions:"Avis des voyageurs", noOpinions:"Aucun avis pour le moment. Soyez la première personne à partager votre expérience.", write:"Partagez votre expérience", name:"Votre nom", comment:"Que devrait savoir un autre voyageur ?", send:"Publier l’avis", sending:"Publication…", success:"Merci ! Votre avis est maintenant publié.", choose:"Choisissez une note", source:"Notes Google Maps observées le 23 septembre 2026 ; elles peuvent changer. Vérifiez horaires et tarifs.", mapHelp:"Touchez un marqueur ou une fiche pour voir tous les détails.", detail:"Informations sur le lieu", reviewsCount:"avis", official:"Information officielle", error:"Impossible de charger les avis pour le moment.", footer:"Votre copilote local, ville après ville." },
 };
 
-const colors:Record<Category,string> = { museum:"#ff573d", coffee:"#9a5b2b", food:"#ed7a25", view:"#168c74", stay:"#7655c7", useful:"#2468b4" };
-const categories:Category[] = ["museum","coffee","food","view","stay","useful"];
+const colors:Record<Category,string> = { museum:"#ff573d", coffee:"#9a5b2b", food:"#ed7a25", view:"#168c74", stay:"#7655c7", useful:"#2468b4", market:"#c44c7a", shop:"#0089a7", experience:"#6d7b24", growshop:"#2e8b57" };
+const categories:Category[] = ["museum","coffee","food","view","stay","market","shop","experience","growshop","useful"];
 
 function mapsUrl(place:Place) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.name} Santiago Chile`)}`;
-}
-
-function loadLeaflet() {
-  if (window.L) return Promise.resolve();
-  return new Promise<void>((resolve, reject) => {
-    if (!document.querySelector('link[data-leaflet]')) {
-      const link=document.createElement("link"); link.rel="stylesheet"; link.href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; link.dataset.leaflet="true"; document.head.appendChild(link);
-    }
-    const existing=document.querySelector('script[data-leaflet]') as HTMLScriptElement | null;
-    if (existing) { existing.addEventListener("load",()=>resolve(),{once:true}); return; }
-    const script=document.createElement("script"); script.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; script.dataset.leaflet="true"; script.onload=()=>resolve(); script.onerror=reject; document.head.appendChild(script);
-  });
 }
 
 export default function MapExplorer() {
@@ -45,6 +29,7 @@ export default function MapExplorer() {
     return saved&&copy[saved]?saved:"es";
   });
   const [category,setCategory]=useState<"all"|Category>("all");
+  const [query,setQuery]=useState("");
   const [selectedId,setSelectedId]=useState("precolombino");
   const [mapReady,setMapReady]=useState(false);
   const [locationStatus,setLocationStatus]=useState("");
@@ -55,20 +40,24 @@ export default function MapExplorer() {
   const [formStatus,setFormStatus]=useState("");
   const [submitting,setSubmitting]=useState(false);
   const mapNode=useRef<HTMLDivElement>(null);
+  const leafletRef=useRef<any>(null);
   const mapRef=useRef<any>(null);
   const markersRef=useRef<any[]>([]);
   const userMarkerRef=useRef<any>(null);
   const detailRef=useRef<HTMLElement>(null);
   const t=copy[locale];
-  const shown=useMemo(()=>places.filter((place)=>category==="all"||place.category===category),[category]);
+  const shown=useMemo(()=>{
+    const needle=query.trim().toLocaleLowerCase(locale);
+    return places.filter((place)=>(category==="all"||place.category===category)&&(!needle||`${place.name} ${place.neighborhood}`.toLocaleLowerCase(locale).includes(needle)));
+  },[category,query,locale]);
   const selected=places.find((place)=>place.id===selectedId) ?? places[0];
 
   useEffect(()=>{ localStorage.setItem("sos-language",locale); document.documentElement.lang=locale; },[locale]);
-  useEffect(()=>{ loadLeaflet().then(()=>setMapReady(true)).catch(()=>setMapReady(false)); },[]);
+  useEffect(()=>{ import("leaflet").then((module)=>{leafletRef.current=module.default;setMapReady(true)}).catch(()=>setMapReady(false)); },[]);
 
   useEffect(()=>{
     if(!mapReady||!mapNode.current||mapRef.current) return;
-    const L=window.L;
+    const L=leafletRef.current;
     const map=L.map(mapNode.current,{zoomControl:false,scrollWheelZoom:false}).setView([-33.435,-70.65],12);
     L.control.zoom({position:"bottomleft"}).addTo(map);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(map);
@@ -77,7 +66,7 @@ export default function MapExplorer() {
   },[mapReady]);
 
   useEffect(()=>{
-    const map=mapRef.current,L=window.L; if(!map||!L) return;
+    const map=mapRef.current,L=leafletRef.current; if(!map||!L) return;
     markersRef.current.forEach((marker)=>marker.remove());
     markersRef.current=shown.map((place)=>{
       const color=colors[place.category];
@@ -102,7 +91,7 @@ export default function MapExplorer() {
     try {
       const response=await fetch(`/api/reviews?placeId=${encodeURIComponent(placeId)}`,{cache:"no-store"});
       if(!response.ok) throw new Error();
-      const data=await response.json(); setReviews(data.reviews??[]); setSummary(data.summary??{count:0,average:null});
+      const data=await response.json() as { reviews?:Review[]; summary?:ReviewSummary }; setReviews(data.reviews??[]); setSummary(data.summary??{count:0,average:null});
     } catch { setReviews([]); setSummary({count:0,average:null}); setReviewsError(true); }
   }
   useEffect(()=>{ loadReviews(selected.id); },[selected.id]);
@@ -117,7 +106,7 @@ export default function MapExplorer() {
     if(!navigator.geolocation) { setLocationStatus("Tu navegador no permite usar la ubicación."); return; }
     setLocationStatus("Buscando tu ubicación…");
     navigator.geolocation.getCurrentPosition((position)=>{
-      const L=window.L,map=mapRef.current,here:[number,number]=[position.coords.latitude,position.coords.longitude];
+      const L=leafletRef.current,map=mapRef.current,here:[number,number]=[position.coords.latitude,position.coords.longitude];
       const nearest=places.reduce((best,place)=>Math.hypot(place.coords[0]-here[0],place.coords[1]-here[1])<Math.hypot(best.coords[0]-here[0],best.coords[1]-here[1])?place:best,places[0]);
       if(userMarkerRef.current) userMarkerRef.current.remove();
       userMarkerRef.current=L.circleMarker(here,{radius:8,color:"#081a36",fillColor:"#ffd21f",fillOpacity:1,weight:4}).addTo(map);
@@ -132,7 +121,7 @@ export default function MapExplorer() {
     const payload={placeId:selected.id,authorName:form.get("authorName"),comment:form.get("comment"),website:form.get("website"),rating};
     try {
       const response=await fetch("/api/reviews",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});
-      const data=await response.json(); if(!response.ok) throw new Error(data.error||"Error");
+      const data=await response.json() as { error?:string }; if(!response.ok) throw new Error(data.error||"Error");
       event.currentTarget.reset(); setRating(5); setFormStatus(t.success); await loadReviews(selected.id);
     } catch(error) { setFormStatus(error instanceof Error?error.message:t.error); }
     finally { setSubmitting(false); }
@@ -141,8 +130,7 @@ export default function MapExplorer() {
   return <>
     <header className="topbar">
       <a className="brand" href="#top" aria-label="SOS Travellers inicio">
-        <img src="/assets/sos-official-logo.jpeg" alt="Logo oficial S.O.S Traveler Assistance" />
-        <span>SOS <b>TRAVELLERS</b></span>
+        <img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy" />
       </a>
       <div className="top-actions"><span className="city">● {t.city}</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select></div>
     </header>
@@ -158,6 +146,7 @@ export default function MapExplorer() {
           <button className={category==="all"?"active":""} onClick={()=>setCategory("all")}>{t.all}</button>
           {categories.map((cat)=><button key={cat} className={category===cat?"active":""} onClick={()=>setCategory(cat)}>{t[cat]}</button>)}
         </div>
+        <label className="place-search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder={t.search} aria-label={t.search}/></label>
         <div className="explorer-grid">
           <div className="map-column">
             <div className="map-wrap">
@@ -201,6 +190,6 @@ export default function MapExplorer() {
         <p className="source">{t.source}</p>
       </section>
     </main>
-    <footer><div className="footer-brand"><img src="/assets/sos-official-logo.jpeg" alt=""/><p>SOS <b>TRAVELLERS</b><small>{t.footer}</small></p></div><a href="https://www.nuevopudahuel.cl/transporte-oficial" target="_blank" rel="noreferrer">{t.official} ↗</a></footer>
+    <footer><div className="footer-brand"><img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy"/><p><small>{t.footer}</small></p></div><a href="https://www.nuevopudahuel.cl/transporte-oficial" target="_blank" rel="noreferrer">{t.official} ↗</a></footer>
   </>;
 }
