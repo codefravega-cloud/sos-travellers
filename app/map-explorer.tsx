@@ -4,6 +4,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Category, Locale, Place, places } from "./places";
+import CurrencyConverter from "./currency-converter";
 
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
@@ -16,6 +17,13 @@ const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; 
   fr:{locating:"Recherche de votre position actuelle…",here:"Votre position actuelle",nearest:"Le plus proche",accuracy:"Précision",recenter:"Revenir à ma position",denied:"Impossible d’accéder à votre position. Activez l’autorisation dans le navigateur puis réessayez.",unavailable:"Votre navigateur ne prend pas en charge la localisation."},
 };
 
+const extraCopy:Record<Locale,Record<"park"|"themed"|"winery"|"snow"|"nightlife"|"hours"|"access",string>>={
+  es:{park:"Parques",themed:"Locales temáticos",winery:"Viñas",snow:"Nieve",nightlife:"Discotecas",hours:"Horario",access:"Acceso / valor"},
+  en:{park:"Parks",themed:"Themed venues",winery:"Wineries",snow:"Snow",nightlife:"Nightlife",hours:"Hours",access:"Entry / price"},
+  pt:{park:"Parques",themed:"Locais temáticos",winery:"Vinícolas",snow:"Neve",nightlife:"Discotecas",hours:"Horário",access:"Acesso / valor"},
+  fr:{park:"Parcs",themed:"Lieux à thème",winery:"Vignobles",snow:"Neige",nightlife:"Discothèques",hours:"Horaires",access:"Accès / tarif"},
+};
+
 const copy = {
   es:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, BIEN SELECCIONADO", title:"Lugares que sí suman", lede:"Un solo mapa para decidir mejor: lugares bien valorados, información práctica y opiniones reales de otros viajeros.", locate:"Usar mi ubicación", locationHint:"Encuentra qué recomendación está más cerca de ti.", all:"Todos", museum:"Museos", coffee:"Cafeterías", food:"Comida chilena", view:"Paseos y vistas", stay:"Hoteles", useful:"Útiles", market:"Mercados", shop:"Compras", experience:"Experiencias", growshop:"Growshops", search:"Buscar por nombre o comuna…", selected:"lugares seleccionados", google:"Fotos, reseñas y ruta en Google Maps", neighborhood:"Barrio", time:"Tiempo sugerido", languages:"Idiomas / información", googleRating:"Referencia Google", community:"Opinión SOS", opinions:"Opiniones de viajeros", noOpinions:"Todavía no hay opiniones. Sé la primera persona en contar cómo fue.", write:"Comparte tu experiencia", name:"Tu nombre", comment:"¿Qué debería saber otro viajero?", send:"Publicar opinión", sending:"Publicando…", success:"¡Gracias! Tu opinión ya está publicada.", choose:"Selecciona una calificación", source:"Referencias y valoraciones de Google Maps revisadas el 23 de septiembre de 2026; pueden cambiar. Las imágenes mostradas provienen de fuentes oficiales acreditadas. Verifica horarios, idiomas y tarifas antes de salir.", mapHelp:"Toca un marcador o una ficha para ver todos los detalles.", detail:"Información del lugar", reviewsCount:"opiniones", official:"Sitio oficial", error:"No pudimos cargar las opiniones ahora.", footer:"Tu copiloto local, ciudad por ciudad." },
   en:{ city:"Santiago, Chile", eyebrow:"SANTIAGO, WELL CHOSEN", title:"Places worth your time", lede:"One map to decide better: well-rated places, practical information and real comments from fellow travellers.", locate:"Use my location", locationHint:"Find the closest recommendation to you.", all:"All", museum:"Museums", coffee:"Coffee", food:"Chilean food", view:"Walks & views", stay:"Hotels", useful:"Useful", market:"Markets", shop:"Shopping", experience:"Experiences", growshop:"Grow shops", search:"Search by name or district…", selected:"selected places", google:"Photos, reviews & directions on Google Maps", neighborhood:"Neighborhood", time:"Suggested time", languages:"Languages / information", googleRating:"Google reference", community:"SOS community", opinions:"Traveller reviews", noOpinions:"No reviews yet. Be the first to share what it was like.", write:"Share your experience", name:"Your name", comment:"What should another traveller know?", send:"Post review", sending:"Posting…", success:"Thank you! Your review is now live.", choose:"Choose a rating", source:"Google Maps references and ratings reviewed on September 23, 2026 and may change. Displayed images come from credited official sources. Confirm hours, languages and fares before leaving.", mapHelp:"Tap a marker or card to see full details.", detail:"Place information", reviewsCount:"reviews", official:"Official site", error:"We could not load reviews right now.", footer:"Your local co-pilot, city by city." },
@@ -23,8 +31,8 @@ const copy = {
   fr:{ city:"Santiago, Chili", eyebrow:"SANTIAGO, BIEN CHOISI", title:"Les lieux qui valent le détour", lede:"Une seule carte pour mieux choisir : lieux bien notés, informations pratiques et avis de voyageurs.", locate:"Utiliser ma position", locationHint:"Trouvez la recommandation la plus proche.", all:"Tous", museum:"Musées", coffee:"Cafés", food:"Cuisine chilienne", view:"Balades et vues", stay:"Hôtels", useful:"Pratique", market:"Marchés", shop:"Shopping", experience:"Expériences", growshop:"Growshops", search:"Rechercher par nom ou quartier…", selected:"lieux sélectionnés", google:"Photos, avis et itinéraire sur Google Maps", neighborhood:"Quartier", time:"Durée suggérée", languages:"Langues / information", googleRating:"Référence Google", community:"Communauté SOS", opinions:"Avis des voyageurs", noOpinions:"Aucun avis pour le moment. Soyez la première personne à partager votre expérience.", write:"Partagez votre expérience", name:"Votre nom", comment:"Que devrait savoir un autre voyageur ?", send:"Publier l’avis", sending:"Publication…", success:"Merci ! Votre avis est maintenant publié.", choose:"Choisissez une note", source:"Références et notes Google Maps vérifiées le 23 septembre 2026 ; elles peuvent changer. Les images proviennent de sources officielles créditées. Vérifiez horaires, langues et tarifs.", mapHelp:"Touchez un marqueur ou une fiche pour voir tous les détails.", detail:"Informations sur le lieu", reviewsCount:"avis", official:"Site officiel", error:"Impossible de charger les avis pour le moment.", footer:"Votre copilote local, ville après ville." },
 };
 
-const colors:Record<Category,string> = { museum:"#ff573d", coffee:"#9a5b2b", food:"#ed7a25", view:"#168c74", stay:"#7655c7", useful:"#2468b4", market:"#c44c7a", shop:"#0089a7", experience:"#6d7b24", growshop:"#2e8b57" };
-const categories:Category[] = ["museum","coffee","food","view","stay","market","shop","experience","growshop","useful"];
+const colors:Record<Category,string> = { museum:"#ff573d", coffee:"#9a5b2b", food:"#ed7a25", view:"#168c74", stay:"#7655c7", useful:"#2468b4", market:"#c44c7a", shop:"#0089a7", experience:"#6d7b24", growshop:"#2e8b57", park:"#2f9b62", themed:"#a148a9", winery:"#7c2d55", snow:"#3893c7", nightlife:"#283593" };
+const categories:Category[] = ["museum","coffee","food","themed","park","view","stay","winery","snow","nightlife","market","shop","experience","growshop","useful"];
 
 function mapsUrl(place:Place) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery??`${place.name} Santiago Chile`)}`;
@@ -67,7 +75,8 @@ export default function MapExplorer() {
   const userAccuracyRef=useRef<any>(null);
   const watchIdRef=useRef<number|null>(null);
   const detailRef=useRef<HTMLElement>(null);
-  const t=copy[locale],lt=locationCopy[locale];
+  const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale];
+  const categoryName=(value:Category)=>(value in xt?xt[value as keyof typeof xt]:(t as unknown as Record<string,string>)[value]);
   const shown=useMemo(()=>{
     const needle=query.trim().toLocaleLowerCase(locale);
     return places.filter((place)=>(category==="all"||place.category===category)&&(!needle||`${place.name} ${place.neighborhood}`.toLocaleLowerCase(locale).includes(needle)));
@@ -175,10 +184,12 @@ export default function MapExplorer() {
         <div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><p role="status">{locationStatus||t.locationHint}</p></div>
       </section>
 
+      <CurrencyConverter locale={locale}/>
+
       <section className="explorer" aria-label={t.title}>
         <div className="filters" role="group" aria-label="Filtrar lugares">
           <button className={category==="all"?"active":""} onClick={()=>setCategory("all")}>{t.all}</button>
-          {categories.map((cat)=><button key={cat} className={category===cat?"active":""} onClick={()=>setCategory(cat)}>{t[cat]}</button>)}
+          {categories.map((cat)=><button key={cat} className={category===cat?"active":""} onClick={()=>setCategory(cat)}>{categoryName(cat)}</button>)}
         </div>
         <label className="place-search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder={t.search} aria-label={t.search}/></label>
         <div className="explorer-grid">
@@ -193,7 +204,7 @@ export default function MapExplorer() {
             <div className="cards" aria-live="polite">
               {shown.map((place)=><button type="button" key={place.id} className={`place-card ${selected.id===place.id?"selected":""}`} onClick={()=>selectPlace(place)}>
                 <span className="category-dot" style={{background:colors[place.category]}} />
-                <span className="place-card-copy"><small>{place.neighborhood}</small><strong>{place.name}</strong><span>{place.summary[locale]}</span></span>
+                <span className="place-card-copy"><small>{place.neighborhood}</small><strong>{place.name}</strong>{place.tag&&<em className="place-tag">{place.tag[locale]}</em>}<span>{place.summary[locale]}</span></span>
                 <b className="rating">{/^\d/.test(place.rating)?`★ ${place.rating}`:place.rating}</b>
               </button>)}
             </div>
@@ -202,10 +213,10 @@ export default function MapExplorer() {
           <aside className="detail-panel" ref={detailRef} aria-label={t.detail}>
             <div className="detail-accent" style={{background:colors[selected.category]}} />
             {selected.photo&&<figure className="detail-photo"><img src={selected.photo.src} alt={selected.photo.alt}/><figcaption>© <a href={selected.photo.url} target="_blank" rel="noreferrer">{selected.photo.credit}</a></figcaption></figure>}
-            <div className="detail-head"><p>{t[selected.category]}</p><h2>{selected.name}</h2><span className="google-score">{/^\d/.test(selected.rating)?`★ ${selected.rating}${selected.reviews?` · ${selected.reviews}`:""}`:selected.rating}</span></div>
+            <div className="detail-head"><p>{categoryName(selected.category)}</p><h2>{selected.name}</h2><span className="google-score">{/^\d/.test(selected.rating)?`★ ${selected.rating}${selected.reviews?` · ${selected.reviews}`:""}`:selected.rating}</span>{selected.tag&&<span className="detail-tag">{selected.tag[locale]}</span>}</div>
             <p className="detail-summary">{selected.summary[locale]}</p>
             {selected.languages&&<div className="language-row"><b>{t.languages}</b>{selected.languages.map((language)=><span key={language}>{language}</span>)}</div>}
-            <dl className="facts"><div><dt>{t.neighborhood}</dt><dd>{selected.neighborhood}</dd></div><div><dt>{t.time}</dt><dd>{selected.visit}</dd></div><div><dt>{t.googleRating}</dt><dd>{selected.rating}</dd></div><div><dt>{t.community}</dt><dd>{summary.average?`★ ${summary.average} · ${summary.count} ${t.reviewsCount}`:`—`}</dd></div></dl>
+            <dl className="facts"><div><dt>{t.neighborhood}</dt><dd>{selected.neighborhood}</dd></div><div><dt>{t.time}</dt><dd>{selected.visit}</dd></div>{selected.hours&&<div><dt>{xt.hours}</dt><dd>{selected.hours}</dd></div>}{selected.access&&<div><dt>{xt.access}</dt><dd>{selected.access[locale]}</dd></div>}<div><dt>{t.googleRating}</dt><dd>{selected.rating}</dd></div><div><dt>{t.community}</dt><dd>{summary.average?`★ ${summary.average} · ${summary.count} ${t.reviewsCount}`:`—`}</dd></div></dl>
             <a className="maps-link" href={mapsUrl(selected)} target="_blank" rel="noreferrer">{t.google}<span>↗</span></a>
             {selected.officialUrl&&<a className="official-link" href={selected.officialUrl} target="_blank" rel="noreferrer">{t.official}<span>↗</span></a>}
 
