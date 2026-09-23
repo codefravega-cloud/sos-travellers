@@ -5,6 +5,10 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Category, Locale, Place, places } from "./places";
 import CurrencyConverter from "./currency-converter";
+import WeatherBackdrop from "./weather-backdrop";
+import TripPlanner from "./trip-planner";
+import SafetyHub from "./safety-hub";
+import BusinessSignup from "./business-signup";
 
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
@@ -15,6 +19,13 @@ const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; 
   en:{locating:"Finding your current location…",here:"Your current location",nearest:"Nearest place",accuracy:"Accuracy",recenter:"Return to my location",denied:"We could not access your location. Enable browser location permission and try again.",unavailable:"Your browser does not support location."},
   pt:{locating:"Buscando sua localização atual…",here:"Sua localização atual",nearest:"Mais próximo",accuracy:"Precisão",recenter:"Voltar à minha localização",denied:"Não foi possível acessar sua localização. Ative a permissão no navegador e tente novamente.",unavailable:"Seu navegador não permite usar a localização."},
   fr:{locating:"Recherche de votre position actuelle…",here:"Votre position actuelle",nearest:"Le plus proche",accuracy:"Précision",recenter:"Revenir à ma position",denied:"Impossible d’accéder à votre position. Activez l’autorisation dans le navigateur puis réessayez.",unavailable:"Votre navigateur ne prend pas en charge la localisation."},
+};
+
+const actionCopy:Record<Locale,{plan:string;map:string;sos:string;business:string;practical:string;directions:string;walk:string;transit:string;drive:string;save:string;saved:string}>={
+  es:{plan:"Planificar",map:"Mapa",sos:"SOS",business:"Negocios",practical:"Ficha práctica",directions:"Cómo llegar",walk:"Caminando",transit:"Transporte público",drive:"En auto",save:"Guardar en mi viaje",saved:"Guardado en mi viaje"},
+  en:{plan:"Plan",map:"Map",sos:"SOS",business:"Businesses",practical:"Practical details",directions:"Get there",walk:"Walking",transit:"Public transport",drive:"Driving",save:"Save to my trip",saved:"Saved to my trip"},
+  pt:{plan:"Planejar",map:"Mapa",sos:"SOS",business:"Negócios",practical:"Ficha prática",directions:"Como chegar",walk:"Caminhando",transit:"Transporte público",drive:"De carro",save:"Salvar na viagem",saved:"Salvo na viagem"},
+  fr:{plan:"Planifier",map:"Carte",sos:"SOS",business:"Entreprises",practical:"Infos pratiques",directions:"S’y rendre",walk:"À pied",transit:"Transport public",drive:"En voiture",save:"Enregistrer",saved:"Enregistré"},
 };
 
 const extraCopy:Record<Locale,Record<"park"|"themed"|"winery"|"snow"|"nightlife"|"hours"|"access",string>>={
@@ -36,6 +47,10 @@ const categories:Category[] = ["museum","coffee","food","themed","park","view","
 
 function mapsUrl(place:Place) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.mapQuery??`${place.name} Santiago Chile`)}`;
+}
+
+function directionsUrl(place:Place,mode:"walking"|"transit"|"driving") {
+  return `https://www.google.com/maps/dir/?api=1&destination=${place.coords[0]},${place.coords[1]}&travelmode=${mode}`;
 }
 
 function distanceKm(a:[number,number],b:[number,number]) {
@@ -67,6 +82,7 @@ export default function MapExplorer() {
   const [rating,setRating]=useState(5);
   const [formStatus,setFormStatus]=useState("");
   const [submitting,setSubmitting]=useState(false);
+  const [favoriteIds,setFavoriteIds]=useState<string[]>([]);
   const mapNode=useRef<HTMLDivElement>(null);
   const leafletRef=useRef<any>(null);
   const mapRef=useRef<any>(null);
@@ -75,7 +91,7 @@ export default function MapExplorer() {
   const userAccuracyRef=useRef<any>(null);
   const watchIdRef=useRef<number|null>(null);
   const detailRef=useRef<HTMLElement>(null);
-  const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale];
+  const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale],at=actionCopy[locale];
   const categoryName=(value:Category)=>(value in xt?xt[value as keyof typeof xt]:(t as unknown as Record<string,string>)[value]);
   const shown=useMemo(()=>{
     const needle=query.trim().toLocaleLowerCase(locale);
@@ -84,6 +100,7 @@ export default function MapExplorer() {
   const selected=places.find((place)=>place.id===selectedId) ?? places[0];
 
   useEffect(()=>{ localStorage.setItem("sos-language",locale); document.documentElement.lang=locale; },[locale]);
+  useEffect(()=>{ try{setFavoriteIds(JSON.parse(localStorage.getItem("sos-favorites")??"[]"))}catch{setFavoriteIds([])} },[]);
   useEffect(()=>{ import("leaflet").then((module)=>{leafletRef.current=module.default;setMapReady(true)}).catch(()=>setMapReady(false)); },[]);
   useEffect(()=>()=>{ if(watchIdRef.current!==null) navigator.geolocation?.clearWatch(watchIdRef.current); },[]);
 
@@ -134,6 +151,14 @@ export default function MapExplorer() {
     if(window.innerWidth<980) setTimeout(()=>detailRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),150);
   }
 
+  function toggleFavorite(id:string){
+    setFavoriteIds(current=>{
+      const next=current.includes(id)?current.filter(item=>item!==id):[...current,id];
+      localStorage.setItem("sos-favorites",JSON.stringify(next));
+      return next;
+    });
+  }
+
   function centerOnUser(location=userLocation) {
     if(!location||!mapRef.current) return;
     mapRef.current.setView(location.coords,16,{animate:true});
@@ -171,10 +196,12 @@ export default function MapExplorer() {
   }
 
   return <>
+    <WeatherBackdrop locale={locale}/>
     <header className="topbar">
       <a className="brand" href="#top" aria-label="SOS Travellers inicio">
         <img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy" />
       </a>
+      <nav className="quick-nav" aria-label="Navegación"><a href="#planificar">{at.plan}</a><a href="#mapa">{at.map}</a><a href="#sos">{at.sos}</a><a href="#negocios">{at.business}</a></nav>
       <div className="top-actions"><span className="city">● {t.city}</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select></div>
     </header>
 
@@ -186,7 +213,9 @@ export default function MapExplorer() {
 
       <CurrencyConverter locale={locale}/>
 
-      <section className="explorer" aria-label={t.title}>
+      <TripPlanner locale={locale} favoriteIds={favoriteIds} onSelectPlace={selectPlace} onToggleFavorite={toggleFavorite}/>
+
+      <section className="explorer" id="mapa" aria-label={t.title}>
         <div className="filters" role="group" aria-label="Filtrar lugares">
           <button className={category==="all"?"active":""} onClick={()=>setCategory("all")}>{t.all}</button>
           {categories.map((cat)=><button key={cat} className={category===cat?"active":""} onClick={()=>setCategory(cat)}>{categoryName(cat)}</button>)}
@@ -215,8 +244,11 @@ export default function MapExplorer() {
             {selected.photo&&<figure className="detail-photo"><img src={selected.photo.src} alt={selected.photo.alt}/><figcaption>© <a href={selected.photo.url} target="_blank" rel="noreferrer">{selected.photo.credit}</a></figcaption></figure>}
             <div className="detail-head"><p>{categoryName(selected.category)}</p><h2>{selected.name}</h2><span className="google-score">{/^\d/.test(selected.rating)?`★ ${selected.rating}${selected.reviews?` · ${selected.reviews}`:""}`:selected.rating}</span>{selected.tag&&<span className="detail-tag">{selected.tag[locale]}</span>}</div>
             <p className="detail-summary">{selected.summary[locale]}</p>
+            <button type="button" className={`favorite-button ${favoriteIds.includes(selected.id)?"active":""}`} onClick={()=>toggleFavorite(selected.id)}>{favoriteIds.includes(selected.id)?"♥":"♡"} {favoriteIds.includes(selected.id)?at.saved:at.save}</button>
             {selected.languages&&<div className="language-row"><b>{t.languages}</b>{selected.languages.map((language)=><span key={language}>{language}</span>)}</div>}
+            <h3 className="practical-title">{at.practical}</h3>
             <dl className="facts"><div><dt>{t.neighborhood}</dt><dd>{selected.neighborhood}</dd></div><div><dt>{t.time}</dt><dd>{selected.visit}</dd></div>{selected.hours&&<div><dt>{xt.hours}</dt><dd>{selected.hours}</dd></div>}{selected.access&&<div><dt>{xt.access}</dt><dd>{selected.access[locale]}</dd></div>}<div><dt>{t.googleRating}</dt><dd>{selected.rating}</dd></div><div><dt>{t.community}</dt><dd>{summary.average?`★ ${summary.average} · ${summary.count} ${t.reviewsCount}`:`—`}</dd></div></dl>
+            <div className="directions"><b>{at.directions}</b><div><a href={directionsUrl(selected,"walking")} target="_blank" rel="noreferrer">🚶 {at.walk}</a><a href={directionsUrl(selected,"transit")} target="_blank" rel="noreferrer">▣ {at.transit}</a><a href={directionsUrl(selected,"driving")} target="_blank" rel="noreferrer">🚗 {at.drive}</a></div></div>
             <a className="maps-link" href={mapsUrl(selected)} target="_blank" rel="noreferrer">{t.google}<span>↗</span></a>
             {selected.officialUrl&&<a className="official-link" href={selected.officialUrl} target="_blank" rel="noreferrer">{t.official}<span>↗</span></a>}
 
@@ -238,6 +270,8 @@ export default function MapExplorer() {
         </div>
         <p className="source">{t.source}</p>
       </section>
+      <SafetyHub locale={locale} coords={userLocation?.coords??null}/>
+      <BusinessSignup locale={locale}/>
     </main>
     <footer><div className="footer-brand"><img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy"/><p><small>{t.footer}</small></p></div><a href="https://www.nuevopudahuel.cl/transporte-oficial" target="_blank" rel="noreferrer">{t.official} ↗</a></footer>
   </>;
