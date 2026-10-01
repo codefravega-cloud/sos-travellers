@@ -46,3 +46,10 @@ next-env.d.ts
 /work/
 /AGENTS.md
 /CLAUDE.md
+
+# Google Places import: paid API responses and unreviewed candidates
+/scripts/places/.cache/
+/scripts/places/out/
+
+# raw generated scene images before resizing
+/scripts/scenes/raw/
