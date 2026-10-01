@@ -14,4 +14,8 @@ create index if not exists reviews_place_created_idx
 
 alter table public.reviews enable row level security;
 
+grant usage on schema public to service_role;
+grant select, insert on table public.reviews to service_role;
+grant usage, select on sequence public.reviews_id_seq to service_role;
+
 comment on table public.reviews is 'Opiniones de viajeros publicadas en SOS Travellers.';

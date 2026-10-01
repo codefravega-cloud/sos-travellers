@@ -1,68 +1,48 @@
-import vinext from "vinext";
-import { defineConfig } from "vite";
-import hostingConfig from "./.openai/hosting.json";
-import { readExecutionProfile } from "./scripts/execution-profile.mjs";
-import { sites } from "./build/sites-vite-plugin";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import react from "@vitejs/plugin-react";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 
-const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
-  "00000000-0000-4000-8000-000000000000";
-
-const { d1, r2 } = hostingConfig;
-
-// macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
-const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
-const managedLinux = readExecutionProfile() === "managed-linux";
-
-const localBindingConfig = {
-  main: "vinext/server/fetch-handler",
-  compatibility_flags: ["nodejs_compat"],
-  d1_databases: d1
-    ? [
-        {
-          binding: d1,
-          database_name: "site-creator-d1",
-          database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
-        },
-      ]
-    : [],
-  r2_buckets: r2
-    ? [
-        {
-          binding: r2,
-          bucket_name: "site-creator-r2",
-        },
-      ]
-    : [],
-};
-
-export default defineConfig(async () => {
-  // Use Miniflare's local Request.cf placeholder unless fetching is requested.
-  process.env.CLOUDFLARE_CF_FETCH_ENABLED ??= "false";
-  process.env.WRANGLER_SEND_METRICS ??= "false";
-
-  // Keep Wrangler and Miniflare state project-local. These are non-secret tool
-  // settings; application environment belongs in ignored `.env*` files.
-  process.env.WRANGLER_WRITE_LOGS ??= "false";
-  process.env.WRANGLER_LOG_PATH ??= ".wrangler/logs";
-  process.env.WRANGLER_REGISTRY_PATH ??= ".wrangler/dev-registry";
-  process.env.MINIFLARE_REGISTRY_PATH ??= ".wrangler/registry";
-
-  // Wrangler snapshots its log path while the Cloudflare plugin is imported.
-  const { cloudflare } = await import("@cloudflare/vite-plugin");
-
+// Serves the Vercel Functions in api/ during `vite dev`, so no Vercel CLI is
+// needed locally. In production Vercel runs the same files as functions.
+function devApi(): Plugin {
   return {
-    server: {
-      ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
-      ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
+    name: "dev-api",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+        const match = /^\/api\/([a-z0-9-]+)$/.exec(url.pathname);
+        if (!match) return next();
+        const file = resolve(server.config.root, "api", `${match[1]}.ts`);
+        if (!existsSync(file)) { res.statusCode = 404; return res.end(); }
+        try {
+          const method = req.method ?? "GET";
+          const handler = (await server.ssrLoadModule(file))[method];
+          if (typeof handler !== "function") { res.statusCode = 405; return res.end(); }
+          const chunks: Buffer[] = [];
+          for await (const chunk of req) chunks.push(chunk as Buffer);
+          const request = new Request(url, {
+            method,
+            headers: req.headers as Record<string, string>,
+            body: method === "GET" || method === "HEAD" ? undefined : Buffer.concat(chunks),
+          });
+          const response: Response = await handler(request);
+          res.statusCode = response.status;
+          response.headers.forEach((value, key) => res.setHeader(key, value));
+          res.end(Buffer.from(await response.arrayBuffer()));
+        } catch (error) {
+          console.error(error);
+          res.statusCode = 500;
+          res.end();
+        }
+      });
     },
-    plugins: [
-      vinext(),
-      sites({ mockAuth: !managedLinux }),
-      cloudflare({
-        viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
-        inspectorPort: false,
-        config: localBindingConfig,
-      }),
-    ],
   };
+}
+
+export default defineConfig(({ mode }) => {
+  // Functions read server-side secrets from process.env, as they do on Vercel.
+  Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
+  return { plugins: [react(), devApi()], server: { port: Number(process.env.PORT) || 3000 } };
 });
