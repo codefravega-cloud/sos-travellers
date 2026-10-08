@@ -1,0 +1,85 @@
+{
+ "locality": "Pichilemu",
+ "places": [
+  {
+   "osm_id": "way/790593120",
+   "name": "Punta de Lobos",
+   "category": "view",
+   "lat": -34.4253,
+   "lng": -72.0467,
+   "visit": "1–2 h",
+   "tag": {
+    "es": "Capital del surf",
+    "en": "Surf capital",
+    "pt": "Capital do surfe",
+    "fr": "Capitale du surf"
+   },
+   "summary": {
+    "es": "Acantilados y dos grandes rocas frente a una de las olas más famosas de Chile; hay miradores para ver a los surfistas.",
+    "en": "Cliffs and two great rocks facing one of Chile's most famous waves; lookouts let you watch the surfers.",
+    "pt": "Falésias e duas grandes rochas diante de uma das ondas mais famosas do Chile; há mirantes para ver os surfistas.",
+    "fr": "Falaises et deux grands rochers face à l'une des vagues les plus célèbres du Chili ; des belvédères pour observer les surfeurs."
+   }
+  },
+  {
+   "osm_id": "way/32076555",
+   "name": "Parque Agustín Ross",
+   "category": "park",
+   "lat": -34.3859,
+   "lng": -72.0108,
+   "visit": "45 min",
+   "tag": {
+    "es": "Parque histórico",
+    "en": "Historic park",
+    "pt": "Parque histórico",
+    "fr": "Parc historique"
+   },
+   "summary": {
+    "es": "Parque de palmeras frente al mar junto al antiguo casino, hoy centro cultural, de comienzos del siglo XX.",
+    "en": "A palm-lined park facing the sea beside the old casino, now a cultural centre, from the early 20th century.",
+    "pt": "Parque de palmeiras em frente ao mar junto ao antigo cassino, hoje centro cultural, do início do século XX.",
+    "fr": "Parc de palmiers face à la mer, près de l'ancien casino du début du XXe siècle, aujourd'hui centre culturel."
+   }
+  },
+  {
+   "osm_id": "node/4228780390",
+   "name": "Laguna de Cáhuil",
+   "category": "view",
+   "lat": -34.4783,
+   "lng": -72.0178,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Salinas y ostras",
+    "en": "Salt pans & oysters",
+    "pt": "Salinas e ostras",
+    "fr": "Salines et huîtres"
+   },
+   "summary": {
+    "es": "Laguna costera al sur de Pichilemu, conocida por su sal artesanal, las ostras y los paseos en bote.",
+    "en": "A coastal lagoon south of Pichilemu, known for its artisanal salt, oysters and boat rides.",
+    "pt": "Lagoa costeira ao sul de Pichilemu, conhecida por seu sal artesanal, as ostras e os passeios de barco.",
+    "fr": "Lagune côtière au sud de Pichilemu, connue pour son sel artisanal, ses huîtres et ses balades en barque."
+   }
+  },
+  {
+   "osm_id": "node/12566650640",
+   "name": "Mirador Salinas de Barrancas",
+   "category": "view",
+   "lat": -34.5033,
+   "lng": -71.9906,
+   "visit": "45 min",
+   "tag": {
+    "es": "Sal de mar artesanal",
+    "en": "Artisanal sea salt",
+    "pt": "Sal marinho artesanal",
+    "fr": "Sel de mer artisanal"
+   },
+   "summary": {
+    "es": "Vista de los cuarteles donde los salineros cosechan sal a mano en verano, un oficio con siglos de historia.",
+    "en": "A view of the pans where salt workers harvest salt by hand in summer, a centuries-old trade.",
+    "pt": "Vista dos tanques onde os salineiros colhem sal à mão no verão, um ofício com séculos de história.",
+    "fr": "Vue sur les bassins où les sauniers récoltent le sel à la main en été, un métier séculaire."
+   }
+  }
+ ]
+}

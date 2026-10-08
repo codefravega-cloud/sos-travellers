@@ -6,11 +6,12 @@ import type { Locale } from "./places";
 import localities from "./data/chile-localities.json";
 
 type Tips = typeof import("./chile-tips");
-type Result = { key:string; label:string; kind:"zone"|"region"|"destination"; haystack:string; zone:ZoneId; region:RegionId|null; locality?:string };
+type Result = { key:string; label:string; kind:"zone"|"region"|"destination"; haystack:string; zone:ZoneId; region:RegionId|null; locality?:string; island?:string };
 type Props = {
   locale:Locale;
   region:RegionId|null;
-  onRegionChange:(region:RegionId|null,locality?:string)=>void;
+  // `island` is set for the islands zone: a destination id, or "all" for the whole zone.
+  onRegionChange:(region:RegionId|null,locality?:string,island?:string)=>void;
   onExplore:(region:RegionId)=>void;
   actions:ReactNode;
   locateBox:ReactNode;
@@ -30,6 +31,9 @@ function localityOf(destination:Destination) {
   const {comunas,towns}=localities[destination.region];
   return !destination.island&&(comunas.includes(destination.name)||towns.includes(destination.name))?destination.name:undefined;
 }
+
+// Comunas that are islands: they open the islands zone instead of mainland Valparaíso.
+const islandLocalities:Record<string,string>={"Isla de Pascua":"hanga-roa","Hanga Roa":"hanga-roa"};
 
 function useMediaQuery(query:string) {
   const [matches,setMatches]=useState(()=>window.matchMedia(query).matches);
@@ -59,22 +63,24 @@ export default function ChileHero({locale,region,onRegionChange,onExplore,action
   const index=useMemo<Result[]>(()=>[
     ...zones.map((item)=>({key:`z-${item.id}`,label:item.name[locale],kind:"zone" as const,haystack:normalize(Object.values(item.name).join(" ")),zone:item.id,region:null})),
     ...regions.map((item)=>({key:`r-${item.id}`,label:item.name,kind:"region" as const,haystack:normalize(`${item.name} ${item.capital}`),zone:item.zone,region:item.id})),
-    ...destinations.map((item)=>({key:`d-${item.id}`,label:item.name,kind:"destination" as const,haystack:normalize(`${item.name} ${(item.aliases??[]).join(" ")}`),zone:item.island?"islas" as const:regionById(item.region).zone,region:item.island?null:item.region,locality:localityOf(item)})),
+    ...destinations.map((item)=>({key:`d-${item.id}`,label:item.name,kind:"destination" as const,haystack:normalize(`${item.name} ${(item.aliases??[]).join(" ")}`),zone:item.island?"islas" as const:regionById(item.region).zone,region:item.island?null:item.region,locality:localityOf(item),island:item.island?item.id:undefined})),
     // Every comuna and tourist town, so any place name resolves to its region.
     ...regions.flatMap((item)=>[...localities[item.id].comunas,...localities[item.id].towns]
       .filter((name)=>!destinations.some((destination)=>destination.name===name)&&name!==item.name)
-      .map((name)=>({key:`l-${item.id}-${name}`,label:name,kind:"destination" as const,haystack:normalize(name),zone:item.zone,region:item.id,locality:name}))),
+      .map((name)=>islandLocalities[name]
+        ?{key:`l-${item.id}-${name}`,label:name,kind:"destination" as const,haystack:normalize(name),zone:"islas" as const,region:null,island:islandLocalities[name]}
+        :{key:`l-${item.id}-${name}`,label:name,kind:"destination" as const,haystack:normalize(name),zone:item.zone,region:item.id,locality:name})),
   ],[locale]);
   const needle=normalize(query);
   const results=needle?index.filter((item)=>item.haystack.includes(needle)).sort((a,b)=>Number(b.haystack.startsWith(needle))-Number(a.haystack.startsWith(needle))).slice(0,7):[];
 
-  function select(nextZone:ZoneId|null,nextRegion:RegionId|null,locality?:string) {
+  function select(nextZone:ZoneId|null,nextRegion:RegionId|null,locality?:string,island?:string) {
     setIslands(nextZone==="islas");
     setZoneOnly(nextZone==="islas"?null:nextZone);
-    onRegionChange(nextRegion,locality);
+    onRegionChange(nextRegion,locality,nextZone==="islas"?island??"all":undefined);
   }
-  function choose(result:Result) { select(result.zone,result.region,result.locality); setQuery(result.label); setOpen(false); }
-  const pickDestination=(destination:Destination)=>select(regionById(destination.region).zone,destination.region,localityOf(destination));
+  function choose(result:Result) { select(result.zone,result.region,result.locality,result.island); setQuery(result.label); setOpen(false); }
+  const pickDestination=(destination:Destination)=>destination.island?select("islas",null,undefined,destination.id):select(regionById(destination.region).zone,destination.region,localityOf(destination));
 
   const zoneInfo=zone?zoneById(zone):null;
   const heading=region?regionById(region).name:zoneInfo?.name[locale];
@@ -125,7 +131,7 @@ export default function ChileHero({locale,region,onRegionChange,onExplore,action
             {topics.map((item)=><button key={item} type="button" role="tab" aria-selected={topic===item} className={topic===item?"on":""} onClick={()=>setTopic(item)}>{t.topics[item]}</button>)}
           </div>
           <p className="chile-tip" role="tabpanel">{tips&&zone?tips.zoneTips[zone][topic][locale]:t.loading}</p>
-          <div className="chile-panel-foot">{region&&<button type="button" className="chile-cta" onClick={()=>onExplore(region)}>{t.cta} ↓</button>}<small>{t.note}</small></div>
+          <div className="chile-panel-foot">{region?<button type="button" className="chile-cta" onClick={()=>onExplore(region)}>{t.cta} ↓</button>:zone==="islas"&&<button type="button" className="chile-cta" onClick={()=>document.getElementById("mapa")?.scrollIntoView({behavior:"smooth",block:"start"})}>{t.cta} ↓</button>}<small>{t.note}</small></div>
         </div>:<div className="landing-actions">{actions}</div>}
 
         <div className="chile-hero-tools">{locateBox}{weather(zone)}</div>

@@ -1,0 +1,215 @@
+{
+ "locality": "Pucón",
+ "places": [
+  {
+   "osm_id": "node/4502902091",
+   "name": "Parque Nacional Villarrica",
+   "category": "park",
+   "lat": -39.46942,
+   "lng": -71.81498,
+   "visit": "Día completo",
+   "address": null,
+   "tag": {
+    "es": "Volcán y bosques",
+    "en": "Volcano & forests",
+    "pt": "Vulcão e florestas",
+    "fr": "Volcan et forêts"
+   },
+   "summary": {
+    "es": "El parque del volcán Villarrica: senderos entre araucarias, coladas de lava y lagunas. El ascenso al cráter solo se hace con guía autorizado y según la alerta volcánica.",
+    "en": "The park of Villarrica volcano: trails among araucarias, lava flows and lagoons. The crater ascent is only done with an authorised guide and depends on the volcanic alert level.",
+    "pt": "O parque do vulcão Villarrica: trilhas entre araucárias, rios de lava e lagoas. A subida à cratera só é feita com guia autorizado e conforme o alerta vulcânico.",
+    "fr": "Le parc du volcan Villarrica : sentiers parmi les araucarias, coulées de lave et lagunes. L'ascension du cratère se fait uniquement avec un guide agréé et selon l'alerte volcanique."
+   }
+  },
+  {
+   "osm_id": "node/5150857321",
+   "name": "Parque Nacional Huerquehue",
+   "category": "park",
+   "lat": -39.14989,
+   "lng": -71.71531,
+   "visit": "Día completo",
+   "address": null,
+   "tag": {
+    "es": "Sendero Los Lagos",
+    "en": "Los Lagos trail",
+    "pt": "Trilha Los Lagos",
+    "fr": "Sentier Los Lagos"
+   },
+   "summary": {
+    "es": "Bosque de araucarias milenarias y lagunas de montaña; el sendero Los Lagos es la caminata de un día más popular de la zona.",
+    "en": "Ancient araucaria forest and mountain lagoons; the Los Lagos trail is the most popular day hike in the area.",
+    "pt": "Floresta de araucárias milenares e lagoas de montanha; a trilha Los Lagos é a caminhada de um dia mais popular da região.",
+    "fr": "Forêt d'araucarias millénaires et lagunes de montagne ; le sentier Los Lagos est la randonnée à la journée la plus prisée de la zone."
+   }
+  },
+  {
+   "osm_id": "node/2349282652",
+   "name": "Ojos del Caburgua",
+   "category": "view",
+   "lat": -39.23841,
+   "lng": -71.83461,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Saltos y pozones",
+    "en": "Waterfalls & pools",
+    "pt": "Cachoeiras e poços",
+    "fr": "Cascades et bassins"
+   },
+   "summary": {
+    "es": "Varias caídas de agua que brotan entre el bosque hacia un pozón azul; una parada corta en el camino a Caburgua.",
+    "en": "Several waterfalls springing out of the forest into a blue pool; a short stop on the road to Caburgua.",
+    "pt": "Várias quedas d'água que brotam da floresta em direção a um poço azul; uma parada curta no caminho para Caburgua.",
+    "fr": "Plusieurs chutes jaillissant de la forêt vers un bassin bleu ; une courte halte sur la route de Caburgua."
+   }
+  },
+  {
+   "osm_id": "node/2811322803",
+   "name": "Termas Los Pozones",
+   "category": "experience",
+   "lat": -39.22686,
+   "lng": -71.65248,
+   "visit": "2–3 h",
+   "address": null,
+   "tag": {
+    "es": "Termas junto al río",
+    "en": "Riverside hot springs",
+    "pt": "Termas à beira do rio",
+    "fr": "Thermes au bord de la rivière"
+   },
+   "summary": {
+    "es": "Pozas termales de piedra a orillas del río Liucura, con turnos de día y de noche; rústicas y de las más conocidas de Pucón.",
+    "en": "Stone hot pools on the banks of the Liucura river, with day and night sessions; rustic and among the best known in Pucón.",
+    "pt": "Piscinas termais de pedra às margens do rio Liucura, com turnos de dia e de noite; rústicas e das mais conhecidas de Pucón.",
+    "fr": "Bassins thermaux en pierre au bord du río Liucura, avec créneaux de jour et de nuit ; rustiques et parmi les plus connus de Pucón."
+   }
+  },
+  {
+   "osm_id": "way/343335843",
+   "name": "Santuario El Cañi",
+   "category": "park",
+   "lat": -39.26251,
+   "lng": -71.72148,
+   "visit": "Día completo",
+   "address": null,
+   "tag": {
+    "es": "Mirador de volcanes",
+    "en": "Volcano lookout",
+    "pt": "Mirante de vulcões",
+    "fr": "Belvédère sur les volcans"
+   },
+   "summary": {
+    "es": "Reserva privada de araucarias con una subida exigente hasta un mirador desde donde se ven cuatro volcanes en días despejados.",
+    "en": "A private araucaria reserve with a demanding climb to a lookout from which four volcanoes can be seen on clear days.",
+    "pt": "Reserva privada de araucárias com uma subida exigente até um mirante de onde se veem quatro vulcões em dias limpos.",
+    "fr": "Réserve privée d'araucarias avec une montée exigeante jusqu'à un belvédère d'où l'on voit quatre volcans par temps clair."
+   }
+  },
+  {
+   "osm_id": "way/934099771",
+   "name": "Centro de Ski Pucón",
+   "category": "snow",
+   "lat": -39.39227,
+   "lng": -71.95876,
+   "visit": "Medio día",
+   "address": null,
+   "tag": {
+    "es": "Nieve en el volcán",
+    "en": "Snow on the volcano",
+    "pt": "Neve no vulcão",
+    "fr": "Neige sur le volcan"
+   },
+   "summary": {
+    "es": "Centro de esquí en la ladera del volcán Villarrica, con vista al lago; fuera de temporada es punto de partida de caminatas. Depende del clima y de la alerta volcánica.",
+    "en": "A ski centre on the slopes of Villarrica volcano, with lake views; off season it is a starting point for hikes. Depends on weather and the volcanic alert level.",
+    "pt": "Centro de esqui na encosta do vulcão Villarrica, com vista para o lago; fora da temporada é ponto de partida de caminhadas. Depende do clima e do alerta vulcânico.",
+    "fr": "Station de ski sur le flanc du volcan Villarrica, avec vue sur le lac ; hors saison, point de départ de randonnées. Dépend de la météo et de l'alerte volcanique."
+   }
+  },
+  {
+   "osm_id": "node/327774421",
+   "name": "Cuevas Volcánicas",
+   "category": "experience",
+   "lat": -39.37445,
+   "lng": -71.94245,
+   "visit": "1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Túnel de lava",
+    "en": "Lava tube",
+    "pt": "Túnel de lava",
+    "fr": "Tunnel de lave"
+   },
+   "summary": {
+    "es": "Visita guiada por un túnel formado por la lava del Villarrica, con un pequeño centro sobre vulcanología; adentro hace frío y hay humedad.",
+    "en": "A guided visit through a tunnel formed by Villarrica's lava, with a small volcanology centre; it is cold and damp inside.",
+    "pt": "Visita guiada por um túnel formado pela lava do Villarrica, com um pequeno centro de vulcanologia; dentro faz frio e há umidade.",
+    "fr": "Visite guidée d'un tunnel formé par la lave du Villarrica, avec un petit centre de volcanologie ; il y fait froid et humide."
+   }
+  },
+  {
+   "osm_id": "node/11784513269",
+   "name": "Salto El Claro",
+   "category": "view",
+   "lat": -39.31571,
+   "lng": -71.93016,
+   "visit": "1,5–2 h",
+   "address": null,
+   "tag": {
+    "es": "Cascada de 90 m",
+    "en": "90 m waterfall",
+    "pt": "Cachoeira de 90 m",
+    "fr": "Cascade de 90 m"
+   },
+   "summary": {
+    "es": "Cascada alta en medio del bosque a pocos kilómetros de Pucón; el último tramo es un sendero empinado y resbaloso con lluvia.",
+    "en": "A tall waterfall in the forest a few kilometres from Pucón; the last stretch is a steep trail that gets slippery in the rain.",
+    "pt": "Cachoeira alta no meio da floresta a poucos quilômetros de Pucón; o último trecho é uma trilha íngreme e escorregadia com chuva.",
+    "fr": "Haute cascade en pleine forêt à quelques kilomètres de Pucón ; le dernier tronçon est un sentier raide, glissant par temps de pluie."
+   }
+  },
+  {
+   "osm_id": "node/8088035524",
+   "name": "Salto El León",
+   "category": "view",
+   "lat": -39.42049,
+   "lng": -71.76037,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Cascada en Palguín",
+    "en": "Waterfall in Palguín",
+    "pt": "Cachoeira em Palguín",
+    "fr": "Cascade à Palguín"
+   },
+   "summary": {
+    "es": "Una de las cascadas más altas de la zona, en el sector Palguín, con acceso corto desde el estacionamiento y entrada pagada.",
+    "en": "One of the tallest waterfalls in the area, in the Palguín sector, with a short walk from the car park and paid entry.",
+    "pt": "Uma das cachoeiras mais altas da região, no setor Palguín, com acesso curto a partir do estacionamento e entrada paga.",
+    "fr": "L'une des plus hautes cascades de la zone, dans le secteur de Palguín, accessible en quelques minutes depuis le parking, entrée payante."
+   }
+  },
+  {
+   "osm_id": "node/4742328622",
+   "name": "Mirador de Pucón y volcán Villarrica",
+   "category": "view",
+   "lat": -39.22823,
+   "lng": -71.95457,
+   "visit": "30 min",
+   "address": null,
+   "tag": {
+    "es": "Vista del lago y el volcán",
+    "en": "Lake & volcano view",
+    "pt": "Vista do lago e do vulcão",
+    "fr": "Vue sur le lac et le volcan"
+   },
+   "summary": {
+    "es": "Mirador sobre la ciudad, el lago Villarrica y el volcán de fondo; mejor con cielo despejado.",
+    "en": "A viewpoint over the town, Lake Villarrica and the volcano behind; best under clear skies.",
+    "pt": "Mirante sobre a cidade, o lago Villarrica e o vulcão ao fundo; melhor com céu limpo.",
+    "fr": "Belvédère sur la ville, le lac Villarrica et le volcan en toile de fond ; à privilégier par ciel dégagé."
+   }
+  }
+ ]
+}

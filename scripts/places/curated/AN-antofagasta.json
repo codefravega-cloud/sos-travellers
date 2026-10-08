@@ -1,0 +1,105 @@
+{
+ "locality": "Antofagasta",
+ "places": [
+  {
+   "osm_id": "way/458587586",
+   "name": "Monumento Natural La Portada",
+   "category": "park",
+   "lat": -23.5012,
+   "lng": -70.4272,
+   "visit": "1 h",
+   "tag": {
+    "es": "Arco sobre el mar",
+    "en": "Sea arch",
+    "pt": "Arco sobre o mar",
+    "fr": "Arche marine"
+   },
+   "summary": {
+    "es": "Arco de roca en el mar frente a acantilados, símbolo de Antofagasta; se mira desde los miradores superiores.",
+    "en": "A rock arch in the sea facing tall cliffs, the symbol of Antofagasta; viewed from the lookouts above.",
+    "pt": "Arco de rocha no mar diante de falésias, símbolo de Antofagasta; observa-se dos mirantes superiores.",
+    "fr": "Arche rocheuse en mer face aux falaises, symbole d'Antofagasta ; à admirer depuis les belvédères."
+   }
+  },
+  {
+   "osm_id": "way/92246765",
+   "name": "Museo del Desierto de Atacama · Ruinas de Huanchaca",
+   "category": "museum",
+   "lat": -23.686,
+   "lng": -70.4126,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Ruinas y museo",
+    "en": "Ruins & museum",
+    "pt": "Ruínas e museu",
+    "fr": "Ruines et musée"
+   },
+   "summary": {
+    "es": "Museo de geología, minería y astronomía junto a las ruinas de una fundición de plata del siglo XIX.",
+    "en": "A geology, mining and astronomy museum beside the ruins of a 19th-century silver smelter.",
+    "pt": "Museu de geologia, mineração e astronomia junto às ruínas de uma fundição de prata do século XIX.",
+    "fr": "Musée de géologie, mines et astronomie près des ruines d'une fonderie d'argent du XIXe siècle."
+   }
+  },
+  {
+   "osm_id": "way/192677063",
+   "name": "Museo Regional de Antofagasta",
+   "category": "museum",
+   "lat": -23.6444,
+   "lng": -70.3978,
+   "visit": "1 h",
+   "tag": {
+    "es": "Historia regional",
+    "en": "Regional history",
+    "pt": "História regional",
+    "fr": "Histoire régionale"
+   },
+   "summary": {
+    "es": "Historia natural y humana de la región en el edificio de la antigua aduana, en el barrio histórico del puerto.",
+    "en": "The region's natural and human history in the old customs house, in the port's historic quarter.",
+    "pt": "História natural e humana da região no edifício da antiga alfândega, no bairro histórico do porto.",
+    "fr": "Histoire naturelle et humaine de la région dans l'ancienne douane, au cœur du quartier historique du port."
+   }
+  },
+  {
+   "osm_id": "way/180070625",
+   "name": "Plaza Colón",
+   "category": "view",
+   "lat": -23.6464,
+   "lng": -70.398,
+   "visit": "30 min",
+   "tag": {
+    "es": "Centro de la ciudad",
+    "en": "City centre",
+    "pt": "Centro da cidade",
+    "fr": "Centre-ville"
+   },
+   "summary": {
+    "es": "La plaza principal, con la torre del reloj donada por la colonia británica y la catedral al frente.",
+    "en": "The main square, with the clock tower donated by the British community and the cathedral opposite.",
+    "pt": "A praça principal, com a torre do relógio doada pela colônia britânica e a catedral em frente.",
+    "fr": "La place principale, avec la tour de l'horloge offerte par la communauté britannique et la cathédrale en face."
+   }
+  },
+  {
+   "osm_id": "relation/4743577",
+   "name": "Parque Nacional Morro Moreno",
+   "category": "park",
+   "lat": -23.4844,
+   "lng": -70.5777,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Desierto costero",
+    "en": "Coastal desert",
+    "pt": "Deserto costeiro",
+    "fr": "Désert côtier"
+   },
+   "summary": {
+    "es": "Parque en la península de Mejillones donde la camanchaca sostiene vegetación en pleno desierto; infórmate de los accesos antes de ir.",
+    "en": "A park on the Mejillones peninsula where coastal fog sustains plant life in the desert; check access before you go.",
+    "pt": "Parque na península de Mejillones onde a neblina costeira sustenta vegetação em pleno deserto; informe-se sobre os acessos antes de ir.",
+    "fr": "Parc de la péninsule de Mejillones où le brouillard côtier fait vivre la végétation en plein désert ; renseignez-vous sur les accès."
+   }
+  }
+ ]
+}

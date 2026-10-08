@@ -1,0 +1,105 @@
+{
+ "locality": "La Serena",
+ "places": [
+  {
+   "osm_id": "way/1482573082",
+   "name": "La Recova",
+   "category": "market",
+   "lat": -29.9016,
+   "lng": -71.2462,
+   "visit": "1 h",
+   "tag": {
+    "es": "Mercado típico",
+    "en": "Traditional market",
+    "pt": "Mercado típico",
+    "fr": "Marché traditionnel"
+   },
+   "summary": {
+    "es": "Mercado de artesanía y productos locales: papayas, manjar y tejidos, con cocinerías en el segundo piso.",
+    "en": "A market for crafts and local produce such as papaya sweets and textiles, with eateries upstairs.",
+    "pt": "Mercado de artesanato e produtos locais: mamões, doce de leite e tecidos, com restaurantes no segundo andar.",
+    "fr": "Marché d'artisanat et de produits locaux : papayes, confiture de lait et tissages, avec des cantines à l'étage."
+   }
+  },
+  {
+   "osm_id": "node/12038323779",
+   "name": "Jardín Japonés",
+   "category": "park",
+   "lat": -29.9033,
+   "lng": -71.2551,
+   "visit": "45 min",
+   "tag": {
+    "es": "Jardín con lagunas",
+    "en": "Garden with ponds",
+    "pt": "Jardim com lagos",
+    "fr": "Jardin et bassins"
+   },
+   "summary": {
+    "es": "Jardín de estilo japonés con puentes, lagunas y peces koi, a pasos del centro histórico.",
+    "en": "A Japanese-style garden with bridges, ponds and koi fish, steps from the historic centre.",
+    "pt": "Jardim de estilo japonês com pontes, lagos e carpas koi, a poucos passos do centro histórico.",
+    "fr": "Jardin de style japonais avec ponts, bassins et carpes koï, à deux pas du centre historique."
+   }
+  },
+  {
+   "osm_id": "relation/8296835",
+   "name": "Museo Arqueológico de La Serena",
+   "category": "museum",
+   "lat": -29.9035,
+   "lng": -71.247,
+   "visit": "1 h",
+   "tag": {
+    "es": "Cultura diaguita y un moái",
+    "en": "Diaguita culture & a moai",
+    "pt": "Cultura diaguita e um moai",
+    "fr": "Culture diaguita et un moaï"
+   },
+   "summary": {
+    "es": "Colección de cerámica diaguita y un moái original de Rapa Nui, en pleno centro.",
+    "en": "A collection of Diaguita pottery and an original moai from Rapa Nui, right in the centre.",
+    "pt": "Coleção de cerâmica diaguita e um moai original de Rapa Nui, em pleno centro.",
+    "fr": "Collection de céramiques diaguitas et un moaï original de Rapa Nui, en plein centre."
+   }
+  },
+  {
+   "osm_id": "way/565137572",
+   "name": "Plaza de Armas",
+   "category": "view",
+   "lat": -29.9027,
+   "lng": -71.252,
+   "visit": "30 min",
+   "tag": {
+    "es": "Centro histórico",
+    "en": "Historic centre",
+    "pt": "Centro histórico",
+    "fr": "Centre historique"
+   },
+   "summary": {
+    "es": "El corazón de una de las ciudades más antiguas de Chile, rodeado de iglesias de piedra y arquitectura neocolonial.",
+    "en": "The heart of one of Chile's oldest cities, surrounded by stone churches and neocolonial architecture.",
+    "pt": "O coração de uma das cidades mais antigas do Chile, cercado de igrejas de pedra e arquitetura neocolonial.",
+    "fr": "Le cœur de l'une des plus anciennes villes du Chili, entouré d'églises en pierre et d'architecture néocoloniale."
+   }
+  },
+  {
+   "osm_id": "node/1064753654",
+   "name": "Cruz del Tercer Milenio · Coquimbo",
+   "category": "view",
+   "lat": -29.9519,
+   "lng": -71.3472,
+   "visit": "45 min",
+   "tag": {
+    "es": "Mirador de la bahía",
+    "en": "Bay lookout",
+    "pt": "Mirante da baía",
+    "fr": "Belvédère sur la baie"
+   },
+   "summary": {
+    "es": "Cruz monumental sobre un cerro de Coquimbo con miradores hacia toda la bahía y La Serena.",
+    "en": "A monumental cross on a Coquimbo hilltop with lookouts over the whole bay and La Serena.",
+    "pt": "Cruz monumental sobre um morro de Coquimbo com mirantes para toda a baía e La Serena.",
+    "fr": "Croix monumentale sur une colline de Coquimbo, avec des belvédères sur toute la baie et La Serena."
+   }
+  }
+ ]
+}

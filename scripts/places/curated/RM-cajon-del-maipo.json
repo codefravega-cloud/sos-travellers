@@ -1,0 +1,85 @@
+{
+ "locality": "San José de Maipo",
+ "places": [
+  {
+   "osm_id": "node/2929276902",
+   "name": "Embalse El Yeso",
+   "category": "view",
+   "lat": -33.6651,
+   "lng": -70.0853,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Laguna turquesa andina",
+    "en": "Turquoise Andean lake",
+    "pt": "Lago turquesa andino",
+    "fr": "Lac turquoise andin"
+   },
+   "summary": {
+    "es": "Embalse de color turquesa rodeado de cumbres a 2.500 m. El camino es de ripio y suele cerrarse con nieve o lluvia: revisa el estado antes de ir.",
+    "en": "A turquoise reservoir ringed by peaks at 2,500 m. The road is gravel and often closes with snow or rain: check conditions first.",
+    "pt": "Represa de cor turquesa cercada de picos a 2.500 m. A estrada é de cascalho e costuma fechar com neve ou chuva: verifique antes de ir.",
+    "fr": "Lac de barrage turquoise entouré de sommets à 2 500 m. La piste ferme souvent par neige ou pluie : vérifiez son état avant de partir."
+   }
+  },
+  {
+   "osm_id": "way/141008372",
+   "name": "Monumento Natural El Morado",
+   "category": "park",
+   "lat": -33.7818,
+   "lng": -70.0738,
+   "visit": "5–6 h",
+   "tag": {
+    "es": "Glaciar y laguna",
+    "en": "Glacier & lagoon",
+    "pt": "Geleira e lagoa",
+    "fr": "Glacier et lagune"
+   },
+   "summary": {
+    "es": "Caminata de unos 8 km hasta la laguna y el glaciar San Francisco, desde Baños Morales; la entrada requiere reserva.",
+    "en": "A hike of about 8 km to the lagoon and San Francisco glacier, from Baños Morales; entry requires booking.",
+    "pt": "Caminhada de cerca de 8 km até a lagoa e a geleira San Francisco, a partir de Baños Morales; a entrada exige reserva.",
+    "fr": "Randonnée d'environ 8 km jusqu'à la lagune et au glacier San Francisco, depuis Baños Morales ; entrée sur réservation."
+   }
+  },
+  {
+   "osm_id": "way/454992695",
+   "name": "Santuario Cascada de las Ánimas",
+   "category": "park",
+   "lat": -33.7708,
+   "lng": -70.3225,
+   "visit": "2–3 h",
+   "tag": {
+    "es": "Cascada y aventura",
+    "en": "Waterfall & adventure",
+    "pt": "Cachoeira e aventura",
+    "fr": "Cascade et aventure"
+   },
+   "summary": {
+    "es": "Reserva privada en San Alfonso con caminata guiada a una cascada, además de rafting y cabalgatas.",
+    "en": "A private reserve in San Alfonso with a guided walk to a waterfall, plus rafting and horse riding.",
+    "pt": "Reserva privada em San Alfonso com caminhada guiada até uma cachoeira, além de rafting e cavalgadas.",
+    "fr": "Réserve privée à San Alfonso avec marche guidée jusqu'à une cascade, ainsi que rafting et balades à cheval."
+   }
+  },
+  {
+   "osm_id": "way/41265517",
+   "name": "Plaza de San José de Maipo",
+   "category": "view",
+   "lat": -33.6404,
+   "lng": -70.3529,
+   "visit": "30 min",
+   "tag": {
+    "es": "Pueblo de montaña",
+    "en": "Mountain town",
+    "pt": "Povoado de montanha",
+    "fr": "Bourg de montagne"
+   },
+   "summary": {
+    "es": "La plaza del pueblo principal del Cajón, con su iglesia colonial y puestos de empanadas y artesanía.",
+    "en": "The square of the Cajón's main town, with its colonial church and stalls selling empanadas and crafts.",
+    "pt": "A praça do principal povoado do Cajón, com sua igreja colonial e bancas de empanadas e artesanato.",
+    "fr": "La place du bourg principal du Cajón, avec son église coloniale et ses étals d'empanadas et d'artisanat."
+   }
+  }
+ ]
+}

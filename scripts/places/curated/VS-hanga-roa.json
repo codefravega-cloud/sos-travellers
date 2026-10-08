@@ -1,0 +1,125 @@
+{
+ "locality": "Hanga Roa",
+ "places": [
+  {
+   "osm_id": "way/221696391",
+   "name": "Ahu Tongariki",
+   "category": "view",
+   "lat": -27.1258,
+   "lng": -109.277,
+   "visit": "1 h",
+   "tag": {
+    "es": "15 moáis al amanecer",
+    "en": "15 moai at sunrise",
+    "pt": "15 moais ao amanhecer",
+    "fr": "15 moaïs au lever du soleil"
+   },
+   "summary": {
+    "es": "La plataforma ceremonial más grande de la isla, con quince moáis en línea; el amanecer aquí es el momento más buscado.",
+    "en": "The island's largest ceremonial platform, with fifteen moai in a row; sunrise here is the most sought-after moment.",
+    "pt": "A maior plataforma cerimonial da ilha, com quinze moais enfileirados; o amanhecer aqui é o momento mais procurado.",
+    "fr": "La plus grande plateforme cérémonielle de l'île, avec quinze moaïs alignés ; le lever du soleil y est le moment le plus prisé."
+   }
+  },
+  {
+   "osm_id": "way/222144438",
+   "name": "Ahu Tahai",
+   "category": "view",
+   "lat": -27.1395,
+   "lng": -109.4269,
+   "visit": "45 min",
+   "tag": {
+    "es": "Atardecer junto al pueblo",
+    "en": "Sunset near town",
+    "pt": "Pôr do sol perto do povoado",
+    "fr": "Coucher de soleil près du village"
+   },
+   "summary": {
+    "es": "Conjunto ceremonial a pasos de Hanga Roa, con un moái de ojos restaurados; el lugar clásico para ver el atardecer.",
+    "en": "A ceremonial complex steps from Hanga Roa, with a moai whose eyes were restored; the classic sunset spot.",
+    "pt": "Conjunto cerimonial a poucos passos de Hanga Roa, com um moai de olhos restaurados; o lugar clássico para ver o pôr do sol.",
+    "fr": "Ensemble cérémoniel à deux pas de Hanga Roa, avec un moaï aux yeux restaurés ; le lieu classique du coucher de soleil."
+   }
+  },
+  {
+   "osm_id": "node/1243637848",
+   "name": "Mirador Rano Kau",
+   "category": "view",
+   "lat": -27.1782,
+   "lng": -109.4307,
+   "visit": "1 h",
+   "tag": {
+    "es": "Cráter con laguna",
+    "en": "Crater with lagoon",
+    "pt": "Cratera com lagoa",
+    "fr": "Cratère et lagune"
+   },
+   "summary": {
+    "es": "Mirador al cráter del volcán Rano Kau, de más de un kilómetro de ancho, con una laguna cubierta de totora.",
+    "en": "A lookout over the crater of Rano Kau volcano, more than a kilometre wide, with a lagoon covered in reeds.",
+    "pt": "Mirante para a cratera do vulcão Rano Kau, com mais de um quilômetro de largura, com uma lagoa coberta de juncos.",
+    "fr": "Belvédère sur le cratère du volcan Rano Kau, large de plus d'un kilomètre, avec une lagune couverte de roseaux."
+   }
+  },
+  {
+   "osm_id": "way/221755582",
+   "name": "Ahu Akivi",
+   "category": "view",
+   "lat": -27.115,
+   "lng": -109.3951,
+   "visit": "45 min",
+   "tag": {
+    "es": "Moáis que miran al mar",
+    "en": "Moai facing the sea",
+    "pt": "Moais que olham o mar",
+    "fr": "Moaïs tournés vers la mer"
+   },
+   "summary": {
+    "es": "Siete moáis en el interior de la isla, los únicos que miran hacia el océano.",
+    "en": "Seven moai in the island's interior, the only ones that face the ocean.",
+    "pt": "Sete moais no interior da ilha, os únicos que olham para o oceano.",
+    "fr": "Sept moaïs à l'intérieur de l'île, les seuls tournés vers l'océan."
+   }
+  },
+  {
+   "osm_id": "way/1459388783",
+   "name": "Museo Antropológico Padre Sebastián Englert",
+   "category": "museum",
+   "lat": -27.1375,
+   "lng": -109.4241,
+   "visit": "1 h",
+   "tag": {
+    "es": "Cultura rapanui",
+    "en": "Rapa Nui culture",
+    "pt": "Cultura rapanui",
+    "fr": "Culture rapanui"
+   },
+   "summary": {
+    "es": "El museo de la isla: historia del poblamiento, tallado de los moáis y escritura rongorongo. Buen comienzo antes de recorrer los sitios.",
+    "en": "The island's museum: settlement history, moai carving and rongorongo script. A good start before touring the sites.",
+    "pt": "O museu da ilha: história do povoamento, entalhe dos moais e escrita rongorongo. Bom começo antes de percorrer os sítios.",
+    "fr": "Le musée de l'île : peuplement, sculpture des moaïs et écriture rongorongo. Un bon début avant de parcourir les sites."
+   }
+  },
+  {
+   "osm_id": "relation/4657638",
+   "name": "Parque Nacional Rapa Nui",
+   "category": "park",
+   "lat": -27.1285,
+   "lng": -109.3412,
+   "visit": "2–3 días",
+   "tag": {
+    "es": "Patrimonio de la Humanidad",
+    "en": "World Heritage",
+    "pt": "Patrimônio da Humanidade",
+    "fr": "Patrimoine mondial"
+   },
+   "summary": {
+    "es": "El parque que protege los sitios arqueológicos de la isla. La entrada se compra antes de visitar y varios sitios exigen guía local acreditado.",
+    "en": "The park protecting the island's archaeological sites. Buy the ticket before visiting; several sites require an accredited local guide.",
+    "pt": "O parque que protege os sítios arqueológicos da ilha. O ingresso é comprado antes da visita e vários sítios exigem guia local credenciado.",
+    "fr": "Le parc qui protège les sites archéologiques de l'île. Le billet s'achète avant la visite et plusieurs sites exigent un guide local agréé."
+   }
+  }
+ ]
+}

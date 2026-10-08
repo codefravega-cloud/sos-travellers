@@ -1,0 +1,85 @@
+{
+ "locality": "Chillán",
+ "places": [
+  {
+   "osm_id": "node/311432330",
+   "name": "Termas de Chillán · Nevados de Chillán",
+   "category": "snow",
+   "lat": -36.9039,
+   "lng": -71.4082,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Nieve y termas",
+    "en": "Snow & hot springs",
+    "pt": "Neve e termas",
+    "fr": "Neige et thermes"
+   },
+   "summary": {
+    "es": "Centro de montaña a 80 km de la ciudad, con esquí en invierno, aguas termales y senderos entre bosques el resto del año.",
+    "en": "A mountain resort 80 km from the city, with skiing in winter, hot springs and forest trails the rest of the year.",
+    "pt": "Centro de montanha a 80 km da cidade, com esqui no inverno, águas termais e trilhas entre florestas no resto do ano.",
+    "fr": "Station de montagne à 80 km de la ville : ski en hiver, sources chaudes et sentiers en forêt le reste de l'année."
+   }
+  },
+  {
+   "osm_id": "way/95388479",
+   "name": "Mercado de Chillán",
+   "category": "market",
+   "lat": -36.6111,
+   "lng": -72.1016,
+   "visit": "1 h",
+   "tag": {
+    "es": "Longanizas y artesanía",
+    "en": "Sausages & crafts",
+    "pt": "Linguiças e artesanato",
+    "fr": "Saucisses et artisanat"
+   },
+   "summary": {
+    "es": "Mercado y feria famosos por las longanizas de Chillán, las cocinerías y la artesanía en greda y mimbre.",
+    "en": "A market and fair famous for Chillán sausages, its eateries and crafts in clay and wicker.",
+    "pt": "Mercado e feira famosos pelas linguiças de Chillán, os restaurantes e o artesanato em argila e vime.",
+    "fr": "Marché et foire réputés pour les saucisses de Chillán, leurs cantines et l'artisanat en argile et osier."
+   }
+  },
+  {
+   "osm_id": "way/305648952",
+   "name": "Museo Claudio Arrau León",
+   "category": "museum",
+   "lat": -36.6058,
+   "lng": -72.1076,
+   "visit": "45 min",
+   "tag": {
+    "es": "Casa del pianista",
+    "en": "The pianist's home",
+    "pt": "Casa do pianista",
+    "fr": "Maison du pianiste"
+   },
+   "summary": {
+    "es": "Museo en el lugar donde nació el pianista Claudio Arrau, con objetos personales, partituras y grabaciones.",
+    "en": "A museum at the birthplace of pianist Claudio Arrau, with personal objects, scores and recordings.",
+    "pt": "Museu no local onde nasceu o pianista Claudio Arrau, com objetos pessoais, partituras e gravações.",
+    "fr": "Musée sur le lieu de naissance du pianiste Claudio Arrau, avec objets personnels, partitions et enregistrements."
+   }
+  },
+  {
+   "osm_id": "node/1289135964",
+   "name": "Cueva de los Pincheira",
+   "category": "view",
+   "lat": -36.8973,
+   "lng": -71.5536,
+   "visit": "45 min",
+   "tag": {
+    "es": "Refugio de bandoleros",
+    "en": "Bandits' hideout",
+    "pt": "Refúgio de bandoleiros",
+    "fr": "Repaire de bandits"
+   },
+   "summary": {
+    "es": "Gran alero de roca en el camino a las termas donde se escondía la banda de los Pincheira en el siglo XIX.",
+    "en": "A large rock shelter on the road to the hot springs where the Pincheira gang hid in the 19th century.",
+    "pt": "Grande abrigo de rocha no caminho para as termas onde se escondia o bando dos Pincheira no século XIX.",
+    "fr": "Grand abri rocheux sur la route des thermes où se cachait la bande des Pincheira au XIXe siècle."
+   }
+  }
+ ]
+}

@@ -1,0 +1,125 @@
+{
+ "locality": "Castro",
+ "places": [
+  {
+   "osm_id": "node/3538246748",
+   "name": "Palafitos de Gamboa",
+   "category": "view",
+   "lat": -42.4813,
+   "lng": -73.7709,
+   "visit": "30 min",
+   "tag": {
+    "es": "Casas sobre pilotes",
+    "en": "Houses on stilts",
+    "pt": "Casas sobre palafitas",
+    "fr": "Maisons sur pilotis"
+   },
+   "summary": {
+    "es": "El mirador clásico hacia los palafitos de colores de Castro, mejor con marea alta.",
+    "en": "The classic lookout over Castro's colourful stilt houses, best at high tide.",
+    "pt": "O mirante clássico para as palafitas coloridas de Castro, melhor com maré alta.",
+    "fr": "Le belvédère classique sur les maisons colorées sur pilotis de Castro, à voir de préférence à marée haute."
+   }
+  },
+  {
+   "osm_id": "way/264791850",
+   "name": "Iglesia San Francisco de Castro",
+   "category": "view",
+   "lat": -42.4815,
+   "lng": -73.7638,
+   "visit": "30 min",
+   "tag": {
+    "es": "Patrimonio de la Humanidad",
+    "en": "World Heritage",
+    "pt": "Patrimônio da Humanidade",
+    "fr": "Patrimoine mondial"
+   },
+   "summary": {
+    "es": "Iglesia de madera de 1912 frente a la plaza, pintada de amarillo y lila, con un interior de maderas nativas.",
+    "en": "A 1912 wooden church facing the square, painted yellow and lilac, with an interior of native timber.",
+    "pt": "Igreja de madeira de 1912 em frente à praça, pintada de amarelo e lilás, com interior de madeiras nativas.",
+    "fr": "Église en bois de 1912 face à la place, peinte en jaune et lilas, avec un intérieur en bois natifs."
+   }
+  },
+  {
+   "osm_id": "way/98836692",
+   "name": "Iglesia de Dalcahue",
+   "category": "view",
+   "lat": -42.3791,
+   "lng": -73.6476,
+   "visit": "1 h",
+   "tag": {
+    "es": "Iglesia y feria artesanal",
+    "en": "Church & craft fair",
+    "pt": "Igreja e feira de artesanato",
+    "fr": "Église et marché artisanal"
+   },
+   "summary": {
+    "es": "Una de las iglesias patrimoniales de Chiloé, a pasos de la feria artesanal y las cocinerías de Dalcahue.",
+    "en": "One of Chiloé's heritage churches, steps from Dalcahue's craft fair and food stalls.",
+    "pt": "Uma das igrejas patrimoniais de Chiloé, a poucos passos da feira de artesanato e dos restaurantes de Dalcahue.",
+    "fr": "L'une des églises classées de Chiloé, à deux pas du marché artisanal et des cantines de Dalcahue."
+   }
+  },
+  {
+   "osm_id": "node/3233029281",
+   "name": "Muelle de las Almas",
+   "category": "view",
+   "lat": -42.7137,
+   "lng": -74.1561,
+   "visit": "3–4 h",
+   "tag": {
+    "es": "Mirador en el Pacífico",
+    "en": "Lookout on the Pacific",
+    "pt": "Mirante no Pacífico",
+    "fr": "Belvédère sur le Pacifique"
+   },
+   "summary": {
+    "es": "Pasarela de madera sobre un acantilado en la costa de Cucao, inspirada en un mito chilote; se llega tras una caminata con barro.",
+    "en": "A wooden walkway on a cliff on the Cucao coast, inspired by a Chiloé myth; reached after a muddy hike.",
+    "pt": "Passarela de madeira sobre uma falésia na costa de Cucao, inspirada em um mito chilote; chega-se após uma caminhada com lama.",
+    "fr": "Passerelle en bois sur une falaise de la côte de Cucao, inspirée d'un mythe de Chiloé ; on y arrive après une marche boueuse."
+   }
+  },
+  {
+   "osm_id": "node/2321490922",
+   "name": "Pingüineras de Puñihuil",
+   "category": "experience",
+   "lat": -41.9292,
+   "lng": -74.034,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Pingüinos en lancha",
+    "en": "Penguins by boat",
+    "pt": "Pinguins de barco",
+    "fr": "Manchots en bateau"
+   },
+   "summary": {
+    "es": "Islotes cerca de Ancud donde anidan pingüinos de Humboldt y de Magallanes; se visitan en lancha, sobre todo entre septiembre y marzo.",
+    "en": "Islets near Ancud where Humboldt and Magellanic penguins nest; visited by boat, mainly between September and March.",
+    "pt": "Ilhotas perto de Ancud onde nidificam pinguins de Humboldt e de Magalhães; visita-se de barco, sobretudo entre setembro e março.",
+    "fr": "Îlots près d'Ancud où nichent manchots de Humboldt et de Magellan ; visite en bateau, surtout de septembre à mars."
+   }
+  },
+  {
+   "osm_id": "way/329674497",
+   "name": "Museo de Arte Moderno de Chiloé",
+   "category": "museum",
+   "lat": -42.461,
+   "lng": -73.799,
+   "visit": "45 min",
+   "tag": {
+    "es": "Arte contemporáneo",
+    "en": "Contemporary art",
+    "pt": "Arte contemporânea",
+    "fr": "Art contemporain"
+   },
+   "summary": {
+    "es": "Arte contemporáneo chileno en galpones de madera de arquitectura chilota, en un parque sobre Castro.",
+    "en": "Chilean contemporary art in wooden sheds of Chiloé architecture, in a park above Castro.",
+    "pt": "Arte contemporânea chilena em galpões de madeira de arquitetura chilota, em um parque acima de Castro.",
+    "fr": "Art contemporain chilien dans des hangars en bois d'architecture chilote, dans un parc au-dessus de Castro."
+   }
+  }
+ ]
+}

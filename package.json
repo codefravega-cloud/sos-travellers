@@ -12,16 +12,20 @@
     "lint": "eslint src api vite.config.ts",
     "places:fetch": "node scripts/places/fetch.mjs",
     "places:osm": "node scripts/places/osm.mjs",
+    "places:specialty": "node scripts/places/specialty.mjs",
     "places:report": "node scripts/places/report.mjs",
     "places:upsert": "node scripts/places/upsert.mjs",
     "places:hours": "node --experimental-strip-types scripts/places/hours-curated.mjs",
-    "places:seed": "node --experimental-strip-types scripts/places/seed-curated.mjs"
+    "places:seed": "node --experimental-strip-types scripts/places/seed-curated.mjs",
+    "agents:events": "node scripts/agents/submit-events.mjs",
+    "agents:summary": "node scripts/agents/weekly-summary.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "motion": "^13.4.6",
+    "qrcode-generator": "^2.0.4",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },

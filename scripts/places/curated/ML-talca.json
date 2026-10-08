@@ -1,0 +1,105 @@
+{
+ "locality": "Talca",
+ "places": [
+  {
+   "osm_id": "relation/10597152",
+   "name": "Parque Nacional Radal Siete Tazas",
+   "category": "park",
+   "lat": -35.4567,
+   "lng": -70.9491,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Pozones en la roca",
+    "en": "Rock pools",
+    "pt": "Poços na rocha",
+    "fr": "Vasques dans la roche"
+   },
+   "summary": {
+    "es": "El río Claro cae por siete pozones seguidos tallados en basalto; también están los saltos La Leona y Velo de la Novia.",
+    "en": "The Claro river drops through seven consecutive pools carved in basalt; the La Leona and Velo de la Novia falls are here too.",
+    "pt": "O rio Claro despenca por sete poços seguidos esculpidos no basalto; também ficam aqui os saltos La Leona e Velo de la Novia.",
+    "fr": "Le río Claro dévale sept vasques successives creusées dans le basalte ; on y trouve aussi les chutes La Leona et Velo de la Novia."
+   }
+  },
+  {
+   "osm_id": "node/1742798574",
+   "name": "Salto Velo de la Novia",
+   "category": "view",
+   "lat": -35.4368,
+   "lng": -71.0446,
+   "visit": "20 min",
+   "tag": {
+    "es": "Cascada de 40 m",
+    "en": "40 m waterfall",
+    "pt": "Cachoeira de 40 m",
+    "fr": "Cascade de 40 m"
+   },
+   "summary": {
+    "es": "Cascada que se ve desde un mirador junto al camino, antes de llegar al sector de las Siete Tazas.",
+    "en": "A waterfall seen from a roadside lookout, before reaching the Siete Tazas sector.",
+    "pt": "Cachoeira vista de um mirante à beira da estrada, antes de chegar ao setor das Siete Tazas.",
+    "fr": "Cascade visible depuis un belvédère en bord de route, avant d'arriver au secteur des Siete Tazas."
+   }
+  },
+  {
+   "osm_id": "relation/5463636",
+   "name": "Reserva Nacional Altos de Lircay",
+   "category": "park",
+   "lat": -35.6015,
+   "lng": -70.9428,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Trekking en la cordillera",
+    "en": "Mountain trekking",
+    "pt": "Trekking na cordilheira",
+    "fr": "Trekking en cordillère"
+   },
+   "summary": {
+    "es": "Bosques de roble y senderos de día completo hacia el Enladrillado, una meseta de roca con vista a los volcanes.",
+    "en": "Oak forests and full-day trails to El Enladrillado, a rock plateau with views of the volcanoes.",
+    "pt": "Florestas de roble e trilhas de dia inteiro até o Enladrillado, um platô de rocha com vista para os vulcões.",
+    "fr": "Forêts de chênes austraux et sentiers d'une journée vers l'Enladrillado, un plateau rocheux avec vue sur les volcans."
+   }
+  },
+  {
+   "osm_id": "way/214849869",
+   "name": "Museo O'Higginiano y de Bellas Artes",
+   "category": "museum",
+   "lat": -35.4258,
+   "lng": -71.6641,
+   "visit": "1 h",
+   "tag": {
+    "es": "Casa de la Independencia",
+    "en": "House of Independence",
+    "pt": "Casa da Independência",
+    "fr": "Maison de l'Indépendance"
+   },
+   "summary": {
+    "es": "Casona colonial donde, según la tradición, se firmó el Acta de Independencia de Chile; hoy museo de historia y arte.",
+    "en": "A colonial house where, by tradition, Chile's Act of Independence was signed; now a history and art museum.",
+    "pt": "Casarão colonial onde, segundo a tradição, foi assinada a Ata de Independência do Chile; hoje museu de história e arte.",
+    "fr": "Demeure coloniale où, selon la tradition, fut signé l'Acte d'indépendance du Chili ; aujourd'hui musée d'histoire et d'art."
+   }
+  },
+  {
+   "osm_id": "way/392092258",
+   "name": "Mercado de Talca",
+   "category": "market",
+   "lat": -35.4253,
+   "lng": -71.659,
+   "visit": "45 min",
+   "tag": {
+    "es": "Cocina del Maule",
+    "en": "Maule cooking",
+    "pt": "Cozinha do Maule",
+    "fr": "Cuisine du Maule"
+   },
+   "summary": {
+    "es": "Mercado central con cocinerías de comida típica y puestos de productos del campo maulino.",
+    "en": "The central market, with eateries serving traditional food and stalls of produce from the Maule countryside.",
+    "pt": "Mercado central com restaurantes de comida típica e bancas de produtos do campo do Maule.",
+    "fr": "Marché central avec cantines de cuisine typique et étals de produits de la campagne du Maule."
+   }
+  }
+ ]
+}

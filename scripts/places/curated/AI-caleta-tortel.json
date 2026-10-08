@@ -1,0 +1,65 @@
+{
+ "locality": "Caleta Tortel",
+ "places": [
+  {
+   "osm_id": "node/11448828263",
+   "name": "Pasarelas de Caleta Tortel",
+   "category": "view",
+   "lat": -47.8038,
+   "lng": -73.5387,
+   "visit": "2 h",
+   "tag": {
+    "es": "Pueblo sin calles",
+    "en": "A village without streets",
+    "pt": "Povoado sem ruas",
+    "fr": "Village sans rues"
+   },
+   "summary": {
+    "es": "Pueblo construido sobre pasarelas de ciprés que bordean el fiordo: no hay calles ni autos, todo se recorre a pie.",
+    "en": "A village built on cypress boardwalks along the fjord: there are no streets or cars, everything is done on foot.",
+    "pt": "Povoado construído sobre passarelas de cipreste que margeiam o fiorde: não há ruas nem carros, tudo se percorre a pé.",
+    "fr": "Village bâti sur des passerelles en cyprès le long du fjord : ni rues ni voitures, tout se fait à pied."
+   }
+  },
+  {
+   "osm_id": "node/482808370",
+   "name": "Mirador Cerro Vigía",
+   "category": "view",
+   "lat": -47.795,
+   "lng": -73.5373,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Vista del delta del Baker",
+    "en": "View of the Baker delta",
+    "pt": "Vista do delta do Baker",
+    "fr": "Vue sur le delta du Baker"
+   },
+   "summary": {
+    "es": "Subida por pasarelas y turba hasta una vista del pueblo, los canales y la desembocadura del río Baker.",
+    "en": "A climb on boardwalks and peat to a view of the village, the channels and the mouth of the Baker river.",
+    "pt": "Subida por passarelas e turfa até uma vista do povoado, dos canais e da foz do rio Baker.",
+    "fr": "Montée sur passerelles et tourbe jusqu'à une vue sur le village, les canaux et l'embouchure du río Baker."
+   }
+  },
+  {
+   "osm_id": "node/11448673226",
+   "name": "Playa Ancha",
+   "category": "view",
+   "lat": -47.8065,
+   "lng": -73.5485,
+   "visit": "45 min",
+   "tag": {
+    "es": "Playa del fiordo",
+    "en": "Fjord beach",
+    "pt": "Praia do fiorde",
+    "fr": "Plage du fjord"
+   },
+   "summary": {
+    "es": "Playa al final de las pasarelas, en el extremo del pueblo, con vista abierta al fiordo.",
+    "en": "A beach at the end of the boardwalks, at the far edge of the village, with an open view of the fjord.",
+    "pt": "Praia no final das passarelas, no extremo do povoado, com vista aberta para o fiorde.",
+    "fr": "Plage au bout des passerelles, à l'extrémité du village, avec vue dégagée sur le fjord."
+   }
+  }
+ ]
+}
