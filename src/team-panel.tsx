@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 
-// Internal tool for the team: Spanish only, behind TEAM_PANEL_KEY (see api/team.ts).
+// Internal tool for the team: Spanish only, behind TEAM_PANEL_KEY (see api/_routes/team.ts).
 type Source={name:string;url:string;ok:boolean;note?:string};
 type Run={id:number;agent:string;section:string;status:"ok"|"error";startedAt:string;finishedAt:string;summary?:string;created:number;skipped:number;details:{sources?:Source[];rejected?:{title:string;reason:string}[];duplicates?:number;metrics?:{label:string;value:number;hint?:string}[];attention?:string[]}};
 type Status="draft"|"published"|"hidden";
@@ -20,7 +20,7 @@ const agents=[
   {id:"events",section:"contenido",name:"Eventos semanales",schedule:"Lunes 9:00",task:"Busca los eventos de las próximas dos semanas en la Región Metropolitana, en recintos reconocidos y pensados para turistas, y los deja como pendientes."},
   {id:"weekly-summary",section:"administracion",name:"Resumen semanal",schedule:"Lunes 10:00",task:"Cuenta lo que pasó en los últimos 7 días y avisa qué necesita atención en cada sección."},
 ];
-// Each tab lists one status; its buttons are the actions api/team.ts allows from that status.
+// Each tab lists one status; its buttons are the actions api/_routes/team.ts allows from that status.
 const tabs:{status:Status;name:string;empty:string;actions:{action:Action;label:string;quiet?:boolean}[]}[]=[
   {status:"draft",name:"Pendientes",empty:"No hay eventos pendientes de aprobación.",actions:[{action:"publish",label:"Aprobar y subir"},{action:"discard",label:"Descartar",quiet:true}]},
   {status:"published",name:"Subidos",empty:"No hay eventos subidos para los próximos días.",actions:[{action:"unpublish",label:"Bajar del sitio",quiet:true}]},

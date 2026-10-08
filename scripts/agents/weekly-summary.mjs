@@ -1,4 +1,4 @@
-// Asks the site for the weekly summary (api/cron-summary.ts → api/_summary.ts). In production Vercel Cron
+// Asks the site for the weekly summary (api/_routes/cron-summary.ts → api/_routes/_summary.ts). In production Vercel Cron
 // calls the same route every Monday; this script is for running it by hand.
 //   node scripts/agents/weekly-summary.mjs [--dry-run]
 // Needs CRON_SECRET (in .env.local or the environment). SOS_SITE_URL picks the site; default is the local dev server.

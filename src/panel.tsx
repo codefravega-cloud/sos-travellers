@@ -4,7 +4,7 @@ import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabase, supabaseReady } from "./supabase-browser";
 
 // Accounts panel for business owners and the SOS Travellers team. Spanish only, like /equipo.
-// What each role may do is enforced by the /api routes (api/owner.ts, api/admin.ts); this file only draws it.
+// What each role may do is enforced by the /api routes (api/_routes/owner.ts, api/_routes/admin.ts); this file only draws it.
 type Role="tourist"|"owner"|"boss";
 type Photo={path:string;status:"pending"|"published"|"rejected";url:string};
 type Promotion={id:number;title:string;description?:string;validUntil:string;status:"pending"|"published"|"rejected";business?:string;partnerId?:number};
@@ -21,7 +21,7 @@ const ZONE="America/Santiago",TEAM_KEY="sos-team-key",MAX_PHOTO_BYTES=5*1024*102
 const kindNames:Record<string,string>={radio_taxi:"Radio taxi",venue:"Local",tour:"Tour",other:"Otro"};
 const roleNames:Record<Role,string>={tourist:"Viajero",owner:"Dueño de local",boss:"Boss"};
 const statusNames:Record<string,string>={pending:"Pendiente",published:"Publicado",rejected:"Rechazado",draft:"En revisión",hidden:"Oculto",approved:"Aprobada",new:"Nueva",read:"Leída",done:"Resuelta"};
-// Mirrors the region check in the SQL migrations and api/_regions.ts.
+// Mirrors the region check in the SQL migrations and api/_routes/_regions.ts.
 const regions=["AP","TA","AN","AT","CO","VS","RM","LI","ML","NB","BI","AR","LR","LL","AI","MA"];
 
 const when=(iso:string)=>new Intl.DateTimeFormat("es-CL",{timeZone:ZONE,day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(iso));

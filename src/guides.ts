@@ -1,6 +1,6 @@
 import { Locale } from "./places";
 
-// Ids are mirrored in api/guide-leads.ts and in the guide_leads SQL check.
+// Ids are mirrored in api/_routes/guide-leads.ts and in the guide_leads SQL check.
 // A guide without `checkoutUrl` is not on sale yet: the section collects emails instead of charging.
 export type Guide={id:string;icon:string;priceClp:number;pages:number;featured?:boolean;checkoutUrl?:string;copy:Record<Locale,{title:string;blurb:string;open:string[];locked:string[]}>};
 

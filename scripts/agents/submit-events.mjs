@@ -1,5 +1,5 @@
 // Hands the events found by the events agent to the site, which validates them, stores them as drafts and
-// records the run (api/agent-events.ts → api/_event-intake.ts). Nothing here publishes an event.
+// records the run (api/_routes/agent-events.ts → api/_routes/_event-intake.ts). Nothing here publishes an event.
 //   node scripts/agents/submit-events.mjs <file.json> [--dry-run]
 // Needs AGENT_KEY (in .env.local or the environment). SOS_SITE_URL picks the site; default is the local dev server.
 // File: { summary, startedAt?, sources: [{ name, url, ok, note? }], events: [{ title, venue, category,

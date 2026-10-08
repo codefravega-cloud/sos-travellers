@@ -31,6 +31,8 @@ npm run dev
 
 `npm run dev` levanta Vite en http://localhost:3000 y sirve también las funciones de `api/`, sin necesidad del CLI de Vercel.
 
+Toda la API es una sola función de Vercel: `api/[route].ts` reparte `/api/<nombre>` al archivo `api/_routes/<nombre>.ts` (el plan gratuito admite 12 funciones por despliegue y hay más rutas que eso). Al crear una ruta nueva hay que agregarla a la tabla de `api/[route].ts`. Los archivos con `_` al inicio son ayudas, no rutas.
+
 Variables en `.env.local`:
 
 ```env
@@ -68,7 +70,7 @@ Las cuentas son de Supabase Auth (correo y contraseña) y el rol vive en `app_us
 | `boss` | `/panel` | Opiniones, sugerencias, aprobaciones, negocios, solicitudes, usuarios, beneficios y acceso a `/equipo` |
 
 - **Un negocio** es una fila de `partners` con `owner_id`. `place_id` lo enlaza a su ficha en `places`; sin él, sus opiniones usan la clave `partner-<id>`.
-- **Fotos y promociones** quedan pendientes hasta que un boss las aprueba. Las fotos van al bucket público `business-photos`; se suben con una dirección firmada que entrega `api/owner-photos.ts`.
+- **Fotos y promociones** quedan pendientes hasta que un boss las aprueba. Las fotos van al bucket público `business-photos`; se suben con una dirección firmada que entrega `api/_routes/owner-photos.ts`.
 - **Opiniones por NFC:** `/r/<id>` abre el formulario de opinión del negocio (cuatro idiomas). El panel del dueño muestra ese enlace y su código QR.
 - **Primer boss:** se asigna a mano una vez: `update public.app_users set role = 'boss' where id = (select id from auth.users where email = 'correo@ejemplo.cl');`. Después, los roles se cambian en el panel.
 - `/panel` necesita `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` (la clave publicable, nunca la `service_role`). Es el único punto del sitio donde el navegador habla con Supabase, y solo para la sesión y la subida de fotos.

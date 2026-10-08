@@ -55,7 +55,7 @@ grant usage, select on sequence public.promotions_id_seq, public.suggestions_id_
 -- A boss hides or republishes reviews from the panel.
 grant update on public.reviews to service_role;
 
--- Photos of a business. Public read by URL; uploads only through signed URLs issued by api/owner-photos.ts.
+-- Photos of a business. Public read by URL; uploads only through signed URLs issued by api/_routes/owner-photos.ts.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('business-photos', 'business-photos', true, 5242880, array['image/jpeg','image/png','image/webp'])
 on conflict (id) do nothing;
