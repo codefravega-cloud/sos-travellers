@@ -1,7 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import qrcode from "qrcode-generator";
 import { FormEvent, useCallback, useEffect, useState } from "react";
-import { supabase, supabaseReady } from "./supabase-browser";
+import { supabase } from "./supabase-browser";
 
 // Accounts panel for business owners and the SOS Travellers team. Spanish only, like /equipo.
 // What each role may do is enforced by the /api routes (api/_routes/owner.ts, api/_routes/admin.ts); this file only draws it.
@@ -81,7 +81,6 @@ export default function Panel(){
     return()=>{alive=false};
   },[userId]);
 
-  if(!supabaseReady)return <main className="team team-gate"><form><h1>Panel</h1><p className="team-error">Falta configurar VITE_SUPABASE_URL y VITE_SUPABASE_KEY.</p></form></main>;
   if(!ready)return null;
   if(!session)return <SignIn/>;
   const mine=profile?.id===userId?profile:null;

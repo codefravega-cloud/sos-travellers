@@ -73,7 +73,7 @@ Las cuentas son de Supabase Auth (correo y contraseña) y el rol vive en `app_us
 - **Fotos y promociones** quedan pendientes hasta que un boss las aprueba. Las fotos van al bucket público `business-photos`; se suben con una dirección firmada que entrega `api/_routes/owner-photos.ts`.
 - **Opiniones por NFC:** `/r/<id>` abre el formulario de opinión del negocio (cuatro idiomas). El panel del dueño muestra ese enlace y su código QR.
 - **Primer boss:** se asigna a mano una vez: `update public.app_users set role = 'boss' where id = (select id from auth.users where email = 'correo@ejemplo.cl');`. Después, los roles se cambian en el panel.
-- `/panel` necesita `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` (la clave publicable, nunca la `service_role`). Es el único punto del sitio donde el navegador habla con Supabase, y solo para la sesión y la subida de fotos.
+- `/panel` es el único punto del sitio donde el navegador habla con Supabase, y solo para la sesión y la subida de fotos. El proyecto y su clave publicable (pública por diseño) están en `src/supabase-browser.ts`, así que no requiere configuración; `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` solo sirven para apuntar a otro proyecto. La `service_role` nunca va en una variable `VITE_`.
 
 ## Agentes y panel del equipo
 
