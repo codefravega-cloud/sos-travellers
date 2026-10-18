@@ -2,7 +2,7 @@ import { regionCapitals } from "./_regions.js";
 import { getSupabase } from "./_supabase.js";
 
 const PAGE = 1000, MAX_PAGES = 4;
-const columns = "id, google_place_id, name, category, rating, rating_label, review_count, lat, lng, region, comuna, locality, address, hours, opening_periods, visit, website, google_maps_url, map_query, languages, summary, tag, access, photo, curated, checked_at, source";
+const columns = "id, google_place_id, name, category, rating, rating_label, review_count, lat, lng, region, comuna, locality, address, hours, opening_periods, visit, website, google_maps_url, map_query, languages, summary, tag, access, photo, curated, checked_at, source, specialty";
 
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -16,6 +16,7 @@ function toPlace(row: Row) {
     reviews: row.review_count == null ? undefined : new Intl.NumberFormat("es-CL").format(row.review_count),
     coords: [row.lat, row.lng],
     neighborhood: row.locality,
+    comuna: row.comuna ?? undefined,
     address: row.address ?? undefined,
     visit: row.visit ?? undefined,
     mapQuery: row.map_query ?? undefined,
@@ -33,6 +34,7 @@ function toPlace(row: Row) {
     curated: row.curated,
     checkedAt: row.checked_at,
     source: row.source,
+    specialty: row.specialty || undefined,
   };
 }
 

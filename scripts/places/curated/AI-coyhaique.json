@@ -1,0 +1,105 @@
+{
+ "locality": "Coyhaique",
+ "places": [
+  {
+   "osm_id": "way/337856415",
+   "name": "Reserva Nacional Coyhaique",
+   "category": "park",
+   "lat": -45.5242,
+   "lng": -72.0119,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Bosque junto a la ciudad",
+    "en": "Forest by the city",
+    "pt": "Floresta junto à cidade",
+    "fr": "Forêt près de la ville"
+   },
+   "summary": {
+    "es": "Senderos entre lengas y lagunas a 5 km de la ciudad, con miradores hacia el valle.",
+    "en": "Trails among lenga beech and lagoons 5 km from the city, with lookouts over the valley.",
+    "pt": "Trilhas entre lengas e lagoas a 5 km da cidade, com mirantes para o vale.",
+    "fr": "Sentiers parmi les lengas et les lagunes à 5 km de la ville, avec belvédères sur la vallée."
+   }
+  },
+  {
+   "osm_id": "node/4274764303",
+   "name": "Piedra del Indio",
+   "category": "view",
+   "lat": -45.5753,
+   "lng": -72.079,
+   "visit": "20 min",
+   "tag": {
+    "es": "Perfil en la roca",
+    "en": "Profile in the rock",
+    "pt": "Perfil na rocha",
+    "fr": "Profil dans la roche"
+   },
+   "summary": {
+    "es": "Formación rocosa con forma de rostro sobre el río Simpson, visible desde un mirador a la salida de la ciudad.",
+    "en": "A rock formation shaped like a face above the Simpson river, seen from a lookout at the edge of the city.",
+    "pt": "Formação rochosa em forma de rosto sobre o rio Simpson, visível de um mirante na saída da cidade.",
+    "fr": "Formation rocheuse en forme de visage au-dessus du río Simpson, visible depuis un belvédère à la sortie de la ville."
+   }
+  },
+  {
+   "osm_id": "relation/4807841",
+   "name": "Parque Nacional Cerro Castillo",
+   "category": "park",
+   "lat": -46.0223,
+   "lng": -72.1367,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Agujas de basalto",
+    "en": "Basalt spires",
+    "pt": "Agulhas de basalto",
+    "fr": "Aiguilles de basalte"
+   },
+   "summary": {
+    "es": "Cumbres afiladas y una laguna turquesa al pie del cerro Castillo; la caminata de un día a la laguna es exigente.",
+    "en": "Jagged peaks and a turquoise lagoon at the foot of Cerro Castillo; the day hike to the lagoon is demanding.",
+    "pt": "Picos afiados e uma lagoa turquesa aos pés do cerro Castillo; a caminhada de um dia até a lagoa é exigente.",
+    "fr": "Sommets acérés et lagune turquoise au pied du cerro Castillo ; la randonnée d'une journée jusqu'à la lagune est exigeante."
+   }
+  },
+  {
+   "osm_id": "way/1176119294",
+   "name": "Museo Regional de Aysén",
+   "category": "museum",
+   "lat": -45.5727,
+   "lng": -72.0261,
+   "visit": "1 h",
+   "tag": {
+    "es": "Historia de Aysén",
+    "en": "History of Aysén",
+    "pt": "História de Aysén",
+    "fr": "Histoire d'Aysén"
+   },
+   "summary": {
+    "es": "Historia natural y de la colonización de Aysén, en los edificios restaurados de una antigua estancia ganadera.",
+    "en": "The natural history and settlement of Aysén, in the restored buildings of a former cattle ranch.",
+    "pt": "História natural e da colonização de Aysén, nos edifícios restaurados de uma antiga estância de gado.",
+    "fr": "Histoire naturelle et colonisation d'Aysén, dans les bâtiments restaurés d'une ancienne estancia."
+   }
+  },
+  {
+   "osm_id": "relation/5461838",
+   "name": "Reserva Nacional Río Simpson",
+   "category": "park",
+   "lat": -45.4959,
+   "lng": -72.2953,
+   "visit": "1–2 h",
+   "tag": {
+    "es": "Cascadas en la ruta",
+    "en": "Roadside waterfalls",
+    "pt": "Cachoeiras na estrada",
+    "fr": "Cascades en bord de route"
+   },
+   "summary": {
+    "es": "Valle boscoso en el camino a Puerto Aysén, con cascadas junto a la ruta y un pequeño centro de visitantes.",
+    "en": "A forested valley on the road to Puerto Aysén, with waterfalls beside the road and a small visitor centre.",
+    "pt": "Vale arborizado no caminho para Puerto Aysén, com cachoeiras junto à estrada e um pequeno centro de visitantes.",
+    "fr": "Vallée boisée sur la route de Puerto Aysén, avec cascades en bord de route et petit centre d'accueil."
+   }
+  }
+ ]
+}

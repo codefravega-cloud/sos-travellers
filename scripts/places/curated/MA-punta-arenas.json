@@ -1,0 +1,125 @@
+{
+ "locality": "Punta Arenas",
+ "places": [
+  {
+   "osm_id": "node/6352927204",
+   "name": "Mirador Cerro de la Cruz",
+   "category": "view",
+   "lat": -53.1601,
+   "lng": -70.9158,
+   "visit": "20 min",
+   "tag": {
+    "es": "Vista del Estrecho",
+    "en": "View of the Strait",
+    "pt": "Vista do Estreito",
+    "fr": "Vue sur le détroit"
+   },
+   "summary": {
+    "es": "El mirador clásico sobre los techos de colores de la ciudad y el estrecho de Magallanes, con Tierra del Fuego al fondo.",
+    "en": "The classic lookout over the city's colourful roofs and the Strait of Magellan, with Tierra del Fuego beyond.",
+    "pt": "O mirante clássico sobre os telhados coloridos da cidade e o estreito de Magalhães, com a Terra do Fogo ao fundo.",
+    "fr": "Le belvédère classique sur les toits colorés de la ville et le détroit de Magellan, avec la Terre de Feu au loin."
+   }
+  },
+  {
+   "osm_id": "node/2403303653",
+   "name": "Museo Regional de Magallanes",
+   "category": "museum",
+   "lat": -53.1621,
+   "lng": -70.9061,
+   "visit": "1 h",
+   "tag": {
+    "es": "Palacio Braun Menéndez",
+    "en": "Braun Menéndez palace",
+    "pt": "Palácio Braun Menéndez",
+    "fr": "Palais Braun Menéndez"
+   },
+   "summary": {
+    "es": "Mansión de una familia ganadera de comienzos del siglo XX, con sus salones originales y la historia de la región.",
+    "en": "The mansion of an early 20th-century ranching family, with its original rooms and the history of the region.",
+    "pt": "Mansão de uma família pecuarista do início do século XX, com seus salões originais e a história da região.",
+    "fr": "Hôtel particulier d'une famille d'éleveurs du début du XXe siècle, avec ses salons d'origine et l'histoire de la région."
+   }
+  },
+  {
+   "osm_id": "way/231993107",
+   "name": "Museo Nao Victoria",
+   "category": "museum",
+   "lat": -53.1076,
+   "lng": -70.8794,
+   "visit": "1 h",
+   "tag": {
+    "es": "Réplicas de barcos históricos",
+    "en": "Replica historic ships",
+    "pt": "Réplicas de navios históricos",
+    "fr": "Répliques de navires historiques"
+   },
+   "summary": {
+    "es": "Réplicas a tamaño real de la nave de Magallanes y otros barcos de la exploración austral, a orillas del Estrecho.",
+    "en": "Full-size replicas of Magellan's ship and other vessels of southern exploration, on the shore of the Strait.",
+    "pt": "Réplicas em tamanho real da nau de Magalhães e outros navios da exploração austral, às margens do Estreito.",
+    "fr": "Répliques grandeur nature du navire de Magellan et d'autres bateaux de l'exploration australe, au bord du détroit."
+   }
+  },
+  {
+   "osm_id": "way/12742387",
+   "name": "Monumento Natural Los Pingüinos · Isla Magdalena",
+   "category": "experience",
+   "lat": -52.9189,
+   "lng": -70.5763,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Colonia de pingüinos",
+    "en": "Penguin colony",
+    "pt": "Colônia de pinguins",
+    "fr": "Colonie de manchots"
+   },
+   "summary": {
+    "es": "Isla del Estrecho con una gran colonia de pingüinos de Magallanes; se visita en navegación entre octubre y marzo, según el clima.",
+    "en": "An island in the Strait with a large colony of Magellanic penguins; visited by boat between October and March, weather permitting.",
+    "pt": "Ilha do Estreito com uma grande colônia de pinguins-de-magalhães; visita-se de barco entre outubro e março, conforme o clima.",
+    "fr": "Île du détroit abritant une grande colonie de manchots de Magellan ; visite en bateau d'octobre à mars, selon la météo."
+   }
+  },
+  {
+   "osm_id": "way/548702549",
+   "name": "Fuerte Bulnes · Parque del Estrecho",
+   "category": "museum",
+   "lat": -53.6303,
+   "lng": -70.9172,
+   "visit": "2–3 h",
+   "tag": {
+    "es": "Primer asentamiento chileno",
+    "en": "First Chilean settlement",
+    "pt": "Primeiro assentamento chileno",
+    "fr": "Premier établissement chilien"
+   },
+   "summary": {
+    "es": "Reconstrucción del fuerte de 1843 con el que Chile tomó posesión del Estrecho, 60 km al sur de la ciudad, con senderos y museo.",
+    "en": "A reconstruction of the 1843 fort with which Chile took possession of the Strait, 60 km south of the city, with trails and a museum.",
+    "pt": "Reconstrução do forte de 1843 com o qual o Chile tomou posse do Estreito, 60 km ao sul da cidade, com trilhas e museu.",
+    "fr": "Reconstitution du fort de 1843 par lequel le Chili prit possession du détroit, à 60 km au sud de la ville, avec sentiers et musée."
+   }
+  },
+  {
+   "osm_id": "node/11749272092",
+   "name": "Costanera del Estrecho",
+   "category": "view",
+   "lat": -53.1646,
+   "lng": -70.9005,
+   "visit": "45 min",
+   "tag": {
+    "es": "Paseo junto al Estrecho",
+    "en": "Walk by the Strait",
+    "pt": "Passeio junto ao Estreito",
+    "fr": "Promenade le long du détroit"
+   },
+   "summary": {
+    "es": "Paseo a orillas del estrecho de Magallanes, con monumentos y cormoranes en los antiguos muelles. Abrígate: el viento es constante.",
+    "en": "A promenade along the Strait of Magellan, with monuments and cormorants on the old piers. Wrap up: the wind is constant.",
+    "pt": "Passeio às margens do estreito de Magalhães, com monumentos e cormorões nos antigos cais. Agasalhe-se: o vento é constante.",
+    "fr": "Promenade le long du détroit de Magellan, avec monuments et cormorans sur les anciens quais. Couvrez-vous : le vent est constant."
+   }
+  }
+ ]
+}

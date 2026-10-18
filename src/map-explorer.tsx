@@ -16,11 +16,14 @@ import PersonalizedRecommendations from "./personalized-recommendations";
 import ChileHero from "./chile-hero";
 import { RegionId, regionById, regions } from "./chile-regions";
 import { openLabel, openStatus } from "./open-status";
+import EventsToday from "./events-today";
+import ExclusiveGuides from "./exclusive-guides";
 
 type Review = { id:number; author_name:string; rating:number; comment:string; created_at:string };
 type ReviewSummary = { count:number; average:number | null };
 type UserLocation = { coords:[number,number]; accuracy:number; nearest:Place|null; distanceKm:number };
 type PendingLocation = { coords:[number,number]; accuracy:number; manual:boolean };
+type MetroData = { lines:{id:string;color:string;paths:[number,number][][]}[]; stations:{name:string;lines:string[];coords:[number,number]}[] };
 
 const locationCopy:Record<Locale,{locating:string; here:string; nearest:string; accuracy:string; recenter:string; denied:string; unavailable:string;timeout:string;positionUnavailable:string;manual:string;manualHint:string;manualSet:string}> = {
   es:{locating:"Buscando tu ubicación actual… Acepta el permiso del teléfono.",here:"Tu ubicación actual",nearest:"Más cerca",accuracy:"Precisión",recenter:"Volver a mi ubicación",denied:"La ubicación está bloqueada. iPhone: Ajustes › Privacidad y seguridad › Localización › Safari. Android: toca el candado del navegador › Permisos › Ubicación. También puedes usar “Marcar en el mapa”.",unavailable:"Este navegador no puede usar tu ubicación. Abre la página con HTTPS en Safari o Chrome, o marca tu punto en el mapa.",timeout:"El teléfono tardó demasiado en responder. Activa GPS/Ubicación, sal al exterior y vuelve a intentarlo; también puedes marcar tu punto.",positionUnavailable:"No pudimos obtener señal de ubicación. Activa GPS/Ubicación y Wi-Fi o marca tu punto en el mapa.",manual:"Marcar en el mapa",manualHint:"Toca el mapa en el punto donde estás. No necesitas dar permiso al teléfono.",manualSet:"Ubicación aproximada marcada"},
@@ -94,6 +97,30 @@ function isFreePlace(place:Place) {
   return place.rating==="GRATIS" || Boolean(place.access?.es.toLocaleLowerCase("es").includes("gratuit"));
 }
 
+// Longitude tells the islands apart from the mainland: Rapa Nui lies near 109°W, Juan Fernández near 79°W.
+const islandNames:Record<string,string>={"hanga-roa":"Rapa Nui","juan-fernandez":"Juan Fernández",all:"Rapa Nui · Juan Fernández"};
+function onIsland(place:Place,island:string|null) {
+  const lng=place.coords[1];
+  if(!island) return lng>-75;
+  return island==="hanga-roa"?lng<-100:island==="juan-fernandez"?lng<-75&&lng>-100:lng<-75;
+}
+
+const metroCopy:Record<Locale,{toggle:string;line:string;interchange:string;today:string;guides:string}>={
+  es:{toggle:"Metro",line:"Línea",interchange:"Combinación",today:"Hoy",guides:"Guías"},
+  en:{toggle:"Metro",line:"Line",interchange:"Interchange",today:"Today",guides:"Guides"},
+  pt:{toggle:"Metrô",line:"Linha",interchange:"Integração",today:"Hoje",guides:"Guias"},
+  fr:{toggle:"Métro",line:"Ligne",interchange:"Correspondance",today:"Aujourd’hui",guides:"Guides"},
+};
+// Specialty coffee is a Santiago-only filter that can be narrowed to a comuna or to the visitor's surroundings.
+const NEAR="near",NEAR_KM=2,NEAR_FALLBACK=5;
+const specialtyCopy:Record<Locale,{filter:string;comuna:string;all:string;near:string}>={
+  es:{filter:"Café de especialidad",comuna:"Comuna",all:"Todas las comunas",near:"Cerca de mí"},
+  en:{filter:"Specialty coffee",comuna:"District",all:"All districts",near:"Near me"},
+  pt:{filter:"Café especial",comuna:"Bairro",all:"Todos os bairros",near:"Perto de mim"},
+  fr:{filter:"Café de spécialité",comuna:"Quartier",all:"Tous les quartiers",near:"Près de moi"},
+};
+const escapeHtml=(value:string)=>value.replace(/[&<>"']/g,(char)=>`&#${char.charCodeAt(0)};`);
+
 const CARD_PAGE=60;
 const regionCopy:Record<Locale,{empty:string;loading:string;imported:string;checked:string;more:string;curated:string;openNow:string;osm:string;osmCredit:string}>={
   es:{empty:"Aún no hay locales cargados para esta región. Estamos sumando destinos de todo Chile.",loading:"Cargando locales…",imported:"Local con nota 4,0 o más en Google Maps. Revisa fotos, horarios y opiniones actualizadas en su ficha.",checked:"Nota verificada el",more:"Mostrar más",curated:"Selección SOS",openNow:"Abiertos ahora",osm:"Local registrado en OpenStreetMap, aún sin nota. Si lo visitas, deja tu opinión para otros viajeros.",osmCredit:"Datos de locales © colaboradores de OpenStreetMap."},
@@ -108,7 +135,8 @@ export default function MapExplorer() {
     const saved=localStorage.getItem("sos-language") as Locale|null;
     return saved&&copy[saved]?saved:"es";
   });
-  const [category,setCategory]=useState<"all"|"free"|Category>("all");
+  const [category,setCategory]=useState<"all"|"free"|"specialty"|Category>("all");
+  const [comuna,setComuna]=useState("");
   const [query,setQuery]=useState("");
   const [selectedId,setSelectedId]=useState("precolombino");
   const [mapReady,setMapReady]=useState(false);
@@ -126,39 +154,65 @@ export default function MapExplorer() {
   const [manualPicking,setManualPicking]=useState(false);
   const [travellerProfile,setTravellerProfile]=useState<TravellerProfile|null>(null);
   const [region,setRegion]=useState<RegionId|null>(null);
-  const activeRegion:RegionId=region??"RM";
-  const {places,loading:placesLoading}=usePlaces(activeRegion);
+  // Rapa Nui and Juan Fernández belong to the Valparaíso region; `island` narrows its places to them.
+  const [island,setIsland]=useState<string|null>(null);
+  const activeRegion:RegionId=island?"VS":region??"RM";
+  const {places:regionPlaces,loading:placesLoading}=usePlaces(activeRegion);
+  const places=useMemo(()=>regionPlaces.filter((place)=>onIsland(place,island)),[regionPlaces,island]);
   const [cardLimit,setCardLimit]=useState({key:"",count:CARD_PAGE});
   const [openOnly,setOpenOnly]=useState(false);
   const [now,setNow]=useState(()=>new Date());
+  const [metroOn,setMetroOn]=useState(false);
+  const [metro,setMetro]=useState<MetroData|null>(null);
   const mapNode=useRef<HTMLDivElement>(null);
   const leafletRef=useRef<any>(null);
   const mapRef=useRef<any>(null);
   const markersRef=useRef<any[]>([]);
+  const markerIdsRef=useRef<string[]>([]);
   const clusterRef=useRef<any>(null);
   const placesRef=useRef<Place[]>(places);
   const regionRef=useRef<RegionId>(activeRegion);
   const relocateRef=useRef<PendingLocation|null>(null);
+  const categoryRef=useRef(category);
+  const wantNearRef=useRef(false);
   const userMarkerRef=useRef<any>(null);
   const userAccuracyRef=useRef<any>(null);
   const watchIdRef=useRef<number|null>(null);
   const pendingLocationRef=useRef<PendingLocation|null>(null);
   const detailRef=useRef<HTMLElement>(null);
-  const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale],at=actionCopy[locale],landing=landingCopy[locale],rt=regionCopy[locale];
+  const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale],at=actionCopy[locale],landing=landingCopy[locale],rt=regionCopy[locale],mc=metroCopy[locale],sc=specialtyCopy[locale];
   const freePlaces=useMemo(()=>places.filter(isFreePlace),[places]);
   const categoryName=(value:Category)=>(value in xt?xt[value as keyof typeof xt]:(t as unknown as Record<string,string>)[value]);
   // Only the "open now" filter makes the list depend on the clock.
   const openClock=openOnly?now:null;
+  const specialtyPlaces=useMemo(()=>activeRegion==="RM"?places.filter((place)=>place.specialty):[],[places,activeRegion]);
+  const comunaCounts=useMemo(()=>{
+    const counts=new Map<string,number>();
+    specialtyPlaces.forEach((place)=>{ if(place.comuna) counts.set(place.comuna,(counts.get(place.comuna)??0)+1); });
+    return [...counts].sort((a,b)=>a[0].localeCompare(b[0],"es"));
+  },[specialtyPlaces]);
+  // Rounded to about 100 m so a moving visitor does not reshuffle the list on every GPS update.
+  const originKey=userLocation?`${userLocation.coords[0].toFixed(3)},${userLocation.coords[1].toFixed(3)}`:"";
+  const origin=useMemo(()=>originKey?originKey.split(",").map(Number) as [number,number]:null,[originKey]);
   const shown=useMemo(()=>{
     const needle=query.trim().toLocaleLowerCase(locale);
+    const matches=(place:Place)=>(!needle||`${place.name} ${place.neighborhood} ${place.comuna??""} ${place.address??""}`.toLocaleLowerCase(locale).includes(needle))&&(!openClock||openStatus(place,openClock).state==="open");
+    if(category==="specialty"){
+      const list=specialtyPlaces.filter((place)=>matches(place)&&(!comuna||comuna===NEAR||place.comuna===comuna));
+      if(!origin) return list;
+      const byDistance=list.map((place)=>({place,km:distanceKm(origin,place.coords)})).sort((a,b)=>a.km-b.km);
+      if(comuna!==NEAR) return byDistance.map((item)=>item.place);
+      const close=byDistance.filter((item)=>item.km<=NEAR_KM);
+      return (close.length?close:byDistance.slice(0,NEAR_FALLBACK)).map((item)=>item.place);
+    }
     return places
-      .filter((place)=>(category==="all"||(category==="free"?isFreePlace(place):place.category===category))&&(!needle||`${place.name} ${place.neighborhood} ${place.address??""}`.toLocaleLowerCase(locale).includes(needle))&&(!openClock||openStatus(place,openClock).state==="open"))
+      .filter((place)=>(category==="all"||(category==="free"?isFreePlace(place):place.category===category))&&matches(place))
       .sort((a,b)=>category==="all"?Number(isFreePlace(b))-Number(isFreePlace(a)):0);
-  },[places,category,query,locale,openClock]);
+  },[places,specialtyPlaces,category,comuna,origin,query,locale,openClock]);
   const selected:Place|undefined=places.find((place)=>place.id===selectedId) ?? shown[0] ?? places[0];
-  const cardKey=`${activeRegion}|${category}|${query}|${openOnly}`;
+  const cardKey=`${activeRegion}|${island}|${category}|${comuna}|${query}|${openOnly}`;
   const cardCount=cardLimit.key===cardKey?cardLimit.count:CARD_PAGE;
-  useEffect(()=>{ placesRef.current=places; regionRef.current=activeRegion; },[places,activeRegion]);
+  useEffect(()=>{ placesRef.current=places; regionRef.current=activeRegion; categoryRef.current=category; },[places,activeRegion,category]);
 
   useEffect(()=>{ localStorage.setItem("sos-language",locale); document.documentElement.lang=locale; },[locale]);
   useEffect(()=>{ localStorage.setItem("sos-currency",displayCurrency); },[displayCurrency]);
@@ -193,22 +247,49 @@ export default function MapExplorer() {
       marker.on("click",()=>setSelectedId(place.id));
       return marker;
     });
+    markerIdsRef.current=shown.map((place)=>place.id);
     cluster.addLayers(markersRef.current);
     if(shown.length) map.fitBounds(L.latLngBounds(shown.map((place)=>place.coords)),{padding:[42,42],maxZoom:14});
     else { const {center,zoom}=regionById(activeRegion); map.setView(center,zoom); }
   },[shown,mapReady,activeRegion,locale]);
 
+  useEffect(()=>{ if(metroOn&&!metro) import("./data/metro-santiago.json").then((module)=>setMetro(module.default as unknown as MetroData)).catch(()=>setMetroOn(false)); },[metroOn,metro]);
+  // The Metro layer sits under the place markers and only exists while Santiago is on screen.
   useEffect(()=>{
-    const index=shown.findIndex((place)=>place.id===selectedId);
-    const marker=markersRef.current[index];
-    if(index>=0&&clusterRef.current&&marker) clusterRef.current.zoomToShowLayer(marker,()=>marker.openTooltip());
-  },[selectedId,shown]);
+    const map=mapRef.current,L=leafletRef.current;
+    if(!map||!L||!metro||!metroOn||activeRegion!=="RM") return;
+    const layer=L.layerGroup();
+    metro.lines.forEach((line)=>L.polyline(line.paths,{color:line.color,weight:5,opacity:.9,interactive:false}).addTo(layer));
+    metro.stations.forEach((station)=>{
+      const chips=station.lines.map((id)=>`<i style="background:${metro.lines.find((line)=>line.id===id)?.color??"#637087"}">${id}</i>`).join("");
+      L.circleMarker(station.coords,{radius:station.lines.length>1?6:4,color:"#081a36",weight:2,fillColor:"#fff",fillOpacity:1})
+        .bindPopup(`<div class="metro-popup"><b>${escapeHtml(station.name)}</b><span>${mc.line} ${chips}</span>${station.lines.length>1?`<em>${mc.interchange}</em>`:""}</div>`)
+        .addTo(layer);
+    });
+    layer.addTo(map);
+    map.fitBounds(L.latLngBounds(metro.stations.map((station)=>station.coords)),{padding:[24,24]});
+    return()=>{ layer.remove(); };
+  },[metro,metroOn,activeRegion,mapReady,mc]);
+
+  function showMetro() {
+    setMetroOn(true);
+    setTimeout(()=>document.getElementById("mapa")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }
+
+  // Brings a place's marker into view when the visitor picks it from a list. Markers are replaced whenever
+  // the list changes, so the tooltip only opens if this marker is still on the map once the move ends.
+  function focusMarker(id:string) {
+    const map=mapRef.current,marker=markersRef.current[markerIdsRef.current.indexOf(id)];
+    if(!map||!marker) return;
+    map.once("moveend",()=>{ if(marker._map) marker.openTooltip(); });
+    map.setView(marker.getLatLng(),Math.max(map.getZoom(),15));
+  }
 
   useEffect(()=>{
     const map=mapRef.current;
     if(!map||!manualPicking) return;
     map.getContainer().classList.add("manual-location-mode");
-    const handler=(event:any)=>{applyUserLocation([event.latlng.lat,event.latlng.lng],0,true);setManualPicking(false)};
+    const handler=(event:any)=>{wantNearRef.current=true;applyUserLocation([event.latlng.lat,event.latlng.lng],0,true);setManualPicking(false)};
     map.on("click",handler);
     return()=>{map.off("click",handler);map.getContainer().classList.remove("manual-location-mode")};
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -234,18 +315,23 @@ export default function MapExplorer() {
   function selectPlace(place:Place) {
     setFormStatus("");
     setSelectedId(place.id);
+    focusMarker(place.id);
     if(window.innerWidth<980) setTimeout(()=>detailRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),150);
   }
 
   // A locality picked in the hero search narrows the list to that city or town.
-  function changeRegion(next:RegionId|null,locality="") {
-    setRegion(next);setCategory("all");setQuery(locality);
+  function changeRegion(next:RegionId|null,locality="",nextIsland?:string) {
+    setRegion(next);setIsland(nextIsland??null);setCategory("all");setComuna("");setQuery(locality);
   }
 
   function exploreRegion(next:RegionId) {
     changeRegion(next);
     setTimeout(()=>document.getElementById("mapa")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
   }
+
+  function showSpecialty() { setCategory("specialty");setComuna(userLocation?NEAR:""); }
+  // "Near me" needs a position: ask for it the first time it is picked.
+  function chooseComuna(value:string) { setComuna(value); if(value===NEAR&&!userLocation) locate(); }
 
   function showFreePlaces() {
     setCategory("free");
@@ -271,10 +357,14 @@ export default function MapExplorer() {
     // Watch callbacks outlive renders, so read the current region and places from refs.
     const home=regions.reduce((best,item)=>distanceKm(here,item.center)<distanceKm(here,best.center)?item:best);
     if(home.id!==regionRef.current&&distanceKm(here,home.center)<500){ relocateRef.current={coords:here,accuracy,manual};regionRef.current=home.id;changeRegion(home.id);return; }
-    const pool=placesRef.current;
+    // With the specialty coffee filter on, the location looks for coffee only and keeps the filter.
+    const coffeeOnly=categoryRef.current==="specialty";
+    const pool=coffeeOnly?placesRef.current.filter((place)=>place.specialty):placesRef.current;
     const nearest=pool.length?pool.reduce((best,place)=>distanceKm(here,place.coords)<distanceKm(here,best.coords)?place:best):null;
     const next={coords:here,accuracy,nearest,distanceKm:nearest?distanceKm(here,nearest.coords):0};
-    setUserLocation(next);setCategory("all");setLocating(false);
+    setUserLocation(next);setLocating(false);
+    if(!coffeeOnly) setCategory("all"); else if(wantNearRef.current) setComuna(NEAR);
+    wantNearRef.current=false;
     if(nearest) setSelectedId(nearest.id);
     setLocationStatus(nearest?`${manual?lt.manualSet:lt.nearest}: ${nearest.name} · ${displayDistance(next.distanceKm)}`:manual?lt.manualSet:lt.here);
     const L=leafletRef.current,map=mapRef.current;
@@ -288,7 +378,7 @@ export default function MapExplorer() {
 
   async function locate() {
     if(!window.isSecureContext||!navigator.geolocation) { setLocating(false);setLocationStatus(lt.unavailable); return; }
-    setManualPicking(false);setLocating(true); setLocationStatus(lt.locating);
+    setManualPicking(false);setLocating(true); setLocationStatus(lt.locating);wantNearRef.current=true;
     if(watchIdRef.current!==null) navigator.geolocation.clearWatch(watchIdRef.current);
     try{const permission=await navigator.permissions?.query({name:"geolocation"});if(permission?.state==="denied"){setLocating(false);setLocationStatus(lt.denied);return}}catch{}
     navigator.geolocation.getCurrentPosition((position)=>{
@@ -325,16 +415,18 @@ export default function MapExplorer() {
       <a className="brand" href="#top" aria-label="SOS Travellers inicio">
         <img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy" />
       </a>
-      <nav className="quick-nav" aria-label="Navegación"><a href="#planificar">{at.plan}</a><a href="#transporte">{at.transport}</a><a href="#mapa">{at.map}</a><a href="#sos">{at.sos}</a></nav>
-      <div className="top-actions"><span className="city">● {regionById(activeRegion).name}, Chile</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select><select className="header-currency" aria-label={at.currency} value={displayCurrency} onChange={event=>setDisplayCurrency(event.target.value)}>{currencyOptions.map(([code])=><option key={code} value={code}>{code}</option>)}</select></div>
+      <nav className="quick-nav" aria-label="Navegación"><a href="#hoy">{mc.today}</a><a href="#guias">{mc.guides}</a><a href="#planificar">{at.plan}</a><a href="#transporte">{at.transport}</a><a href="#mapa">{at.map}</a><a href="#sos">{at.sos}</a></nav>
+      <div className="top-actions"><span className="city">● {island?islandNames[island]??islandNames.all:regionById(activeRegion).name}, Chile</span><select aria-label="Cambiar idioma" value={locale} onChange={(e)=>setLocale(e.target.value as Locale)}><option value="es">ES · Español</option><option value="en">EN · English</option><option value="pt">PT · Português</option><option value="fr">FR · Français</option></select><select className="header-currency" aria-label={at.currency} value={displayCurrency} onChange={event=>setDisplayCurrency(event.target.value)}>{currencyOptions.map(([code])=><option key={code} value={code}>{code}</option>)}</select></div>
     </header>
 
     <main id="top">
       <ChileHero locale={locale} region={region} onRegionChange={changeRegion} onExplore={exploreRegion} weather={(zone)=><WeatherBackdrop locale={locale} region={activeRegion} zone={zone}/>}
-        actions={<><a className="primary" href="#gratis">◉ {landing.now}</a><a href="#planificar">＋ {landing.plan}</a><a className="emergency" href="#sos">SOS · {landing.sos}</a></>}
+        actions={<><a className="primary" href="#hoy">◉ {landing.now}</a><a href="#planificar">＋ {landing.plan}</a><a className="emergency" href="#sos">SOS · {landing.sos}</a></>}
         locateBox={<div className={`locate-box ${userLocation?"located":""}`}><button type="button" onClick={locate} disabled={locating}><span>{locating?"◌":"⌖"}</span>{locating?lt.locating:t.locate}</button><button className={`manual-location ${manualPicking?"active":""}`} type="button" onClick={()=>{setManualPicking(value=>!value);setLocationStatus(lt.manualHint)}}>＋ {lt.manual}</button><p role="status">{locationStatus||t.locationHint}</p></div>}/>
 
       <div className="page-body">
+      <EventsToday locale={locale} region={activeRegion} now={now}/>
+
       {activeRegion==="RM"&&<section className="free-discovery" id="gratis">
         <div className="free-discovery-head"><div><p>{landing.free}</p><h2>{landing.freeTitle}</h2><span>{landing.freeLede}</span></div><strong>{freePlaces.length}<small>{landing.freeCount}</small></strong></div>
         <div className="free-place-grid">{freePlaces.slice(0,6).map(place=><button type="button" key={place.id} onClick={()=>{selectPlace(place);setCategory("free");setTimeout(()=>document.getElementById("mapa")?.scrollIntoView({behavior:"smooth"}),80)}}><i>✓</i><span><small>{place.neighborhood}</small><b>{place.name}</b><em>{place.tag?.[locale]??landing.verified}</em>{badge(place)}</span><strong>{landing.free}</strong></button>)}</div>
@@ -345,8 +437,10 @@ export default function MapExplorer() {
 
       <CurrencyConverter locale={locale} selectedCurrency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>
 
+      <ExclusiveGuides locale={locale} currency={displayCurrency}/>
+
       <TripPlanner locale={locale} places={places} now={now} showRoutes={activeRegion==="RM"} favoriteIds={favoriteIds} onSelectPlace={selectPlace} onToggleFavorite={toggleFavorite} currency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>
-      {activeRegion==="RM"&&<TransportGuide locale={locale} currency={displayCurrency} onCurrencyChange={setDisplayCurrency}/>}
+      {activeRegion==="RM"&&<TransportGuide locale={locale} currency={displayCurrency} onCurrencyChange={setDisplayCurrency} onShowMetro={showMetro}/>}
       <ConnectivityGuide locale={locale} profile={travellerProfile}/>
 
       <section className="explorer" id="mapa" aria-label={t.title}>
@@ -354,14 +448,18 @@ export default function MapExplorer() {
           <button className={category==="all"?"active":""} onClick={()=>setCategory("all")}>{t.all}</button>
           <button className={`free-filter ${category==="free"?"active":""}`} onClick={()=>setCategory("free")}>✓ {landing.free}</button>
           <button className={`open-filter ${openOnly?"active":""}`} aria-pressed={openOnly} onClick={()=>setOpenOnly(value=>!value)}>● {rt.openNow}</button>
+          {activeRegion==="RM"&&<button className={`metro-filter ${metroOn?"active":""}`} aria-pressed={metroOn} onClick={()=>setMetroOn(value=>!value)}>▣ {mc.toggle}</button>}
+          {specialtyPlaces.length>0&&<button className={`specialty-filter ${category==="specialty"?"active":""}`} onClick={showSpecialty}>☕ {sc.filter}</button>}
           {categories.map((cat)=><button key={cat} className={category===cat?"active":""} onClick={()=>setCategory(cat)}>{categoryName(cat)}</button>)}
         </div>
+        {category==="specialty"&&<label className="comuna-filter">{sc.comuna}<select value={comuna} onChange={(event)=>chooseComuna(event.target.value)}><option value="">{sc.all} ({specialtyPlaces.length})</option><option value={NEAR}>⌖ {sc.near}</option>{comunaCounts.map(([name,count])=><option key={name} value={name}>{name} ({count})</option>)}</select></label>}
         <label className="place-search"><span aria-hidden="true">⌕</span><input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder={t.search} aria-label={t.search}/></label>
         <div className="explorer-grid">
           <div className="map-column">
             <div className="map-wrap">
               <div className="map-count"><b>{shown.length}</b> {t.selected}</div>
               {userLocation&&<div className="location-card"><div><strong><i/> {userLocation.accuracy?lt.here:lt.manualSet}</strong><small>{userLocation.coords[0].toFixed(4)}, {userLocation.coords[1].toFixed(4)}{userLocation.accuracy?` · ${lt.accuracy} ±${Math.round(userLocation.accuracy)} m`:""}</small><span>{lt.nearest}: <b>{userLocation.nearest?.name??"—"}</b>{userLocation.nearest?` · ${displayDistance(userLocation.distanceKm)}`:""}</span></div><button type="button" onClick={()=>centerOnUser()} aria-label={lt.recenter}>⌖</button></div>}
+              {metroOn&&metro&&activeRegion==="RM"&&<div className="metro-legend" aria-label={mc.toggle}>{metro.lines.map((line)=><i key={line.id} style={{background:line.color}}>{line.id}</i>)}</div>}
               <div ref={mapNode} className="places-map" aria-label="Mapa de lugares recomendados en Chile" />
               {!mapReady&&<div className="map-loading">Cargando mapa…</div>}
             </div>
@@ -371,7 +469,7 @@ export default function MapExplorer() {
               {shown.slice(0,cardCount).map((place)=><article key={place.id} className={`place-card ${selected?.id===place.id?"selected":""}`}>
                 <button type="button" className="place-card-details" onClick={()=>selectPlace(place)} aria-label={`${place.name} · ${t.detail}`}>
                   <span className="category-dot" style={{background:colors[place.category]}} />
-                  <span className="place-card-copy"><small>{place.neighborhood}</small><strong>{place.name}</strong>{place.tag&&<em className="place-tag">{place.tag[locale]}</em>}<span>{place.summary?.[locale]??place.address??""}</span></span>
+                  <span className="place-card-copy"><small>{place.neighborhood}{category==="specialty"&&origin?` · ${displayDistance(distanceKm(origin,place.coords))}`:""}</small><strong>{place.name}</strong>{place.tag&&<em className="place-tag">{place.tag[locale]}</em>}<span>{place.summary?.[locale]??place.address??""}</span></span>
                   <span className="place-card-side">{place.rating!=="—"&&<b className="rating">{/^\d/.test(place.rating)?`★ ${place.rating}`:place.rating}</b>}{badge(place)}</span>
                 </button>
                 <a className="place-card-map" href={mapsUrl(place)} target="_blank" rel="noopener noreferrer" aria-label={`${openMapsCopy[locale]}: ${place.name}`}>⌖ {openMapsCopy[locale]} ↗</a>
@@ -416,5 +514,6 @@ export default function MapExplorer() {
       </div>
     </main>
     <footer><div className="footer-brand"><img src="/assets/sos-logo-v2.png" alt="SOS Travellers · Just Enjoy"/><p><small>{t.footer}</small></p></div><a href="https://www.nuevopudahuel.cl/transporte-oficial" target="_blank" rel="noreferrer">{t.official} ↗</a></footer>
+<a className="team-entry" href="/panel" rel="nofollow">Acceso locales y equipo</a>
   </>;
 }

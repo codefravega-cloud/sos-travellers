@@ -1,0 +1,105 @@
+{
+ "locality": "Pisco Elqui",
+ "places": [
+  {
+   "osm_id": "way/91053971",
+   "name": "Plaza de Pisco Elqui",
+   "category": "view",
+   "lat": -30.1232,
+   "lng": -70.4929,
+   "visit": "30 min",
+   "tag": {
+    "es": "Pueblo del valle",
+    "en": "Valley village",
+    "pt": "Povoado do vale",
+    "fr": "Village de la vallée"
+   },
+   "summary": {
+    "es": "La plaza del pueblo, con su iglesia de madera y puestos de artesanía, entre cerros secos y viñedos.",
+    "en": "The village square, with its wooden church and craft stalls, among dry hills and vineyards.",
+    "pt": "A praça do povoado, com sua igreja de madeira e bancas de artesanato, entre morros secos e vinhedos.",
+    "fr": "La place du village, avec son église en bois et ses étals d'artisanat, entre collines arides et vignes."
+   }
+  },
+  {
+   "osm_id": "way/817523180",
+   "name": "Fundo Los Nichos",
+   "category": "winery",
+   "lat": -30.1566,
+   "lng": -70.4968,
+   "visit": "1 h",
+   "tag": {
+    "es": "Pisquera artesanal",
+    "en": "Craft pisco distillery",
+    "pt": "Destilaria artesanal",
+    "fr": "Distillerie artisanale"
+   },
+   "summary": {
+    "es": "Destilería de pisco antigua con visitas guiadas a sus bodegas subterráneas y degustación.",
+    "en": "An old pisco distillery with guided visits to its underground cellars and a tasting.",
+    "pt": "Destilaria de pisco antiga com visitas guiadas às suas adegas subterrâneas e degustação.",
+    "fr": "Ancienne distillerie de pisco avec visite guidée de ses caves souterraines et dégustation."
+   }
+  },
+  {
+   "osm_id": "node/4732723921",
+   "name": "Casa Escuela Gabriela Mistral · Montegrande",
+   "category": "museum",
+   "lat": -30.0931,
+   "lng": -70.4942,
+   "visit": "30 min",
+   "tag": {
+    "es": "Infancia de la Nobel",
+    "en": "The Nobel laureate's childhood",
+    "pt": "Infância da Nobel",
+    "fr": "Enfance de la prix Nobel"
+   },
+   "summary": {
+    "es": "La escuela rural donde Gabriela Mistral vivió de niña, hoy museo de sitio en el pueblo de Montegrande.",
+    "en": "The rural school where Gabriela Mistral lived as a child, now a site museum in the village of Montegrande.",
+    "pt": "A escola rural onde Gabriela Mistral viveu quando criança, hoje museu de sítio no povoado de Montegrande.",
+    "fr": "L'école rurale où Gabriela Mistral vécut enfant, aujourd'hui musée dans le village de Montegrande."
+   }
+  },
+  {
+   "osm_id": "way/1482217560",
+   "name": "Museo Gabriela Mistral · Vicuña",
+   "category": "museum",
+   "lat": -30.0334,
+   "lng": -70.7065,
+   "visit": "1 h",
+   "tag": {
+    "es": "Vida y obra",
+    "en": "Life and work",
+    "pt": "Vida e obra",
+    "fr": "Vie et œuvre"
+   },
+   "summary": {
+    "es": "Museo dedicado a la poeta en su ciudad natal, con objetos personales y una réplica de su casa.",
+    "en": "A museum devoted to the poet in her home town, with personal belongings and a replica of her house.",
+    "pt": "Museu dedicado à poeta em sua cidade natal, com objetos pessoais e uma réplica de sua casa.",
+    "fr": "Musée consacré à la poétesse dans sa ville natale, avec objets personnels et une réplique de sa maison."
+   }
+  },
+  {
+   "osm_id": "way/139628497",
+   "name": "Observatorio Cerro Mamalluca",
+   "category": "experience",
+   "lat": -29.9896,
+   "lng": -70.6855,
+   "visit": "2 h (de noche)",
+   "tag": {
+    "es": "Astroturismo",
+    "en": "Stargazing",
+    "pt": "Astroturismo",
+    "fr": "Astrotourisme"
+   },
+   "summary": {
+    "es": "Observatorio turístico cerca de Vicuña bajo uno de los cielos más limpios del mundo; las visitas son nocturnas y con reserva.",
+    "en": "A public observatory near Vicuña under some of the clearest skies in the world; visits are at night and need booking.",
+    "pt": "Observatório turístico perto de Vicuña sob um dos céus mais limpos do mundo; as visitas são noturnas e com reserva.",
+    "fr": "Observatoire touristique près de Vicuña sous l'un des ciels les plus purs du monde ; visites nocturnes sur réservation."
+   }
+  }
+ ]
+}

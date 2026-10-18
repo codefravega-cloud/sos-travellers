@@ -1,0 +1,125 @@
+{
+ "locality": "Viña del Mar",
+ "places": [
+  {
+   "osm_id": "way/818653733",
+   "name": "Reloj de Flores",
+   "category": "view",
+   "lat": -33.0233,
+   "lng": -71.5672,
+   "visit": "15 min",
+   "tag": {
+    "es": "Postal de Viña",
+    "en": "Viña's postcard",
+    "pt": "Cartão-postal de Viña",
+    "fr": "Carte postale de Viña"
+   },
+   "summary": {
+    "es": "El reloj de flores que funciona de verdad, a la entrada de la ciudad frente a la playa Caleta Abarca.",
+    "en": "The working flower clock at the entrance to the city, facing Caleta Abarca beach.",
+    "pt": "O relógio de flores que funciona de verdade, na entrada da cidade em frente à praia Caleta Abarca.",
+    "fr": "L'horloge fleurie, qui fonctionne vraiment, à l'entrée de la ville face à la plage Caleta Abarca."
+   }
+  },
+  {
+   "osm_id": "way/26145126",
+   "name": "Quinta Vergara",
+   "category": "park",
+   "lat": -33.0328,
+   "lng": -71.5522,
+   "visit": "1 h",
+   "tag": {
+    "es": "Parque y anfiteatro",
+    "en": "Park & amphitheatre",
+    "pt": "Parque e anfiteatro",
+    "fr": "Parc et amphithéâtre"
+   },
+   "summary": {
+    "es": "Parque con árboles centenarios, el Palacio Vergara y el anfiteatro donde se hace el Festival de Viña.",
+    "en": "A park with century-old trees, Palacio Vergara and the amphitheatre that hosts the Viña Festival.",
+    "pt": "Parque com árvores centenárias, o Palácio Vergara e o anfiteatro onde acontece o Festival de Viña.",
+    "fr": "Parc aux arbres centenaires, avec le palais Vergara et l'amphithéâtre du Festival de Viña."
+   }
+  },
+  {
+   "osm_id": "way/332702279",
+   "name": "Castillo Wulff",
+   "category": "view",
+   "lat": -33.0192,
+   "lng": -71.5649,
+   "visit": "30 min",
+   "tag": {
+    "es": "Castillo sobre el mar",
+    "en": "Castle over the sea",
+    "pt": "Castelo sobre o mar",
+    "fr": "Château sur la mer"
+   },
+   "summary": {
+    "es": "Castillo de 1906 construido sobre las rocas, con un tramo de piso de vidrio sobre las olas.",
+    "en": "A 1906 castle built on the rocks, with a stretch of glass floor above the waves.",
+    "pt": "Castelo de 1906 construído sobre as rochas, com um trecho de piso de vidro sobre as ondas.",
+    "fr": "Château de 1906 bâti sur les rochers, avec un tronçon de sol vitré au-dessus des vagues."
+   }
+  },
+  {
+   "osm_id": "way/546207953",
+   "name": "Museo Fonck",
+   "category": "museum",
+   "lat": -33.0198,
+   "lng": -71.5499,
+   "visit": "1 h",
+   "tag": {
+    "es": "Un moái en el jardín",
+    "en": "A moai in the garden",
+    "pt": "Um moai no jardim",
+    "fr": "Un moaï dans le jardin"
+   },
+   "summary": {
+    "es": "Museo de arqueología e historia natural con una colección de Rapa Nui y un moái original en la entrada.",
+    "en": "An archaeology and natural history museum with a Rapa Nui collection and an original moai at the entrance.",
+    "pt": "Museu de arqueologia e história natural com uma coleção de Rapa Nui e um moai original na entrada.",
+    "fr": "Musée d'archéologie et d'histoire naturelle avec une collection de Rapa Nui et un moaï original à l'entrée."
+   }
+  },
+  {
+   "osm_id": "way/23485655",
+   "name": "Muelle Vergara",
+   "category": "view",
+   "lat": -33.0113,
+   "lng": -71.5546,
+   "visit": "30 min",
+   "tag": {
+    "es": "Paseo sobre el mar",
+    "en": "Walk over the sea",
+    "pt": "Passeio sobre o mar",
+    "fr": "Promenade sur la mer"
+   },
+   "summary": {
+    "es": "Antiguo muelle de carga restaurado como paseo peatonal, con vista a la costa de Viña y Valparaíso.",
+    "en": "An old cargo pier restored as a pedestrian walk, with views of the Viña and Valparaíso coast.",
+    "pt": "Antigo cais de carga restaurado como passeio de pedestres, com vista para a costa de Viña e Valparaíso.",
+    "fr": "Ancien quai de chargement restauré en promenade piétonne, avec vue sur la côte de Viña et Valparaíso."
+   }
+  },
+  {
+   "osm_id": "way/28160231",
+   "name": "Jardín Botánico Nacional",
+   "category": "park",
+   "lat": -33.0445,
+   "lng": -71.5003,
+   "visit": "2 h",
+   "tag": {
+    "es": "Área verde extensa",
+    "en": "Large green space",
+    "pt": "Ampla área verde",
+    "fr": "Vaste espace vert"
+   },
+   "summary": {
+    "es": "Parque de casi 400 hectáreas con colecciones de plantas de Chile y del mundo, senderos y zonas de picnic.",
+    "en": "A park of nearly 400 hectares with plant collections from Chile and abroad, trails and picnic areas.",
+    "pt": "Parque de quase 400 hectares com coleções de plantas do Chile e do mundo, trilhas e áreas de piquenique.",
+    "fr": "Parc de près de 400 hectares avec des collections de plantes du Chili et du monde, sentiers et aires de pique-nique."
+   }
+  }
+ ]
+}

@@ -1,0 +1,105 @@
+{
+ "locality": "Santa Cruz",
+ "places": [
+  {
+   "osm_id": "way/202280549",
+   "name": "Museo de Colchagua",
+   "category": "museum",
+   "lat": -34.6401,
+   "lng": -71.364,
+   "visit": "2 h",
+   "tag": {
+    "es": "El gran museo del valle",
+    "en": "The valley's great museum",
+    "pt": "O grande museu do vale",
+    "fr": "Le grand musée de la vallée"
+   },
+   "summary": {
+    "es": "Uno de los museos privados más grandes de Chile: fósiles, arte precolombino, carruajes y una sala sobre el rescate de los 33 mineros.",
+    "en": "One of Chile's largest private museums: fossils, pre-Columbian art, carriages and a room on the rescue of the 33 miners.",
+    "pt": "Um dos maiores museus privados do Chile: fósseis, arte pré-colombiana, carruagens e uma sala sobre o resgate dos 33 mineiros.",
+    "fr": "L'un des plus grands musées privés du Chili : fossiles, art précolombien, attelages et une salle sur le sauvetage des 33 mineurs."
+   }
+  },
+  {
+   "osm_id": "node/2291985653",
+   "name": "Viña Montes",
+   "category": "winery",
+   "lat": -34.6124,
+   "lng": -71.2737,
+   "visit": "1,5–2 h",
+   "tag": {
+    "es": "Viña en Apalta",
+    "en": "Winery in Apalta",
+    "pt": "Vinícola em Apalta",
+    "fr": "Domaine à Apalta"
+   },
+   "summary": {
+    "es": "Bodega en el valle de Apalta con visitas guiadas y degustación entre viñedos en ladera; se visita con reserva.",
+    "en": "A winery in the Apalta valley with guided tours and tastings among hillside vineyards; visits need booking.",
+    "pt": "Vinícola no vale de Apalta com visitas guiadas e degustação entre vinhedos em encosta; visita com reserva.",
+    "fr": "Domaine de la vallée d'Apalta avec visites guidées et dégustation parmi les vignes en coteau ; sur réservation."
+   }
+  },
+  {
+   "osm_id": "node/2291985643",
+   "name": "Clos Apalta · Viña Lapostolle",
+   "category": "winery",
+   "lat": -34.5925,
+   "lng": -71.2919,
+   "visit": "1,5–2 h",
+   "tag": {
+    "es": "Bodega de autor",
+    "en": "Signature winery",
+    "pt": "Vinícola de autor",
+    "fr": "Chai d'architecte"
+   },
+   "summary": {
+    "es": "Bodega construida en varios niveles dentro del cerro, conocida por sus tintos de Apalta; visitas con reserva.",
+    "en": "A winery built on several levels inside the hillside, known for its Apalta reds; visits by reservation.",
+    "pt": "Vinícola construída em vários níveis dentro do morro, conhecida por seus tintos de Apalta; visitas com reserva.",
+    "fr": "Chai construit sur plusieurs niveaux dans la colline, réputé pour ses rouges d'Apalta ; visites sur réservation."
+   }
+  },
+  {
+   "osm_id": "node/3113324171",
+   "name": "Viña Viu Manent",
+   "category": "winery",
+   "lat": -34.6514,
+   "lng": -71.3101,
+   "visit": "1,5–2 h",
+   "tag": {
+    "es": "Paseo en carruaje",
+    "en": "Carriage ride",
+    "pt": "Passeio de carruagem",
+    "fr": "Balade en calèche"
+   },
+   "summary": {
+    "es": "Viña familiar a pocos minutos de Santa Cruz, con recorrido por los viñedos en carruaje y restaurante.",
+    "en": "A family winery minutes from Santa Cruz, with a vineyard tour by horse-drawn carriage and a restaurant.",
+    "pt": "Vinícola familiar a poucos minutos de Santa Cruz, com passeio pelos vinhedos em carruagem e restaurante.",
+    "fr": "Domaine familial à quelques minutes de Santa Cruz, avec visite des vignes en calèche et restaurant."
+   }
+  },
+  {
+   "osm_id": "node/1480442463",
+   "name": "Museo San José del Carmen de El Huique",
+   "category": "museum",
+   "lat": -34.5264,
+   "lng": -71.3728,
+   "visit": "1 h",
+   "tag": {
+    "es": "Hacienda del siglo XIX",
+    "en": "19th-century hacienda",
+    "pt": "Fazenda do século XIX",
+    "fr": "Hacienda du XIXe siècle"
+   },
+   "summary": {
+    "es": "Casa patronal conservada con su mobiliario original, que muestra cómo era la vida de una hacienda chilena.",
+    "en": "A preserved manor house with its original furnishings, showing what life on a Chilean hacienda was like.",
+    "pt": "Casa-grande conservada com seu mobiliário original, que mostra como era a vida em uma fazenda chilena.",
+    "fr": "Maison de maître conservée avec son mobilier d'origine, témoin de la vie d'une hacienda chilienne."
+   }
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+  "include": [
+    { "name": "Coffee Cure", "comuna": "Maipú", "address": "Primera Transversal 1953, Maipú", "lat": -33.5093694, "lng": -70.7527389 },
+    { "name": "Murta Cafetería", "comuna": "Maipú", "address": "Alcalde José Luis Infante Larraín 1446, Ciudad Satélite, Maipú", "lat": -33.5587186, "lng": -70.7833221 },
+    { "name": "Coffee On Wheels", "comuna": "Maipú", "address": "Primera Transversal 2100, Maipú", "lat": -33.5076793, "lng": -70.7529576 },
+    { "name": "Café Cabra", "comuna": "Maipú", "address": "Av. El Olimpo 735, Maipú", "lat": -33.5218877, "lng": -70.7751764 },
+    { "name": "Grinder Coffee", "comuna": "Maipú", "address": "Av. Américo Vespucio 51, local 108, Arauco Express, Maipú", "lat": -33.4863371, "lng": -70.7496019 },
+    { "name": "Pienso Café", "comuna": "Maipú", "address": "4 Poniente 1042, Villa El Abrazo, Maipú", "lat": -33.5479879, "lng": -70.7684353 },
+    { "name": "Barra B", "comuna": "Maipú", "address": "Av. Pajaritos 4810, Maipú", "lat": -33.4776041, "lng": -70.7422153 }
+  ],
+  "exclude": []
+}

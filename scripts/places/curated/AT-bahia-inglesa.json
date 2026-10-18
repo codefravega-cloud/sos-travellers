@@ -1,0 +1,85 @@
+{
+ "locality": "Bahía Inglesa",
+ "places": [
+  {
+   "osm_id": "node/1270189551",
+   "name": "Playa Bahía Inglesa",
+   "category": "view",
+   "lat": -27.1028,
+   "lng": -70.8579,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Aguas turquesa",
+    "en": "Turquoise water",
+    "pt": "Águas turquesa",
+    "fr": "Eaux turquoise"
+   },
+   "summary": {
+    "es": "Playa de arena blanca y agua turquesa, tranquila y poco profunda; de las más conocidas del norte de Chile.",
+    "en": "A white-sand beach with calm, shallow turquoise water; one of the best known in northern Chile.",
+    "pt": "Praia de areia branca e água turquesa, calma e rasa; uma das mais conhecidas do norte do Chile.",
+    "fr": "Plage de sable blanc aux eaux turquoise, calmes et peu profondes ; l'une des plus connues du nord du Chili."
+   }
+  },
+  {
+   "osm_id": "way/581743128",
+   "name": "Parque Paleontológico Los Dedos",
+   "category": "park",
+   "lat": -27.1521,
+   "lng": -70.8847,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Fósiles marinos",
+    "en": "Marine fossils",
+    "pt": "Fósseis marinhos",
+    "fr": "Fossiles marins"
+   },
+   "summary": {
+    "es": "Sendero entre fósiles de ballenas, tiburones y otros animales marinos de millones de años, al sur de Bahía Inglesa.",
+    "en": "A trail among fossils of whales, sharks and other marine animals millions of years old, south of Bahía Inglesa.",
+    "pt": "Trilha entre fósseis de baleias, tubarões e outros animais marinhos de milhões de anos, ao sul de Bahía Inglesa.",
+    "fr": "Sentier parmi des fossiles de baleines, requins et autres animaux marins vieux de millions d'années, au sud de Bahía Inglesa."
+   }
+  },
+  {
+   "osm_id": "node/5759159596",
+   "name": "Museo Paleontológico de Caldera",
+   "category": "museum",
+   "lat": -27.0649,
+   "lng": -70.8234,
+   "visit": "45 min",
+   "tag": {
+    "es": "Megalodón y ballenas",
+    "en": "Megalodon & whales",
+    "pt": "Megalodonte e baleias",
+    "fr": "Mégalodon et baleines"
+   },
+   "summary": {
+    "es": "Museo pequeño en la antigua estación de trenes de Caldera con fósiles hallados en la costa de Atacama.",
+    "en": "A small museum in Caldera's old railway station with fossils found on the Atacama coast.",
+    "pt": "Museu pequeno na antiga estação de trens de Caldera com fósseis encontrados na costa do Atacama.",
+    "fr": "Petit musée dans l'ancienne gare de Caldera, avec des fossiles trouvés sur la côte d'Atacama."
+   }
+  },
+  {
+   "osm_id": "way/458561184",
+   "name": "Santuario de la Naturaleza Granito Orbicular",
+   "category": "park",
+   "lat": -26.9721,
+   "lng": -70.7964,
+   "visit": "45 min",
+   "tag": {
+    "es": "Rareza geológica",
+    "en": "Geological rarity",
+    "pt": "Raridade geológica",
+    "fr": "Rareté géologique"
+   },
+   "summary": {
+    "es": "Rocas con manchas circulares que existen en muy pocos lugares del mundo, a orillas del mar al norte de Caldera.",
+    "en": "Rocks with circular patterns found in very few places in the world, on the shore north of Caldera.",
+    "pt": "Rochas com manchas circulares que existem em pouquíssimos lugares do mundo, à beira-mar ao norte de Caldera.",
+    "fr": "Roches aux motifs circulaires présentes en très peu d'endroits au monde, en bord de mer au nord de Caldera."
+   }
+  }
+ ]
+}

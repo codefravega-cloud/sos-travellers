@@ -1,0 +1,215 @@
+{
+ "locality": "San Pedro de Atacama",
+ "places": [
+  {
+   "osm_id": "node/2107005860",
+   "name": "Valle de la Luna",
+   "category": "park",
+   "lat": -22.93162,
+   "lng": -68.30872,
+   "visit": "3–4 h",
+   "address": null,
+   "tag": {
+    "es": "Atardecer imperdible",
+    "en": "Unmissable sunset",
+    "pt": "Pôr do sol imperdível",
+    "fr": "Coucher de soleil incontournable"
+   },
+   "summary": {
+    "es": "Dunas, cavernas de sal y formaciones que parecen de otro planeta, a pocos minutos del pueblo; el atardecer desde sus miradores es el clásico de Atacama.",
+    "en": "Dunes, salt caves and otherworldly rock formations minutes from town; sunset from its viewpoints is the Atacama classic.",
+    "pt": "Dunas, cavernas de sal e formações que parecem de outro planeta, a poucos minutos do povoado; o pôr do sol dos mirantes é o clássico do Atacama.",
+    "fr": "Dunes, grottes de sel et formations d'un autre monde à quelques minutes du village ; le coucher de soleil depuis ses belvédères est le classique d'Atacama."
+   }
+  },
+  {
+   "osm_id": "node/7841648385",
+   "name": "Géiseres del Tatio",
+   "category": "view",
+   "lat": -22.34171,
+   "lng": -68.01171,
+   "visit": "Medio día (salida de madrugada)",
+   "address": null,
+   "tag": {
+    "es": "Géiseres a 4.300 m",
+    "en": "Geysers at 4,300 m",
+    "pt": "Gêiseres a 4.300 m",
+    "fr": "Geysers à 4 300 m"
+   },
+   "summary": {
+    "es": "Uno de los campos de géiseres más altos del mundo: las fumarolas se ven mejor al amanecer, con mucho frío. Sube aclimatado a la altura.",
+    "en": "One of the highest geyser fields in the world: the steam columns are best at dawn, in freezing cold. Acclimatise to the altitude first.",
+    "pt": "Um dos campos de gêiseres mais altos do mundo: as fumarolas ficam melhores ao amanhecer, com muito frio. Suba já aclimatado à altitude.",
+    "fr": "L'un des champs de geysers les plus hauts du monde : les fumerolles sont plus belles à l'aube, par grand froid. Montez une fois acclimaté à l'altitude."
+   }
+  },
+  {
+   "osm_id": "node/1474025079",
+   "name": "Laguna Miscanti",
+   "category": "view",
+   "lat": -23.73843,
+   "lng": -67.79019,
+   "visit": "Día completo",
+   "address": null,
+   "tag": {
+    "es": "Lagunas altiplánicas",
+    "en": "Altiplano lagoons",
+    "pt": "Lagoas altiplânicas",
+    "fr": "Lagunes de l'altiplano"
+   },
+   "summary": {
+    "es": "Laguna azul intenso rodeada de volcanes a más de 4.000 m, dentro de la Reserva Nacional Los Flamencos; se visita junto a la laguna Miñiques.",
+    "en": "A deep-blue lagoon ringed by volcanoes above 4,000 m, inside Los Flamencos National Reserve; visited together with Miñiques lagoon.",
+    "pt": "Lagoa azul intensa cercada por vulcões a mais de 4.000 m, na Reserva Nacional Los Flamencos; visita-se junto com a lagoa Miñiques.",
+    "fr": "Lagune d'un bleu intense entourée de volcans à plus de 4 000 m, dans la réserve nationale Los Flamencos ; se visite avec la lagune Miñiques."
+   }
+  },
+  {
+   "osm_id": "node/4334583691",
+   "name": "Piedras Rojas",
+   "category": "view",
+   "lat": -23.92132,
+   "lng": -67.6964,
+   "visit": "Día completo",
+   "address": null,
+   "tag": {
+    "es": "Salar y rocas rojas",
+    "en": "Salt flat & red rocks",
+    "pt": "Salar e rochas vermelhas",
+    "fr": "Salar et roches rouges"
+   },
+   "summary": {
+    "es": "Rocas rojizas frente a un salar turquesa en plena puna; uno de los paisajes más fotografiados de la región. El viento y la altura se sienten.",
+    "en": "Reddish rocks facing a turquoise salt flat high in the puna; one of the most photographed landscapes in the region. Expect wind and altitude.",
+    "pt": "Rochas avermelhadas diante de um salar turquesa em plena puna; uma das paisagens mais fotografadas da região. O vento e a altitude se fazem sentir.",
+    "fr": "Roches rougeâtres face à un salar turquoise en pleine puna ; l'un des paysages les plus photographiés de la région. Vent et altitude au rendez-vous."
+   }
+  },
+  {
+   "osm_id": "node/781189764",
+   "name": "Laguna Cejar",
+   "category": "view",
+   "lat": -23.06353,
+   "lng": -68.21375,
+   "visit": "2–3 h",
+   "address": null,
+   "tag": {
+    "es": "Flotar en agua salada",
+    "en": "Float in salt water",
+    "pt": "Flutuar em água salgada",
+    "fr": "Flotter dans l'eau salée"
+   },
+   "summary": {
+    "es": "Laguna en el Salar de Atacama tan salada que el cuerpo flota sin esfuerzo; lleva agua dulce para enjuagarte.",
+    "en": "A lagoon in the Atacama salt flat so salty that you float effortlessly; bring fresh water to rinse off.",
+    "pt": "Lagoa no Salar de Atacama tão salgada que o corpo flutua sem esforço; leve água doce para se enxaguar.",
+    "fr": "Lagune du salar d'Atacama si salée que l'on flotte sans effort ; prévoyez de l'eau douce pour vous rincer."
+   }
+  },
+  {
+   "osm_id": "way/133954987",
+   "name": "Laguna Chaxa · Reserva Nacional Los Flamencos",
+   "category": "park",
+   "lat": -23.28709,
+   "lng": -68.17462,
+   "visit": "2 h",
+   "address": null,
+   "tag": {
+    "es": "Flamencos en el salar",
+    "en": "Flamingos on the salt flat",
+    "pt": "Flamingos no salar",
+    "fr": "Flamants sur le salar"
+   },
+   "summary": {
+    "es": "Sector del Salar de Atacama donde se observan flamencos andinos a corta distancia, con pasarelas y un pequeño centro de visitantes.",
+    "en": "A sector of the Atacama salt flat where Andean flamingos can be watched at close range, with boardwalks and a small visitor centre.",
+    "pt": "Setor do Salar de Atacama onde se observam flamingos andinos de perto, com passarelas e um pequeno centro de visitantes.",
+    "fr": "Secteur du salar d'Atacama où l'on observe de près les flamants des Andes, avec passerelles et petit centre d'accueil."
+   }
+  },
+  {
+   "osm_id": "way/30061725",
+   "name": "Pukará de Quitor",
+   "category": "view",
+   "lat": -22.89116,
+   "lng": -68.21488,
+   "visit": "1,5–2 h",
+   "address": null,
+   "tag": {
+    "es": "Fortaleza atacameña",
+    "en": "Atacameño fortress",
+    "pt": "Fortaleza atacamenha",
+    "fr": "Forteresse atacamène"
+   },
+   "summary": {
+    "es": "Fortaleza preincaica del siglo XII sobre el río San Pedro, a 3 km del pueblo; la subida termina en un mirador sobre el oasis.",
+    "en": "A 12th-century pre-Inca fortress above the San Pedro river, 3 km from town; the climb ends at a viewpoint over the oasis.",
+    "pt": "Fortaleza pré-incaica do século XII sobre o rio San Pedro, a 3 km do povoado; a subida termina em um mirante sobre o oásis.",
+    "fr": "Forteresse pré-inca du XIIe siècle au-dessus du río San Pedro, à 3 km du village ; la montée s'achève sur un belvédère dominant l'oasis."
+   }
+  },
+  {
+   "osm_id": "way/243228893",
+   "name": "Termas de Puritama",
+   "category": "experience",
+   "lat": -22.72003,
+   "lng": -68.04353,
+   "visit": "3–4 h",
+   "address": null,
+   "tag": {
+    "es": "Aguas termales",
+    "en": "Hot springs",
+    "pt": "Águas termais",
+    "fr": "Sources chaudes"
+   },
+   "summary": {
+    "es": "Ocho pozas de agua tibia encadenadas en el fondo de una quebrada, a unos 30 km de San Pedro; conviene reservar la entrada.",
+    "en": "Eight linked warm-water pools at the bottom of a ravine, about 30 km from San Pedro; booking ahead is advisable.",
+    "pt": "Oito piscinas de água morna encadeadas no fundo de um desfiladeiro, a cerca de 30 km de San Pedro; convém reservar a entrada.",
+    "fr": "Huit bassins d'eau tiède en enfilade au fond d'un ravin, à environ 30 km de San Pedro ; mieux vaut réserver."
+   }
+  },
+  {
+   "osm_id": "way/199350261",
+   "name": "Aldea de Tulor",
+   "category": "museum",
+   "lat": -22.9683,
+   "lng": -68.24264,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Aldea de 2.500 años",
+    "en": "2,500-year-old village",
+    "pt": "Aldeia de 2.500 anos",
+    "fr": "Village de 2 500 ans"
+   },
+   "summary": {
+    "es": "Restos de una aldea circular de barro, de las más antiguas del norte de Chile, con reconstrucciones para entender cómo se vivía en el oasis.",
+    "en": "Remains of a circular adobe village, among the oldest in northern Chile, with reconstructions that show how people lived in the oasis.",
+    "pt": "Restos de uma aldeia circular de barro, das mais antigas do norte do Chile, com reconstruções para entender como se vivia no oásis.",
+    "fr": "Vestiges d'un village circulaire en terre, parmi les plus anciens du nord du Chili, avec des reconstitutions de la vie dans l'oasis."
+   }
+  },
+  {
+   "osm_id": "way/307887205",
+   "name": "Museo del Meteorito",
+   "category": "museum",
+   "lat": -22.908,
+   "lng": -68.20166,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Meteoritos de Atacama",
+    "en": "Atacama meteorites",
+    "pt": "Meteoritos do Atacama",
+    "fr": "Météorites d'Atacama"
+   },
+   "summary": {
+    "es": "Colección de meteoritos encontrados en el desierto, con audioguía y piezas que se pueden tocar; una visita corta dentro del pueblo.",
+    "en": "A collection of meteorites found in the desert, with an audio guide and pieces you can touch; a short visit right in town.",
+    "pt": "Coleção de meteoritos encontrados no deserto, com audioguia e peças que podem ser tocadas; uma visita curta dentro do povoado.",
+    "fr": "Collection de météorites trouvées dans le désert, avec audioguide et pièces à toucher ; une courte visite au cœur du village."
+   }
+  }
+ ]
+}

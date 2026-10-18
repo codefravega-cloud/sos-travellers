@@ -1,0 +1,105 @@
+{
+ "locality": "Concepción",
+ "places": [
+  {
+   "osm_id": "way/105821369",
+   "name": "Casa del Arte · Pinacoteca",
+   "category": "museum",
+   "lat": -36.8275,
+   "lng": -73.0393,
+   "visit": "1 h",
+   "tag": {
+    "es": "Mural y pintura chilena",
+    "en": "Mural & Chilean painting",
+    "pt": "Mural e pintura chilena",
+    "fr": "Fresque et peinture chilienne"
+   },
+   "summary": {
+    "es": "La pinacoteca de la Universidad de Concepción, con el mural «Presencia de América Latina» y una gran colección de pintura chilena.",
+    "en": "The University of Concepción's art gallery, with the mural 'Presencia de América Latina' and a large collection of Chilean painting.",
+    "pt": "A pinacoteca da Universidade de Concepción, com o mural «Presencia de América Latina» e uma grande coleção de pintura chilena.",
+    "fr": "La pinacothèque de l'Université de Concepción, avec la fresque « Presencia de América Latina » et une vaste collection de peinture chilienne."
+   }
+  },
+  {
+   "osm_id": "way/1061161704",
+   "name": "Parque Metropolitano Cerro Caracol",
+   "category": "park",
+   "lat": -36.8371,
+   "lng": -73.0439,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Bosque y miradores",
+    "en": "Forest & lookouts",
+    "pt": "Floresta e mirantes",
+    "fr": "Forêt et belvédères"
+   },
+   "summary": {
+    "es": "Cerro boscoso junto al centro, con senderos y miradores hacia la ciudad y el río Biobío.",
+    "en": "A wooded hill beside the centre, with trails and lookouts over the city and the Biobío river.",
+    "pt": "Morro arborizado junto ao centro, com trilhas e mirantes para a cidade e o rio Biobío.",
+    "fr": "Colline boisée près du centre, avec sentiers et belvédères sur la ville et le fleuve Biobío."
+   }
+  },
+  {
+   "osm_id": "way/480338029",
+   "name": "Mina Chiflón del Diablo · Lota",
+   "category": "experience",
+   "lat": -37.076,
+   "lng": -73.1607,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Mina bajo el mar",
+    "en": "Mine under the sea",
+    "pt": "Mina sob o mar",
+    "fr": "Mine sous la mer"
+   },
+   "summary": {
+    "es": "Antigua mina de carbón que se recorre con ex mineros como guías, por galerías que avanzan bajo el mar.",
+    "en": "A former coal mine toured with ex-miners as guides, through galleries that run under the sea.",
+    "pt": "Antiga mina de carvão percorrida com ex-mineiros como guias, por galerias que avançam sob o mar.",
+    "fr": "Ancienne mine de charbon visitée avec d'anciens mineurs pour guides, dans des galeries qui s'avancent sous la mer."
+   }
+  },
+  {
+   "osm_id": "way/89121388",
+   "name": "Parque Isidora Cousiño · Lota",
+   "category": "park",
+   "lat": -37.0916,
+   "lng": -73.1685,
+   "visit": "1 h",
+   "tag": {
+    "es": "Jardín del siglo XIX",
+    "en": "19th-century garden",
+    "pt": "Jardim do século XIX",
+    "fr": "Jardin du XIXe siècle"
+   },
+   "summary": {
+    "es": "Parque de estilo europeo sobre un acantilado, creado por la familia dueña de las minas, con esculturas y vista al golfo.",
+    "en": "A European-style park on a cliff, created by the family that owned the mines, with sculptures and views of the gulf.",
+    "pt": "Parque de estilo europeu sobre uma falésia, criado pela família dona das minas, com esculturas e vista para o golfo.",
+    "fr": "Parc de style européen sur une falaise, créé par la famille propriétaire des mines, avec sculptures et vue sur le golfe."
+   }
+  },
+  {
+   "osm_id": "relation/4772479",
+   "name": "Península de Hualpén",
+   "category": "park",
+   "lat": -36.7789,
+   "lng": -73.178,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Costa y desembocadura",
+    "en": "Coast & river mouth",
+    "pt": "Costa e foz",
+    "fr": "Côte et embouchure"
+   },
+   "summary": {
+    "es": "Santuario de la naturaleza con bosque nativo, caletas y miradores sobre la desembocadura del Biobío.",
+    "en": "A nature sanctuary with native forest, coves and lookouts over the mouth of the Biobío.",
+    "pt": "Santuário da natureza com floresta nativa, enseadas e mirantes sobre a foz do Biobío.",
+    "fr": "Sanctuaire naturel avec forêt native, criques et belvédères sur l'embouchure du Biobío."
+   }
+  }
+ ]
+}

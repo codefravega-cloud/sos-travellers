@@ -1,0 +1,105 @@
+{
+ "locality": "Temuco",
+ "places": [
+  {
+   "osm_id": "relation/13254863",
+   "name": "Monumento Natural Cerro Ñielol",
+   "category": "park",
+   "lat": -38.7239,
+   "lng": -72.5868,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Bosque en la ciudad",
+    "en": "Forest in the city",
+    "pt": "Floresta na cidade",
+    "fr": "Forêt en ville"
+   },
+   "summary": {
+    "es": "Cerro con bosque nativo y copihues a pocas cuadras del centro, con miradores hacia Temuco.",
+    "en": "A hill with native forest and copihue flowers a few blocks from the centre, with lookouts over Temuco.",
+    "pt": "Morro com floresta nativa e copihues a poucas quadras do centro, com mirantes para Temuco.",
+    "fr": "Colline couverte de forêt native et de copihues à quelques rues du centre, avec belvédères sur Temuco."
+   }
+  },
+  {
+   "osm_id": "way/909292450",
+   "name": "Feria Pinto",
+   "category": "market",
+   "lat": -38.735,
+   "lng": -72.5796,
+   "visit": "1 h",
+   "tag": {
+    "es": "Sabores mapuche",
+    "en": "Mapuche flavours",
+    "pt": "Sabores mapuche",
+    "fr": "Saveurs mapuches"
+   },
+   "summary": {
+    "es": "Feria de frutas, verduras y productos mapuche como merkén, piñones y digüeñes; cuida tus pertenencias entre la multitud.",
+    "en": "A market of fruit, vegetables and Mapuche produce such as merkén and pine nuts; mind your belongings in the crowd.",
+    "pt": "Feira de frutas, verduras e produtos mapuche como merkén e pinhões; cuide dos seus pertences na multidão.",
+    "fr": "Marché de fruits, légumes et produits mapuches comme le merkén et les pignons ; surveillez vos affaires dans la foule."
+   }
+  },
+  {
+   "osm_id": "way/127256445",
+   "name": "Museo Nacional Ferroviario Pablo Neruda",
+   "category": "museum",
+   "lat": -38.7274,
+   "lng": -72.5709,
+   "visit": "1 h",
+   "tag": {
+    "es": "Locomotoras a vapor",
+    "en": "Steam locomotives",
+    "pt": "Locomotivas a vapor",
+    "fr": "Locomotives à vapeur"
+   },
+   "summary": {
+    "es": "Antigua casa de máquinas con locomotoras a vapor, en homenaje al poeta, hijo de un ferroviario de Temuco.",
+    "en": "A former roundhouse with steam locomotives, honouring the poet, son of a Temuco railwayman.",
+    "pt": "Antiga casa de máquinas com locomotivas a vapor, em homenagem ao poeta, filho de um ferroviário de Temuco.",
+    "fr": "Ancienne rotonde abritant des locomotives à vapeur, en hommage au poète, fils d'un cheminot de Temuco."
+   }
+  },
+  {
+   "osm_id": "way/51653575",
+   "name": "Museo Regional de la Araucanía",
+   "category": "museum",
+   "lat": -38.7373,
+   "lng": -72.603,
+   "visit": "1 h",
+   "tag": {
+    "es": "Historia mapuche",
+    "en": "Mapuche history",
+    "pt": "História mapuche",
+    "fr": "Histoire mapuche"
+   },
+   "summary": {
+    "es": "Historia del pueblo mapuche y de la colonización de la región, en una casona de 1924.",
+    "en": "The history of the Mapuche people and the settlement of the region, in a 1924 mansion.",
+    "pt": "História do povo mapuche e da colonização da região, em um casarão de 1924.",
+    "fr": "Histoire du peuple mapuche et de la colonisation de la région, dans une demeure de 1924."
+   }
+  },
+  {
+   "osm_id": "relation/18454200",
+   "name": "Parque Nacional Conguillío",
+   "category": "park",
+   "lat": -38.6553,
+   "lng": -71.692,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Araucarias y volcán Llaima",
+    "en": "Araucarias & Llaima volcano",
+    "pt": "Araucárias e vulcão Llaima",
+    "fr": "Araucarias et volcan Llaima"
+   },
+   "summary": {
+    "es": "Araucarias milenarias, lagos y campos de lava a los pies del volcán Llaima, a unas dos horas de Temuco.",
+    "en": "Ancient araucarias, lakes and lava fields at the foot of Llaima volcano, about two hours from Temuco.",
+    "pt": "Araucárias milenares, lagos e campos de lava aos pés do vulcão Llaima, a cerca de duas horas de Temuco.",
+    "fr": "Araucarias millénaires, lacs et champs de lave au pied du volcan Llaima, à environ deux heures de Temuco."
+   }
+  }
+ ]
+}

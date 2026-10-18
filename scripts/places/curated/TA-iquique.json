@@ -1,0 +1,125 @@
+{
+ "locality": "Iquique",
+ "places": [
+  {
+   "osm_id": "way/93764101",
+   "name": "Oficina Salitrera Humberstone",
+   "category": "museum",
+   "lat": -20.2068,
+   "lng": -69.7958,
+   "visit": "2–3 h",
+   "tag": {
+    "es": "Patrimonio de la Humanidad",
+    "en": "World Heritage",
+    "pt": "Patrimônio da Humanidade",
+    "fr": "Patrimoine mondial"
+   },
+   "summary": {
+    "es": "Pueblo salitrero abandonado en el desierto, con teatro, piscina, pulpería y casas intactas; a 47 km de Iquique.",
+    "en": "An abandoned nitrate town in the desert, with its theatre, pool, company store and houses intact; 47 km from Iquique.",
+    "pt": "Povoado salitreiro abandonado no deserto, com teatro, piscina, armazém e casas intactas; a 47 km de Iquique.",
+    "fr": "Ville du salpêtre abandonnée dans le désert, avec théâtre, piscine, magasin et maisons intacts ; à 47 km d'Iquique."
+   }
+  },
+  {
+   "osm_id": "way/281937410",
+   "name": "Oficina Salitrera Santa Laura",
+   "category": "museum",
+   "lat": -20.2108,
+   "lng": -69.8144,
+   "visit": "1 h",
+   "tag": {
+    "es": "Planta salitrera",
+    "en": "Nitrate works",
+    "pt": "Usina salitreira",
+    "fr": "Usine de salpêtre"
+   },
+   "summary": {
+    "es": "La planta industrial vecina a Humberstone, con su gran chimenea y la estructura de lixiviación en madera y hierro.",
+    "en": "The industrial plant next to Humberstone, with its tall chimney and the wood-and-iron leaching structure.",
+    "pt": "A planta industrial vizinha a Humberstone, com sua grande chaminé e a estrutura de lixiviação em madeira e ferro.",
+    "fr": "L'usine voisine de Humberstone, avec sa grande cheminée et sa structure de lixiviation en bois et fer."
+   }
+  },
+  {
+   "osm_id": "way/148157708",
+   "name": "Museo Corbeta Esmeralda",
+   "category": "museum",
+   "lat": -20.2094,
+   "lng": -70.1516,
+   "visit": "1 h",
+   "tag": {
+    "es": "Réplica a escala real",
+    "en": "Full-scale replica",
+    "pt": "Réplica em escala real",
+    "fr": "Réplique grandeur nature"
+   },
+   "summary": {
+    "es": "Réplica de la corbeta del Combate Naval de Iquique, con visitas guiadas por sus cubiertas; conviene reservar.",
+    "en": "A replica of the corvette from the Naval Battle of Iquique, with guided visits of its decks; booking is advisable.",
+    "pt": "Réplica da corveta do Combate Naval de Iquique, com visitas guiadas pelos conveses; convém reservar.",
+    "fr": "Réplique de la corvette du combat naval d'Iquique, avec visites guidées des ponts ; réservation conseillée."
+   }
+  },
+  {
+   "osm_id": "way/115782008",
+   "name": "Playa Cavancha",
+   "category": "view",
+   "lat": -20.2309,
+   "lng": -70.1475,
+   "visit": "2–3 h",
+   "tag": {
+    "es": "Playa urbana",
+    "en": "City beach",
+    "pt": "Praia urbana",
+    "fr": "Plage urbaine"
+   },
+   "summary": {
+    "es": "La playa principal de Iquique, con paseo costero, palmeras y agua templada casi todo el año.",
+    "en": "Iquique's main beach, with a seafront promenade, palm trees and mild water most of the year.",
+    "pt": "A praia principal de Iquique, com calçadão, palmeiras e água amena quase o ano todo.",
+    "fr": "La principale plage d'Iquique, avec promenade, palmiers et eau tempérée presque toute l'année."
+   }
+  },
+  {
+   "osm_id": "way/379457692",
+   "name": "Cerro Dragón",
+   "category": "park",
+   "lat": -20.2674,
+   "lng": -70.1192,
+   "visit": "1 h",
+   "tag": {
+    "es": "Duna gigante en la ciudad",
+    "en": "Giant dune in the city",
+    "pt": "Duna gigante na cidade",
+    "fr": "Dune géante en ville"
+   },
+   "summary": {
+    "es": "Una duna de varios kilómetros en plena ciudad, protegida como santuario de la naturaleza; se ve bien desde la costanera sur.",
+    "en": "A dune several kilometres long inside the city, protected as a nature sanctuary; well seen from the southern seafront.",
+    "pt": "Uma duna de vários quilômetros em plena cidade, protegida como santuário da natureza; vê-se bem da orla sul.",
+    "fr": "Une dune de plusieurs kilomètres en pleine ville, protégée comme sanctuaire naturel ; bien visible depuis le front de mer sud."
+   }
+  },
+  {
+   "osm_id": "node/4623342131",
+   "name": "Cocha Resbaladero · Pica",
+   "category": "experience",
+   "lat": -20.4855,
+   "lng": -69.3171,
+   "visit": "2 h",
+   "tag": {
+    "es": "Oasis con poza termal",
+    "en": "Oasis with warm pool",
+    "pt": "Oásis com piscina termal",
+    "fr": "Oasis et bassin tiède"
+   },
+   "summary": {
+    "es": "Poza natural de agua tibia en el oasis de Pica, famoso por sus limones y jugos de fruta, en medio del desierto.",
+    "en": "A natural warm-water pool in the oasis of Pica, known for its limes and fruit juices, in the middle of the desert.",
+    "pt": "Piscina natural de água morna no oásis de Pica, famoso por seus limões e sucos de fruta, no meio do deserto.",
+    "fr": "Bassin naturel d'eau tiède dans l'oasis de Pica, réputée pour ses citrons et ses jus de fruits, en plein désert."
+   }
+  }
+ ]
+}

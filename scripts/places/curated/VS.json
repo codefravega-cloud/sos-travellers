@@ -1,0 +1,215 @@
+{
+ "locality": "Valparaíso",
+ "places": [
+  {
+   "osm_id": "node/292444013",
+   "name": "La Sebastiana · Casa de Pablo Neruda",
+   "category": "museum",
+   "lat": -33.05368,
+   "lng": -71.62295,
+   "visit": "1–1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Casa-museo de Neruda",
+    "en": "Neruda's house museum",
+    "pt": "Casa-museu de Neruda",
+    "fr": "Maison-musée de Neruda"
+   },
+   "summary": {
+    "es": "La casa de Neruda en el cerro Florida: cinco pisos estrechos llenos de objetos y una de las mejores vistas de la bahía.",
+    "en": "Neruda's house on Cerro Florida: five narrow floors packed with objects and one of the best views of the bay.",
+    "pt": "A casa de Neruda no cerro Florida: cinco andares estreitos cheios de objetos e uma das melhores vistas da baía.",
+    "fr": "La maison de Neruda sur le cerro Florida : cinq étages étroits remplis d'objets et l'une des plus belles vues sur la baie."
+   }
+  },
+  {
+   "osm_id": "node/3418287777",
+   "name": "Paseo Gervasoni · Cerro Concepción",
+   "category": "view",
+   "lat": -33.04119,
+   "lng": -71.62656,
+   "visit": "1–2 h",
+   "address": null,
+   "tag": {
+    "es": "Cerros patrimoniales",
+    "en": "Heritage hills",
+    "pt": "Morros patrimoniais",
+    "fr": "Collines classées"
+   },
+   "summary": {
+    "es": "Mirador en el corazón del cerro Concepción, entre casas de colores, murales y cafés; el punto de partida para recorrer a pie los cerros Alegre y Concepción.",
+    "en": "A viewpoint in the heart of Cerro Concepción, among colourful houses, murals and cafés; the starting point for walking Cerro Alegre and Cerro Concepción.",
+    "pt": "Mirante no coração do cerro Concepción, entre casas coloridas, murais e cafés; o ponto de partida para percorrer a pé os cerros Alegre e Concepción.",
+    "fr": "Belvédère au cœur du cerro Concepción, entre maisons colorées, fresques et cafés ; point de départ pour parcourir à pied les cerros Alegre et Concepción."
+   }
+  },
+  {
+   "osm_id": "node/3406229239",
+   "name": "Paseo Atkinson",
+   "category": "view",
+   "lat": -33.04253,
+   "lng": -71.62522,
+   "visit": "30 min",
+   "address": null,
+   "tag": {
+    "es": "Mirador sobre el puerto",
+    "en": "Viewpoint over the port",
+    "pt": "Mirante sobre o porto",
+    "fr": "Belvédère sur le port"
+   },
+   "summary": {
+    "es": "Paseo peatonal con casas de estilo inglés y vista abierta al puerto y al plan de la ciudad; muy fotogénico al atardecer.",
+    "en": "A pedestrian promenade lined with English-style houses and an open view of the port and the flat part of the city; very photogenic at sunset.",
+    "pt": "Passeio de pedestres com casas de estilo inglês e vista aberta para o porto e a parte plana da cidade; muito fotogênico ao entardecer.",
+    "fr": "Promenade piétonne bordée de maisons de style anglais, avec vue dégagée sur le port et la ville basse ; très photogénique au coucher du soleil."
+   }
+  },
+  {
+   "osm_id": "node/8197682703",
+   "name": "Museo de Bellas Artes · Palacio Baburizza",
+   "category": "museum",
+   "lat": -33.04023,
+   "lng": -71.62902,
+   "visit": "1–1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Palacio art nouveau",
+    "en": "Art nouveau palace",
+    "pt": "Palácio art nouveau",
+    "fr": "Palais Art nouveau"
+   },
+   "summary": {
+    "es": "Palacio de 1916 en el paseo Yugoslavo, hoy museo de bellas artes de la ciudad; se llega en el ascensor El Peral desde la plaza Sotomayor.",
+    "en": "A 1916 palace on Paseo Yugoslavo, now the city's fine arts museum; reached by the El Peral funicular from Plaza Sotomayor.",
+    "pt": "Palácio de 1916 no paseo Yugoslavo, hoje museu de belas artes da cidade; chega-se pelo ascensor El Peral a partir da praça Sotomayor.",
+    "fr": "Palais de 1916 sur le paseo Yugoslavo, aujourd'hui musée des beaux-arts de la ville ; on y accède par le funiculaire El Peral depuis la place Sotomayor."
+   }
+  },
+  {
+   "osm_id": "way/201852345",
+   "name": "Ascensor Artillería",
+   "category": "view",
+   "lat": -33.0331,
+   "lng": -71.63026,
+   "visit": "30–45 min",
+   "address": null,
+   "tag": {
+    "es": "Funicular histórico",
+    "en": "Historic funicular",
+    "pt": "Funicular histórico",
+    "fr": "Funiculaire historique"
+   },
+   "summary": {
+    "es": "Uno de los funiculares más antiguos de la ciudad, que sube al paseo 21 de Mayo. Confirma que esté operando antes de ir: los ascensores cierran por mantención con frecuencia.",
+    "en": "One of the city's oldest funiculars, climbing to Paseo 21 de Mayo. Check that it is running before you go: the funiculars often close for maintenance.",
+    "pt": "Um dos funiculares mais antigos da cidade, que sobe ao paseo 21 de Mayo. Confirme se está funcionando antes de ir: os ascensores fecham para manutenção com frequência.",
+    "fr": "L'un des plus anciens funiculaires de la ville, qui monte au paseo 21 de Mayo. Vérifiez qu'il fonctionne avant d'y aller : les funiculaires ferment souvent pour maintenance."
+   }
+  },
+  {
+   "osm_id": "node/386269217",
+   "name": "Mirador Paseo 21 de Mayo",
+   "category": "view",
+   "lat": -33.03191,
+   "lng": -71.63041,
+   "visit": "30–45 min",
+   "address": null,
+   "tag": {
+    "es": "Vista del puerto",
+    "en": "Port view",
+    "pt": "Vista do porto",
+    "fr": "Vue sur le port"
+   },
+   "summary": {
+    "es": "El balcón más amplio sobre el puerto y los barcos, en el cerro Artillería, con puestos de artesanía y el Museo Marítimo a un paso.",
+    "en": "The widest balcony over the port and its ships, on Cerro Artillería, with craft stalls and the Maritime Museum next door.",
+    "pt": "A varanda mais ampla sobre o porto e os navios, no cerro Artillería, com bancas de artesanato e o Museu Marítimo ao lado.",
+    "fr": "Le plus large balcon sur le port et ses navires, sur le cerro Artillería, avec étals d'artisanat et le musée maritime à deux pas."
+   }
+  },
+  {
+   "osm_id": "node/4390539755",
+   "name": "Museo Marítimo Nacional",
+   "category": "museum",
+   "lat": -33.03171,
+   "lng": -71.63138,
+   "visit": "1–1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Historia naval",
+    "en": "Naval history",
+    "pt": "História naval",
+    "fr": "Histoire navale"
+   },
+   "summary": {
+    "es": "Historia naval de Chile en la antigua Escuela Naval, con salas sobre la Guerra del Pacífico y el rescate de los 33 mineros.",
+    "en": "Chile's naval history in the former Naval Academy, with rooms on the War of the Pacific and the rescue of the 33 miners.",
+    "pt": "História naval do Chile na antiga Escola Naval, com salas sobre a Guerra do Pacífico e o resgate dos 33 mineiros.",
+    "fr": "L'histoire navale du Chili dans l'ancienne École navale, avec des salles sur la guerre du Pacifique et le sauvetage des 33 mineurs."
+   }
+  },
+  {
+   "osm_id": "way/337710273",
+   "name": "Plaza Sotomayor",
+   "category": "view",
+   "lat": -33.03876,
+   "lng": -71.62912,
+   "visit": "30 min",
+   "address": null,
+   "tag": {
+    "es": "Centro cívico y muelle",
+    "en": "Civic centre & pier",
+    "pt": "Centro cívico e cais",
+    "fr": "Centre civique et quai"
+   },
+   "summary": {
+    "es": "La plaza principal del puerto, con el edificio de la Armada y el monumento a los Héroes de Iquique; al frente está el muelle Prat, de donde salen los paseos en lancha.",
+    "en": "The port's main square, with the Navy building and the monument to the Heroes of Iquique; opposite is Muelle Prat, where the boat rides leave.",
+    "pt": "A praça principal do porto, com o edifício da Marinha e o monumento aos Heróis de Iquique; em frente fica o cais Prat, de onde saem os passeios de barco.",
+    "fr": "La place principale du port, avec le bâtiment de la Marine et le monument aux Héros d'Iquique ; en face, le quai Prat, d'où partent les balades en bateau."
+   }
+  },
+  {
+   "osm_id": "way/829553966",
+   "name": "Parque Cultural de Valparaíso",
+   "category": "museum",
+   "lat": -33.04648,
+   "lng": -71.62781,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Ex cárcel, hoy cultura",
+    "en": "Former prison, now culture",
+    "pt": "Ex-prisão, hoje cultura",
+    "fr": "Ancienne prison, lieu culturel"
+   },
+   "summary": {
+    "es": "La antigua cárcel de la ciudad convertida en centro cultural con exposiciones, teatro y una explanada con vista a los cerros.",
+    "en": "The city's old prison turned into a cultural centre with exhibitions, theatre and a lawn overlooking the hills.",
+    "pt": "A antiga prisão da cidade transformada em centro cultural com exposições, teatro e uma esplanada com vista para os morros.",
+    "fr": "L'ancienne prison de la ville devenue centre culturel, avec expositions, théâtre et une esplanade face aux collines."
+   }
+  },
+  {
+   "osm_id": "way/313299262",
+   "name": "Mercado Cardonal",
+   "category": "market",
+   "lat": -33.04523,
+   "lng": -71.60754,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Mercado y cocinerías",
+    "en": "Market & eateries",
+    "pt": "Mercado e restaurantes",
+    "fr": "Marché et cantines"
+   },
+   "summary": {
+    "es": "Mercado de frutas y verduras en un edificio de hierro de 1912; en el segundo piso hay cocinerías de pescados y mariscos a buen precio. Cuida tus pertenencias en el entorno.",
+    "en": "A fruit and vegetable market in a 1912 iron building; upstairs are well-priced fish and seafood eateries. Keep an eye on your belongings in the area.",
+    "pt": "Mercado de frutas e verduras em um edifício de ferro de 1912; no segundo andar há restaurantes de peixes e frutos do mar a bom preço. Cuide dos seus pertences nos arredores.",
+    "fr": "Marché de fruits et légumes dans une halle en fer de 1912 ; à l'étage, des cantines de poissons et fruits de mer à bon prix. Surveillez vos affaires aux alentours."
+   }
+  }
+ ]
+}

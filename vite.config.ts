@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
@@ -12,10 +11,9 @@ function devApi(): Plugin {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
-        const match = /^\/api\/([a-z0-9-]+)$/.exec(url.pathname);
-        if (!match) return next();
-        const file = resolve(server.config.root, "api", `${match[1]}.ts`);
-        if (!existsSync(file)) { res.statusCode = 404; return res.end(); }
+        if (!/^\/api\/[a-z0-9-]+$/.test(url.pathname)) return next();
+        // Every route goes through the same dispatcher Vercel runs (api/[route].ts → api/_routes/<name>.ts).
+        const file = resolve(server.config.root, "api", "[route].ts");
         try {
           const method = req.method ?? "GET";
           const handler = (await server.ssrLoadModule(file))[method];

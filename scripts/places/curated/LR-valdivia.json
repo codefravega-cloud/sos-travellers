@@ -1,0 +1,125 @@
+{
+ "locality": "Valdivia",
+ "places": [
+  {
+   "osm_id": "way/434945305",
+   "name": "Feria Fluvial y costanera",
+   "category": "market",
+   "lat": -39.8151,
+   "lng": -73.2485,
+   "visit": "1 h",
+   "tag": {
+    "es": "Mercado junto al río",
+    "en": "Riverside market",
+    "pt": "Mercado à beira do rio",
+    "fr": "Marché au bord du fleuve"
+   },
+   "summary": {
+    "es": "Mercado de pescados, mariscos y productos locales a orillas del río, con lobos marinos esperando sobras en el muelle.",
+    "en": "A market for fish, seafood and local produce on the riverbank, with sea lions waiting for scraps on the pier.",
+    "pt": "Mercado de peixes, frutos do mar e produtos locais à beira do rio, com lobos-marinhos esperando sobras no cais.",
+    "fr": "Marché de poissons, fruits de mer et produits locaux au bord du fleuve, avec des otaries guettant les restes sur le quai."
+   }
+  },
+  {
+   "osm_id": "way/478749492",
+   "name": "Museo Histórico y Antropológico · Casa Anwandter",
+   "category": "museum",
+   "lat": -39.8134,
+   "lng": -73.2508,
+   "visit": "1 h",
+   "tag": {
+    "es": "Colonización alemana",
+    "en": "German settlement",
+    "pt": "Colonização alemã",
+    "fr": "Colonisation allemande"
+   },
+   "summary": {
+    "es": "Casona de un colono alemán en la isla Teja, con salas sobre los pueblos originarios y la colonización.",
+    "en": "A German settler's mansion on Isla Teja, with rooms on the indigenous peoples and the settlement.",
+    "pt": "Casarão de um colono alemão na ilha Teja, com salas sobre os povos originários e a colonização.",
+    "fr": "Demeure d'un colon allemand sur l'île Teja, avec des salles sur les peuples autochtones et la colonisation."
+   }
+  },
+  {
+   "osm_id": "way/111295448",
+   "name": "Jardín Botánico de la Universidad Austral",
+   "category": "park",
+   "lat": -39.8039,
+   "lng": -73.2498,
+   "visit": "1 h",
+   "tag": {
+    "es": "Flora del sur",
+    "en": "Southern flora",
+    "pt": "Flora do sul",
+    "fr": "Flore du sud"
+   },
+   "summary": {
+    "es": "Jardín junto al río Cau-Cau con árboles y plantas del bosque valdiviano, dentro del campus de la isla Teja.",
+    "en": "A garden beside the Cau-Cau river with trees and plants of the Valdivian forest, inside the Isla Teja campus.",
+    "pt": "Jardim junto ao rio Cau-Cau com árvores e plantas da floresta valdiviana, dentro do campus da ilha Teja.",
+    "fr": "Jardin au bord du río Cau-Cau, avec arbres et plantes de la forêt valdivienne, sur le campus de l'île Teja."
+   }
+  },
+  {
+   "osm_id": "way/84880198",
+   "name": "Castillo de Niebla",
+   "category": "museum",
+   "lat": -39.87,
+   "lng": -73.4019,
+   "visit": "1 h",
+   "tag": {
+    "es": "Fortaleza española",
+    "en": "Spanish fortress",
+    "pt": "Fortaleza espanhola",
+    "fr": "Forteresse espagnole"
+   },
+   "summary": {
+    "es": "Fuerte español del siglo XVII sobre la bahía de Corral, con cañones tallados en la roca y museo de sitio.",
+    "en": "A 17th-century Spanish fort above Corral Bay, with a gun battery cut into the rock and a site museum.",
+    "pt": "Forte espanhol do século XVII sobre a baía de Corral, com canhões talhados na rocha e museu de sítio.",
+    "fr": "Fort espagnol du XVIIe siècle au-dessus de la baie de Corral, avec batterie taillée dans la roche et musée de site."
+   }
+  },
+  {
+   "osm_id": "way/84880204",
+   "name": "Castillo de Corral",
+   "category": "museum",
+   "lat": -39.8887,
+   "lng": -73.4258,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Fuerte al otro lado de la bahía",
+    "en": "Fort across the bay",
+    "pt": "Forte do outro lado da baía",
+    "fr": "Fort de l'autre côté de la baie"
+   },
+   "summary": {
+    "es": "El fuerte principal del sistema defensivo español, al que se cruza en lancha desde Niebla.",
+    "en": "The main fort of the Spanish defensive system, reached by boat from Niebla.",
+    "pt": "O forte principal do sistema defensivo espanhol, ao qual se chega de barco a partir de Niebla.",
+    "fr": "Le fort principal du système défensif espagnol, que l'on rejoint en bateau depuis Niebla."
+   }
+  },
+  {
+   "osm_id": "way/667788166",
+   "name": "Parque Oncol",
+   "category": "park",
+   "lat": -39.7013,
+   "lng": -73.3079,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Selva valdiviana",
+    "en": "Valdivian rainforest",
+    "pt": "Selva valdiviana",
+    "fr": "Forêt valdivienne"
+   },
+   "summary": {
+    "es": "Bosque lluvioso costero con senderos y miradores hacia el Pacífico y los volcanes, a 30 km de la ciudad.",
+    "en": "Coastal rainforest with trails and lookouts towards the Pacific and the volcanoes, 30 km from the city.",
+    "pt": "Floresta chuvosa costeira com trilhas e mirantes para o Pacífico e os vulcões, a 30 km da cidade.",
+    "fr": "Forêt pluviale côtière avec sentiers et belvédères vers le Pacifique et les volcans, à 30 km de la ville."
+   }
+  }
+ ]
+}

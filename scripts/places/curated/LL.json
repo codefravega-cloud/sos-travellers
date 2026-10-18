@@ -1,0 +1,215 @@
+{
+ "locality": "Puerto Varas",
+ "places": [
+  {
+   "osm_id": "node/1550608559",
+   "name": "Saltos del Petrohué",
+   "category": "view",
+   "lat": -41.17311,
+   "lng": -72.44741,
+   "visit": "1,5–2 h",
+   "address": null,
+   "tag": {
+    "es": "Río turquesa y volcán",
+    "en": "Turquoise river & volcano",
+    "pt": "Rio turquesa e vulcão",
+    "fr": "Rivière turquoise et volcan"
+   },
+   "summary": {
+    "es": "El río Petrohué cae entre roca volcánica negra con el volcán Osorno de fondo; pasarelas cortas dentro del parque Vicente Pérez Rosales.",
+    "en": "The Petrohué river drops through black volcanic rock with Osorno volcano behind; short boardwalks inside Vicente Pérez Rosales park.",
+    "pt": "O rio Petrohué despenca entre rochas vulcânicas negras com o vulcão Osorno ao fundo; passarelas curtas dentro do parque Vicente Pérez Rosales.",
+    "fr": "Le río Petrohué dévale la roche volcanique noire avec le volcan Osorno en toile de fond ; courtes passerelles dans le parc Vicente Pérez Rosales."
+   }
+  },
+  {
+   "osm_id": "node/1390371271",
+   "name": "Lago Todos los Santos",
+   "category": "view",
+   "lat": -41.13674,
+   "lng": -72.39872,
+   "visit": "2–3 h",
+   "address": null,
+   "tag": {
+    "es": "Lago esmeralda",
+    "en": "Emerald lake",
+    "pt": "Lago esmeralda",
+    "fr": "Lac émeraude"
+   },
+   "summary": {
+    "es": "Lago de color esmeralda en Petrohué, rodeado de volcanes; desde el embarcadero salen navegaciones cortas y el cruce hacia Peulla.",
+    "en": "An emerald-coloured lake at Petrohué, surrounded by volcanoes; short boat trips and the crossing to Peulla leave from the pier.",
+    "pt": "Lago de cor esmeralda em Petrohué, cercado por vulcões; do cais saem passeios curtos de barco e a travessia para Peulla.",
+    "fr": "Lac couleur émeraude à Petrohué, entouré de volcans ; de l'embarcadère partent de courtes navigations et la traversée vers Peulla."
+   }
+  },
+  {
+   "osm_id": "way/934101794",
+   "name": "Volcán Osorno · Centro de montaña",
+   "category": "snow",
+   "lat": -41.12165,
+   "lng": -72.5232,
+   "visit": "Medio día",
+   "address": null,
+   "tag": {
+    "es": "Telesillas con vista",
+    "en": "Chairlift views",
+    "pt": "Teleférico com vista",
+    "fr": "Télésièges avec vue"
+   },
+   "summary": {
+    "es": "Camino pavimentado hasta el centro de montaña del volcán Osorno, con telesillas y vista al lago Llanquihue; nieve en invierno y miradores todo el año.",
+    "en": "A paved road up to the mountain centre on Osorno volcano, with chairlifts and views of Lake Llanquihue; snow in winter and viewpoints all year.",
+    "pt": "Estrada pavimentada até o centro de montanha do vulcão Osorno, com teleféricos e vista para o lago Llanquihue; neve no inverno e mirantes o ano todo.",
+    "fr": "Route goudronnée jusqu'au centre de montagne du volcan Osorno, avec télésièges et vue sur le lac Llanquihue ; neige en hiver et belvédères toute l'année."
+   }
+  },
+  {
+   "osm_id": "node/3407891401",
+   "name": "Sendero Laguna Verde",
+   "category": "park",
+   "lat": -41.20324,
+   "lng": -72.54078,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Caminata corta",
+    "en": "Short walk",
+    "pt": "Caminhada curta",
+    "fr": "Courte balade"
+   },
+   "summary": {
+    "es": "Sendero breve y plano hasta una laguna de color verde intenso junto al lago Llanquihue, en el sector Ensenada.",
+    "en": "A short, flat trail to an intensely green lagoon beside Lake Llanquihue, in the Ensenada sector.",
+    "pt": "Trilha curta e plana até uma lagoa de cor verde intensa junto ao lago Llanquihue, no setor Ensenada.",
+    "fr": "Sentier court et plat jusqu'à une lagune d'un vert intense au bord du lac Llanquihue, dans le secteur d'Ensenada."
+   }
+  },
+  {
+   "osm_id": "way/303108885",
+   "name": "Parque Cerro Philippi",
+   "category": "view",
+   "lat": -41.31104,
+   "lng": -72.97993,
+   "visit": "1 h",
+   "address": null,
+   "tag": {
+    "es": "Mirador de la ciudad",
+    "en": "Town viewpoint",
+    "pt": "Mirante da cidade",
+    "fr": "Belvédère sur la ville"
+   },
+   "summary": {
+    "es": "Cerro boscoso a pasos del centro con miradores hacia el lago y los volcanes Osorno y Calbuco.",
+    "en": "A wooded hill steps from the centre with viewpoints towards the lake and the Osorno and Calbuco volcanoes.",
+    "pt": "Morro arborizado a poucos passos do centro com mirantes para o lago e os vulcões Osorno e Calbuco.",
+    "fr": "Colline boisée à deux pas du centre, avec des belvédères sur le lac et les volcans Osorno et Calbuco."
+   }
+  },
+  {
+   "osm_id": "way/320690319",
+   "name": "Museo Pablo Fierro",
+   "category": "museum",
+   "lat": -41.32273,
+   "lng": -72.97537,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Casa-museo singular",
+    "en": "Quirky house museum",
+    "pt": "Casa-museu singular",
+    "fr": "Maison-musée insolite"
+   },
+   "summary": {
+    "es": "Casa llena de objetos antiguos, pinturas y rincones curiosos creada por el artista Pablo Fierro, frente a la costanera.",
+    "en": "A house packed with antiques, paintings and curious corners created by artist Pablo Fierro, facing the lakefront.",
+    "pt": "Casa cheia de objetos antigos, pinturas e cantos curiosos criada pelo artista Pablo Fierro, em frente à orla.",
+    "fr": "Maison remplie d'objets anciens, de peintures et de recoins curieux créée par l'artiste Pablo Fierro, face au lac."
+   }
+  },
+  {
+   "osm_id": "node/1617287466",
+   "name": "Cerro Calvario",
+   "category": "view",
+   "lat": -41.31972,
+   "lng": -72.99047,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Vista del lago",
+    "en": "Lake view",
+    "pt": "Vista do lago",
+    "fr": "Vue sur le lac"
+   },
+   "summary": {
+    "es": "Cerro con un vía crucis y un mirador hacia Puerto Varas y el lago Llanquihue; subida corta desde el centro.",
+    "en": "A hill with stations of the cross and a viewpoint over Puerto Varas and Lake Llanquihue; a short climb from the centre.",
+    "pt": "Morro com uma via-sacra e um mirante para Puerto Varas e o lago Llanquihue; subida curta a partir do centro.",
+    "fr": "Colline avec un chemin de croix et un belvédère sur Puerto Varas et le lac Llanquihue ; courte montée depuis le centre."
+   }
+  },
+  {
+   "osm_id": "node/1642611637",
+   "name": "Teatro del Lago · Frutillar",
+   "category": "experience",
+   "lat": -41.13938,
+   "lng": -73.02485,
+   "visit": "1–2 h",
+   "address": null,
+   "tag": {
+    "es": "Música frente al lago",
+    "en": "Music by the lake",
+    "pt": "Música à beira do lago",
+    "fr": "Musique au bord du lac"
+   },
+   "summary": {
+    "es": "Teatro sobre el lago Llanquihue en Frutillar, sede de las Semanas Musicales; aun sin concierto vale la visita por el edificio y el muelle.",
+    "en": "A theatre over Lake Llanquihue in Frutillar, home of the Semanas Musicales festival; worth visiting for the building and the pier even without a concert.",
+    "pt": "Teatro sobre o lago Llanquihue em Frutillar, sede das Semanas Musicales; mesmo sem concerto vale a visita pelo edifício e pelo píer.",
+    "fr": "Théâtre sur le lac Llanquihue à Frutillar, siège des Semanas Musicales ; même sans concert, le bâtiment et le ponton valent la visite."
+   }
+  },
+  {
+   "osm_id": "way/139980279",
+   "name": "Museo Colonial Alemán · Frutillar",
+   "category": "museum",
+   "lat": -41.13241,
+   "lng": -73.03025,
+   "visit": "1–1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Colonización alemana",
+    "en": "German settlement",
+    "pt": "Colonização alemã",
+    "fr": "Colonisation allemande"
+   },
+   "summary": {
+    "es": "Casas, molino y herrería que muestran cómo vivían los colonos alemanes del siglo XIX, en un parque con jardines.",
+    "en": "Houses, a mill and a smithy showing how 19th-century German settlers lived, set in a park with gardens.",
+    "pt": "Casas, moinho e ferraria que mostram como viviam os colonos alemães do século XIX, em um parque com jardins.",
+    "fr": "Maisons, moulin et forge montrant la vie des colons allemands du XIXe siècle, dans un parc paysager."
+   }
+  },
+  {
+   "osm_id": "way/98679419",
+   "name": "Costanera de Llanquihue",
+   "category": "park",
+   "lat": -41.26676,
+   "lng": -72.9921,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Paseo junto al lago",
+    "en": "Lakeside promenade",
+    "pt": "Passeio à beira do lago",
+    "fr": "Promenade au bord du lac"
+   },
+   "summary": {
+    "es": "Paseo a orillas del lago con vista a los volcanes, en la vecina ciudad de Llanquihue; tranquilo y menos concurrido que Puerto Varas.",
+    "en": "A lakeshore promenade with volcano views in the neighbouring town of Llanquihue; quiet and less crowded than Puerto Varas.",
+    "pt": "Passeio às margens do lago com vista para os vulcões, na vizinha cidade de Llanquihue; tranquilo e menos movimentado que Puerto Varas.",
+    "fr": "Promenade au bord du lac avec vue sur les volcans, dans la ville voisine de Llanquihue ; calme et moins fréquentée que Puerto Varas."
+   }
+  }
+ ]
+}

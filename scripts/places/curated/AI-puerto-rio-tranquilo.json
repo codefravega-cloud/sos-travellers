@@ -1,0 +1,65 @@
+{
+ "locality": "Puerto Río Tranquilo",
+ "places": [
+  {
+   "osm_id": "way/1242126674",
+   "name": "Capillas de Mármol",
+   "category": "experience",
+   "lat": -46.6583,
+   "lng": -72.626,
+   "visit": "1,5–2 h",
+   "tag": {
+    "es": "Cavernas en lancha o kayak",
+    "en": "Caves by boat or kayak",
+    "pt": "Cavernas de barco ou caiaque",
+    "fr": "Grottes en bateau ou kayak"
+   },
+   "summary": {
+    "es": "Cavernas de mármol esculpidas por el lago General Carrera, de tonos azules y blancos; se visitan en lancha o kayak, mejor con el lago en calma por la mañana.",
+    "en": "Marble caves carved by Lake General Carrera, in blues and whites; visited by boat or kayak, best on a calm morning.",
+    "pt": "Cavernas de mármore esculpidas pelo lago General Carrera, em tons azuis e brancos; visita-se de barco ou caiaque, melhor com o lago calmo pela manhã.",
+    "fr": "Grottes de marbre sculptées par le lac General Carrera, aux tons bleus et blancs ; visite en bateau ou kayak, de préférence par matin calme."
+   }
+  },
+  {
+   "osm_id": "node/4738543423",
+   "name": "Mirador Glaciar Exploradores",
+   "category": "view",
+   "lat": -46.5004,
+   "lng": -73.1563,
+   "visit": "Medio día",
+   "tag": {
+    "es": "Glaciar del monte San Valentín",
+    "en": "San Valentín glacier",
+    "pt": "Geleira do monte San Valentín",
+    "fr": "Glacier du mont San Valentín"
+   },
+   "summary": {
+    "es": "Sendero corto a un mirador sobre el glaciar Exploradores, a 50 km del pueblo; las caminatas sobre el hielo se hacen solo con guía.",
+    "en": "A short trail to a lookout over Exploradores glacier, 50 km from the village; walks on the ice are only done with a guide.",
+    "pt": "Trilha curta até um mirante sobre a geleira Exploradores, a 50 km do povoado; as caminhadas sobre o gelo só são feitas com guia.",
+    "fr": "Court sentier jusqu'à un belvédère sur le glacier Exploradores, à 50 km du village ; les marches sur la glace se font uniquement avec guide."
+   }
+  },
+  {
+   "osm_id": "node/3323466155",
+   "name": "Mirador Lago General Carrera",
+   "category": "view",
+   "lat": -46.4737,
+   "lng": -72.7215,
+   "visit": "20 min",
+   "tag": {
+    "es": "El lago más grande de Chile",
+    "en": "Chile's largest lake",
+    "pt": "O maior lago do Chile",
+    "fr": "Le plus grand lac du Chili"
+   },
+   "summary": {
+    "es": "Vista del lago de color turquesa desde la Carretera Austral, al norte del pueblo.",
+    "en": "A view of the turquoise lake from the Carretera Austral, north of the village.",
+    "pt": "Vista do lago de cor turquesa a partir da Carretera Austral, ao norte do povoado.",
+    "fr": "Vue sur le lac turquoise depuis la Carretera Austral, au nord du village."
+   }
+  }
+ ]
+}

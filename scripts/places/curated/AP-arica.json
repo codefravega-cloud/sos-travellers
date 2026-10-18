@@ -1,0 +1,105 @@
+{
+ "locality": "Arica",
+ "places": [
+  {
+   "osm_id": "node/2401281153",
+   "name": "Morro de Arica",
+   "category": "view",
+   "lat": -18.484,
+   "lng": -70.3221,
+   "visit": "1 h",
+   "tag": {
+    "es": "Mirador de la ciudad",
+    "en": "City lookout",
+    "pt": "Mirante da cidade",
+    "fr": "Belvédère sur la ville"
+   },
+   "summary": {
+    "es": "El peñón que domina Arica: vista del puerto, las playas y el desierto, con un museo histórico en la cima.",
+    "en": "The headland that towers over Arica: views of the port, beaches and desert, with a history museum on top.",
+    "pt": "O penhasco que domina Arica: vista do porto, das praias e do deserto, com um museu histórico no topo.",
+    "fr": "Le promontoire qui domine Arica : vue sur le port, les plages et le désert, avec un musée historique au sommet."
+   }
+  },
+  {
+   "osm_id": "way/199328090",
+   "name": "Museo Arqueológico San Miguel de Azapa",
+   "category": "museum",
+   "lat": -18.5165,
+   "lng": -70.1809,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Momias Chinchorro",
+    "en": "Chinchorro mummies",
+    "pt": "Múmias Chinchorro",
+    "fr": "Momies Chinchorro"
+   },
+   "summary": {
+    "es": "Museo en el valle de Azapa dedicado a la cultura Chinchorro, cuyas momias artificiales son las más antiguas que se conocen.",
+    "en": "A museum in the Azapa valley devoted to the Chinchorro culture, whose artificial mummies are the oldest known.",
+    "pt": "Museu no vale de Azapa dedicado à cultura Chinchorro, cujas múmias artificiais são as mais antigas conhecidas.",
+    "fr": "Musée de la vallée d'Azapa consacré à la culture Chinchorro, dont les momies artificielles sont les plus anciennes connues."
+   }
+  },
+  {
+   "osm_id": "way/231802701",
+   "name": "Museo de Sitio Colón 10",
+   "category": "museum",
+   "lat": -18.4807,
+   "lng": -70.3216,
+   "visit": "45 min",
+   "tag": {
+    "es": "Momias en su sitio",
+    "en": "Mummies in situ",
+    "pt": "Múmias no local",
+    "fr": "Momies in situ"
+   },
+   "summary": {
+    "es": "Entierros Chinchorro conservados en el lugar donde se encontraron, bajo un piso de vidrio, a los pies del Morro.",
+    "en": "Chinchorro burials preserved where they were found, under a glass floor, at the foot of the Morro.",
+    "pt": "Sepultamentos Chinchorro conservados onde foram encontrados, sob um piso de vidro, aos pés do Morro.",
+    "fr": "Sépultures Chinchorro conservées là où elles furent découvertes, sous un sol de verre, au pied du Morro."
+   }
+  },
+  {
+   "osm_id": "node/12677244913",
+   "name": "Cuevas de Anzota",
+   "category": "view",
+   "lat": -18.5499,
+   "lng": -70.3314,
+   "visit": "1,5 h",
+   "tag": {
+    "es": "Sendero costero",
+    "en": "Coastal trail",
+    "pt": "Trilha costeira",
+    "fr": "Sentier côtier"
+   },
+   "summary": {
+    "es": "Sendero con pasarelas entre acantilados y cuevas frente al mar, al sur de la ciudad; se suelen ver aves y lobos marinos.",
+    "en": "A boardwalk trail among sea cliffs and caves south of the city; seabirds and sea lions are often seen.",
+    "pt": "Trilha com passarelas entre falésias e cavernas diante do mar, ao sul da cidade; costuma-se ver aves e lobos-marinhos.",
+    "fr": "Sentier sur passerelles entre falaises et grottes face à la mer, au sud de la ville ; on y voit souvent oiseaux et otaries."
+   }
+  },
+  {
+   "osm_id": "node/1545677496",
+   "name": "Playa La Lisera",
+   "category": "view",
+   "lat": -18.493,
+   "lng": -70.3257,
+   "visit": "2–3 h",
+   "tag": {
+    "es": "Playa de aguas calmas",
+    "en": "Calm-water beach",
+    "pt": "Praia de águas calmas",
+    "fr": "Plage aux eaux calmes"
+   },
+   "summary": {
+    "es": "Bahía protegida y de aguas templadas todo el año, de las más apropiadas para bañarse en Arica.",
+    "en": "A sheltered bay with mild water all year, among the most suitable for swimming in Arica.",
+    "pt": "Baía protegida e de águas amenas o ano todo, das mais adequadas para banho em Arica.",
+    "fr": "Baie abritée aux eaux tempérées toute l'année, parmi les plus adaptées à la baignade à Arica."
+   }
+  }
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "locality": "Juan Fernández",
+ "places": [
+  {
+   "osm_id": "node/1776247540",
+   "name": "Mirador de Selkirk",
+   "category": "view",
+   "lat": -33.6377,
+   "lng": -78.8489,
+   "visit": "3–4 h (ida y vuelta)",
+   "tag": {
+    "es": "La vista de Robinson",
+    "en": "Robinson's view",
+    "pt": "A vista de Robinson",
+    "fr": "La vue de Robinson"
+   },
+   "summary": {
+    "es": "Sendero empinado desde San Juan Bautista hasta el mirador donde, según la tradición, Alexander Selkirk vigilaba el horizonte.",
+    "en": "A steep trail from San Juan Bautista to the lookout where, by tradition, Alexander Selkirk watched the horizon.",
+    "pt": "Trilha íngreme desde San Juan Bautista até o mirante onde, segundo a tradição, Alexander Selkirk vigiava o horizonte.",
+    "fr": "Sentier raide depuis San Juan Bautista jusqu'au belvédère d'où, selon la tradition, Alexander Selkirk scrutait l'horizon."
+   }
+  },
+  {
+   "osm_id": "node/1776247543",
+   "name": "Plazoleta El Yunque",
+   "category": "park",
+   "lat": -33.6477,
+   "lng": -78.8389,
+   "visit": "2 h",
+   "tag": {
+    "es": "Bosque endémico",
+    "en": "Endemic forest",
+    "pt": "Floresta endêmica",
+    "fr": "Forêt endémique"
+   },
+   "summary": {
+    "es": "Caminata corta entre helechos gigantes y árboles que solo existen en el archipiélago, al pie del cerro El Yunque.",
+    "en": "A short walk among giant ferns and trees found only in the archipelago, at the foot of El Yunque peak.",
+    "pt": "Caminhada curta entre samambaias gigantes e árvores que só existem no arquipélago, aos pés do morro El Yunque.",
+    "fr": "Courte marche parmi fougères géantes et arbres endémiques de l'archipel, au pied du mont El Yunque."
+   }
+  },
+  {
+   "osm_id": "way/27940819",
+   "name": "Plaza de San Juan Bautista",
+   "category": "view",
+   "lat": -33.6357,
+   "lng": -78.8313,
+   "visit": "30 min",
+   "tag": {
+    "es": "El único pueblo",
+    "en": "The only village",
+    "pt": "O único povoado",
+    "fr": "L'unique village"
+   },
+   "summary": {
+    "es": "El centro del único poblado de la isla Robinson Crusoe, frente a la bahía Cumberland.",
+    "en": "The centre of the only settlement on Robinson Crusoe Island, facing Cumberland Bay.",
+    "pt": "O centro do único povoado da ilha Robinson Crusoe, em frente à baía Cumberland.",
+    "fr": "Le centre de l'unique village de l'île Robinson Crusoé, face à la baie Cumberland."
+   }
+  }
+ ]
+}

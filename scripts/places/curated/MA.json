@@ -1,0 +1,215 @@
+{
+ "locality": "Puerto Natales",
+ "places": [
+  {
+   "osm_id": "node/603300185",
+   "name": "Parque Nacional Torres del Paine",
+   "category": "park",
+   "lat": -51.17886,
+   "lng": -72.95693,
+   "visit": "1 a varios días",
+   "address": null,
+   "tag": {
+    "es": "Reserva de la Biósfera",
+    "en": "Biosphere Reserve",
+    "pt": "Reserva da Biosfera",
+    "fr": "Réserve de biosphère"
+   },
+   "summary": {
+    "es": "El gran parque de la Patagonia chilena: torres de granito, glaciares y lagos turquesa. Compra la entrada en línea con anticipación y prepárate para viento fuerte y clima cambiante.",
+    "en": "Chilean Patagonia's great park: granite towers, glaciers and turquoise lakes. Buy your entry online in advance and be ready for strong wind and changeable weather.",
+    "pt": "O grande parque da Patagônia chilena: torres de granito, geleiras e lagos turquesa. Compre a entrada on-line com antecedência e prepare-se para vento forte e clima instável.",
+    "fr": "Le grand parc de la Patagonie chilienne : tours de granit, glaciers et lacs turquoise. Achetez l'entrée en ligne à l'avance et préparez-vous au vent fort et à une météo changeante."
+   }
+  },
+  {
+   "osm_id": "node/349097979",
+   "name": "Mirador Base Torres",
+   "category": "view",
+   "lat": -50.94267,
+   "lng": -72.94966,
+   "visit": "8–9 h (ida y vuelta)",
+   "address": null,
+   "tag": {
+    "es": "La caminata clásica",
+    "en": "The classic hike",
+    "pt": "A caminhada clássica",
+    "fr": "La randonnée classique"
+   },
+   "summary": {
+    "es": "La caminata más famosa del parque: unos 20 km ida y vuelta, exigente al final, hasta la laguna al pie de las tres torres. Sal temprano y revisa el pronóstico.",
+    "en": "The park's most famous hike: about 20 km return, demanding at the end, up to the lagoon at the foot of the three towers. Start early and check the forecast.",
+    "pt": "A caminhada mais famosa do parque: cerca de 20 km ida e volta, exigente no final, até a lagoa aos pés das três torres. Saia cedo e confira a previsão.",
+    "fr": "La randonnée la plus célèbre du parc : environ 20 km aller-retour, exigeante sur la fin, jusqu'à la lagune au pied des trois tours. Partez tôt et consultez la météo."
+   }
+  },
+  {
+   "osm_id": "node/348210361",
+   "name": "Salto Grande",
+   "category": "view",
+   "lat": -51.06765,
+   "lng": -73.00656,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Cascada y viento",
+    "en": "Waterfall & wind",
+    "pt": "Cachoeira e vento",
+    "fr": "Cascade et vent"
+   },
+   "summary": {
+    "es": "Cascada que une los lagos Nordenskjöld y Pehoé, a pocos minutos del estacionamiento; uno de los puntos más ventosos del parque.",
+    "en": "A waterfall linking lakes Nordenskjöld and Pehoé, minutes from the car park; one of the windiest spots in the park.",
+    "pt": "Cachoeira que une os lagos Nordenskjöld e Pehoé, a poucos minutos do estacionamento; um dos pontos mais ventosos do parque.",
+    "fr": "Cascade reliant les lacs Nordenskjöld et Pehoé, à quelques minutes du parking ; l'un des endroits les plus venteux du parc."
+   }
+  },
+  {
+   "osm_id": "node/349116507",
+   "name": "Mirador Cuernos",
+   "category": "view",
+   "lat": -51.04829,
+   "lng": -73.01234,
+   "visit": "2 h (ida y vuelta)",
+   "address": null,
+   "tag": {
+    "es": "Caminata fácil",
+    "en": "Easy hike",
+    "pt": "Caminhada fácil",
+    "fr": "Randonnée facile"
+   },
+   "summary": {
+    "es": "Sendero casi plano desde Salto Grande hasta un mirador frente a los Cuernos del Paine y el lago Nordenskjöld.",
+    "en": "An almost flat trail from Salto Grande to a viewpoint facing the Cuernos del Paine and Lake Nordenskjöld.",
+    "pt": "Trilha quase plana desde Salto Grande até um mirante em frente aos Cuernos del Paine e ao lago Nordenskjöld.",
+    "fr": "Sentier presque plat depuis Salto Grande jusqu'à un belvédère face aux Cuernos del Paine et au lac Nordenskjöld."
+   }
+  },
+  {
+   "osm_id": "node/605044713",
+   "name": "Mirador Lago Grey",
+   "category": "view",
+   "lat": -51.04011,
+   "lng": -73.14722,
+   "visit": "1,5–2 h",
+   "address": null,
+   "tag": {
+    "es": "Témpanos y glaciar",
+    "en": "Icebergs & glacier",
+    "pt": "Icebergs e geleira",
+    "fr": "Icebergs et glacier"
+   },
+   "summary": {
+    "es": "Caminata por la playa del lago Grey hasta un mirador con témpanos azules y el glaciar al fondo; desde aquí salen las navegaciones al glaciar.",
+    "en": "A walk along the beach of Lake Grey to a viewpoint with blue icebergs and the glacier beyond; boat trips to the glacier leave from here.",
+    "pt": "Caminhada pela praia do lago Grey até um mirante com icebergs azuis e a geleira ao fundo; daqui saem as navegações até a geleira.",
+    "fr": "Marche sur la plage du lac Grey jusqu'à un belvédère avec icebergs bleus et le glacier au fond ; les navigations vers le glacier partent d'ici."
+   }
+  },
+  {
+   "osm_id": "node/603300186",
+   "name": "Mirador Pehoé",
+   "category": "view",
+   "lat": -51.09948,
+   "lng": -73.08957,
+   "visit": "30 min",
+   "address": null,
+   "tag": {
+    "es": "La postal del parque",
+    "en": "The park's postcard",
+    "pt": "O cartão-postal do parque",
+    "fr": "La carte postale du parc"
+   },
+   "summary": {
+    "es": "Vista del lago Pehoé de color turquesa con el macizo del Paine detrás; una de las fotos más conocidas del parque.",
+    "en": "A view of turquoise Lake Pehoé with the Paine massif behind; one of the park's best-known photos.",
+    "pt": "Vista do lago Pehoé de cor turquesa com o maciço do Paine atrás; uma das fotos mais conhecidas do parque.",
+    "fr": "Vue sur le lac Pehoé turquoise avec le massif du Paine en arrière-plan ; l'une des photos les plus connues du parc."
+   }
+  },
+  {
+   "osm_id": "way/70515988",
+   "name": "Monumento Natural Cueva del Milodón",
+   "category": "park",
+   "lat": -51.56736,
+   "lng": -72.60467,
+   "visit": "1,5 h",
+   "address": null,
+   "tag": {
+    "es": "Caverna prehistórica",
+    "en": "Prehistoric cave",
+    "pt": "Caverna pré-histórica",
+    "fr": "Grotte préhistorique"
+   },
+   "summary": {
+    "es": "Caverna enorme donde se hallaron restos de un milodón, a 25 km de Puerto Natales, con senderos y una réplica del animal.",
+    "en": "A huge cave where mylodon remains were found, 25 km from Puerto Natales, with trails and a replica of the animal.",
+    "pt": "Caverna enorme onde foram encontrados restos de um milodonte, a 25 km de Puerto Natales, com trilhas e uma réplica do animal.",
+    "fr": "Immense grotte où furent découverts des restes de mylodon, à 25 km de Puerto Natales, avec sentiers et une réplique de l'animal."
+   }
+  },
+  {
+   "osm_id": "node/3524225764",
+   "name": "Cerro Dorotea",
+   "category": "view",
+   "lat": -51.68088,
+   "lng": -72.43801,
+   "visit": "3 h (ida y vuelta)",
+   "address": null,
+   "tag": {
+    "es": "Vista de los fiordos",
+    "en": "Fjord views",
+    "pt": "Vista dos fiordes",
+    "fr": "Vue sur les fjords"
+   },
+   "summary": {
+    "es": "Caminata de medio día cerca de la ciudad, por terreno privado con entrada pagada, hasta una vista amplia de Puerto Natales y el seno Última Esperanza.",
+    "en": "A half-day hike near town, across private land with paid entry, up to a wide view of Puerto Natales and Última Esperanza Sound.",
+    "pt": "Caminhada de meio dia perto da cidade, por terreno privado com entrada paga, até uma vista ampla de Puerto Natales e do seno Última Esperanza.",
+    "fr": "Randonnée d'une demi-journée près de la ville, sur un terrain privé à entrée payante, jusqu'à une large vue sur Puerto Natales et le fjord Última Esperanza."
+   }
+  },
+  {
+   "osm_id": "node/4680353189",
+   "name": "Muelle histórico · Costanera",
+   "category": "view",
+   "lat": -51.72404,
+   "lng": -72.51096,
+   "visit": "30–45 min",
+   "address": null,
+   "tag": {
+    "es": "Atardecer en el fiordo",
+    "en": "Sunset on the fjord",
+    "pt": "Pôr do sol no fiorde",
+    "fr": "Coucher de soleil sur le fjord"
+   },
+   "summary": {
+    "es": "Los pilotes del antiguo muelle frente al seno Última Esperanza, con montañas nevadas al fondo; el paseo clásico de la costanera.",
+    "en": "The pilings of the old pier facing Última Esperanza Sound, with snowy mountains behind; the classic waterfront stroll.",
+    "pt": "As estacas do antigo cais em frente ao seno Última Esperanza, com montanhas nevadas ao fundo; o passeio clássico da orla.",
+    "fr": "Les pilotis de l'ancien quai face au fjord Última Esperanza, sur fond de montagnes enneigées ; la promenade classique du front de mer."
+   }
+  },
+  {
+   "osm_id": "way/817089583",
+   "name": "Museo Histórico Municipal",
+   "category": "museum",
+   "lat": -51.72822,
+   "lng": -72.50858,
+   "visit": "45 min",
+   "address": null,
+   "tag": {
+    "es": "Historia de Natales",
+    "en": "History of Natales",
+    "pt": "História de Natales",
+    "fr": "Histoire de Natales"
+   },
+   "summary": {
+    "es": "Museo pequeño sobre los pueblos kawésqar y aónikenk, los colonos y las estancias ovejeras de Última Esperanza.",
+    "en": "A small museum on the Kawésqar and Aónikenk peoples, the settlers and the sheep ranches of Última Esperanza.",
+    "pt": "Museu pequeno sobre os povos kawésqar e aónikenk, os colonos e as estâncias de ovelhas de Última Esperanza.",
+    "fr": "Petit musée consacré aux peuples kawésqar et aónikenk, aux colons et aux estancias ovines d'Última Esperanza."
+   }
+  }
+ ]
+}

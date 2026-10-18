@@ -1,0 +1,85 @@
+{
+ "locality": "Putre",
+ "places": [
+  {
+   "osm_id": "relation/4740979",
+   "name": "Parque Nacional Lauca",
+   "category": "park",
+   "lat": -18.2615,
+   "lng": -69.349,
+   "visit": "Día completo",
+   "tag": {
+    "es": "Altiplano a 4.500 m",
+    "en": "Altiplano at 4,500 m",
+    "pt": "Altiplano a 4.500 m",
+    "fr": "Altiplano à 4 500 m"
+   },
+   "summary": {
+    "es": "Volcanes nevados, bofedales, vicuñas y lagunas de altura. Aclimátate en Putre antes de subir: el parque supera los 4.500 m.",
+    "en": "Snowy volcanoes, wetlands, vicuñas and high lagoons. Acclimatise in Putre before going up: the park rises above 4,500 m.",
+    "pt": "Vulcões nevados, banhados, vicunhas e lagoas de altitude. Aclimate-se em Putre antes de subir: o parque passa dos 4.500 m.",
+    "fr": "Volcans enneigés, zones humides, vigognes et lagunes d'altitude. Acclimatez-vous à Putre avant de monter : le parc dépasse 4 500 m."
+   }
+  },
+  {
+   "osm_id": "node/6668888867",
+   "name": "Mirador Lago Chungará",
+   "category": "view",
+   "lat": -18.233,
+   "lng": -69.1843,
+   "visit": "1 h",
+   "tag": {
+    "es": "Lago y volcán Parinacota",
+    "en": "Lake & Parinacota volcano",
+    "pt": "Lago e vulcão Parinacota",
+    "fr": "Lac et volcan Parinacota"
+   },
+   "summary": {
+    "es": "Uno de los lagos más altos del mundo, con el volcán Parinacota reflejado en el agua y flamencos en la orilla.",
+    "en": "One of the highest lakes in the world, with Parinacota volcano mirrored in the water and flamingos on the shore.",
+    "pt": "Um dos lagos mais altos do mundo, com o vulcão Parinacota refletido na água e flamingos na margem.",
+    "fr": "L'un des lacs les plus hauts du monde, avec le volcan Parinacota reflété dans l'eau et des flamants sur la rive."
+   }
+  },
+  {
+   "osm_id": "node/4981376722",
+   "name": "Mirador Lagunas de Cotacotani",
+   "category": "view",
+   "lat": -18.2032,
+   "lng": -69.2343,
+   "visit": "30 min",
+   "tag": {
+    "es": "Lagunas entre lava",
+    "en": "Lagoons among lava",
+    "pt": "Lagoas entre lava",
+    "fr": "Lagunes dans la lave"
+   },
+   "summary": {
+    "es": "Conjunto de lagunas verdes entre coladas de lava e islotes, con los volcanes Payachatas de fondo.",
+    "en": "A cluster of green lagoons among lava flows and islets, with the Payachatas volcanoes behind.",
+    "pt": "Conjunto de lagoas verdes entre derrames de lava e ilhotas, com os vulcões Payachatas ao fundo.",
+    "fr": "Ensemble de lagunes vertes entre coulées de lave et îlots, avec les volcans Payachatas en toile de fond."
+   }
+  },
+  {
+   "osm_id": "node/4522529850",
+   "name": "Mirador de Putre",
+   "category": "view",
+   "lat": -18.2074,
+   "lng": -69.5586,
+   "visit": "20 min",
+   "tag": {
+    "es": "Vista del pueblo",
+    "en": "Village view",
+    "pt": "Vista do povoado",
+    "fr": "Vue sur le village"
+   },
+   "summary": {
+    "es": "Vista del pueblo aymara de Putre y sus terrazas de cultivo bajo los nevados de Taapaca.",
+    "en": "A view of the Aymara village of Putre and its farming terraces beneath the snowy Taapaca peaks.",
+    "pt": "Vista do povoado aimará de Putre e seus terraços de cultivo sob os nevados de Taapaca.",
+    "fr": "Vue sur le village aymara de Putre et ses terrasses de culture au pied des sommets enneigés du Taapaca."
+   }
+  }
+ ]
+}
