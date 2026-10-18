@@ -41,6 +41,16 @@ async function api<T>(token:string,path:string,body?:Record<string,unknown>):Pro
 const demoNames:Record<Role,string>={tourist:"Emma",owner:"Carolina",boss:"Equipo"};
 const demoAccount=(role:string|null)=>role&&role in demoNames?{id:`demo-${role}`,firstName:demoNames[role as Role],role:role as Role}:null;
 const demo=demoAccount(new URLSearchParams(window.location.search).get("demo"));
+// Each demo asks for its own password, shared with the team in a PDF. Only SHA-256 hashes live here because this
+// repository is public. The demo holds sample data only, so this keeps casual visitors out; it does not protect data.
+const demoHashes:Record<Role,string>={
+  owner:"7405473f926015cccc774c0d989a1fe407e178cf1e2a2202a0aca39c1063ef0e",
+  boss:"a49140f5130614a8e8db81c6f1ceb38f14aa1880259cd641e7fe9919c7a72001",
+  tourist:"eddfae6f04d5f120f6fd416c88d2a7959f75ea73dfeccd6d0e48796fbc8077ec",
+};
+const DEMO_KEY="sos-demo-open";
+const sha256=async(text:string)=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text))),(byte)=>byte.toString(16).padStart(2,"0")).join("");
+const demoOpen=(role:Role)=>{try{return sessionStorage.getItem(`${DEMO_KEY}-${role}`)==="1"}catch{return false}};
 
 const message=(cause:unknown)=>cause instanceof Error&&cause.message?cause.message:"Algo salió mal. Intenta nuevamente.";
 
@@ -67,6 +77,7 @@ export default function Panel(){
   const [ready,setReady]=useState(false);
   const [session,setSession]=useState<Session|null>(null);
   const [profile,setProfile]=useState<{id:string;firstName:string;role:Role}|null>(null);
+  const [demoReady,setDemoReady]=useState(()=>demo?demoOpen(demo.role):false);
   const userId=session?.user.id;
 
   useEffect(()=>{
@@ -89,6 +100,7 @@ export default function Panel(){
   },[userId]);
 
   const account=demo?{token:demo.id,email:`${demo.firstName.toLowerCase()}@example.com`}:session&&{token:session.access_token,email:session.user.email,trial:Boolean(session.user.is_anonymous)};
+  if(demo&&!demoReady)return <DemoGate role={demo.role} onOpen={()=>setDemoReady(true)}/>;
   if(!ready&&!demo)return null;
   if(!account)return <SignIn/>;
   const mine=demo??(profile?.id===userId?profile:null);
@@ -110,6 +122,28 @@ export default function Panel(){
     {mine?.role==="owner"&&<OwnerPanel token={token}/>}
     {mine?.role==="boss"&&<BossPanel token={token}/>}
     {mine&&<SuggestionBox token={token}/>}
+  </main>;
+}
+
+function DemoGate({role,onOpen}:{role:Role;onOpen:()=>void}){
+  const [error,setError]=useState("");
+  async function submit(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    // Lowercase, so a phone that capitalises the first letter still matches.
+    const password=String(new FormData(event.currentTarget).get("password")??"").trim().toLowerCase();
+    if(await sha256(password)!==demoHashes[role])return setError("Contraseña incorrecta.");
+    try{sessionStorage.setItem(`${DEMO_KEY}-${role}`,"1")}catch{}
+    onOpen();
+  }
+  return <main className="team team-gate">
+    <form onSubmit={submit}>
+      <p className="team-eyebrow">SOS TRAVELLERS · DEMO</p>
+      <h1>Demo: {roleNames[role]}</h1>
+      <label htmlFor="demo-password">Contraseña de la demo</label><input id="demo-password" name="password" type="password" autoComplete="off" autoCapitalize="none" autoFocus/>
+      <button type="submit">Entrar a la demo</button>
+      {error&&<p className="team-error" role="alert">{error}</p>}
+      <p className="team-empty">La contraseña está en el documento que compartió el equipo de SOS Travellers.</p>
+    </form>
   </main>;
 }
 
