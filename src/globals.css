@@ -211,3 +211,30 @@ body{background:transparent}.weather-backdrop{position:fixed;inset:0;z-index:-2;
 .review-link .review-card{position:relative;width:min(440px,100%);background:var(--white);border:1px solid var(--line);border-radius:20px;padding:26px}.review-link form{width:auto;background:none;border:0;border-radius:0;padding:0}.review-link h1{font-size:2rem;margin:4px 0 8px}.review-link p{margin:0;line-height:1.5}.review-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px}.review-head select{padding:6px 9px;font-size:.8rem}.review-stars{border:0;padding:0;margin:8px 0 0;display:flex;gap:6px}.review-stars legend{font-weight:700;font-size:.86rem;margin-bottom:6px;padding:0}.team .review-stars button{background:var(--paper);border-color:var(--line);color:#b8c0cc;font-size:1.5rem;line-height:1;padding:9px 13px;border-radius:12px}.team .review-stars button.on{background:var(--yellow);border-color:var(--yellow);color:var(--navy)}
 .taxi-grid article>em.taxi-active{align-self:flex-start;font-style:normal;border-radius:999px;background:#dff5e6;color:#17663a;padding:4px 8px;font-size:.6rem;font-weight:900;text-transform:uppercase}
 @media(max-width:700px){.panel-form{grid-template-columns:1fr}}
+/* Traveller home (/panel for a traveller account): the landing's sections around the traveller's name and region. */
+.th-notes{max-width:1540px;margin:0 auto;padding:16px clamp(18px,5vw,72px) 0}
+.th-hero{position:relative;overflow:hidden;min-height:460px;padding:56px clamp(18px,5vw,72px) 48px}
+.th-hero-copy{position:relative;z-index:1;max-width:780px}
+.th-eyebrow{margin:0 0 10px;color:var(--coral);font-size:.7rem;font-weight:900;letter-spacing:.16em}
+.th-hero h1{margin:0;font:800 clamp(3.2rem,6.2vw,6.2rem)/.88 var(--font-display);text-transform:uppercase;letter-spacing:-.03em}
+.th-from{margin:12px 0 0;font-weight:700;color:var(--navy2)}
+.th-region{display:flex;align-items:center;gap:10px;margin:24px 0 0;font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.th-region select{font:700 1rem var(--font-body);padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--navy);max-width:100%}
+.th-summary{margin:16px 0 0;max-width:660px;padding:13px 16px;border-radius:16px;background:#ffffffe6;font-size:1rem;line-height:1.55}
+.th-highlights{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px}
+.th-highlights b{padding:5px 11px;border-radius:999px;background:#ffffffe6;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+.th-highlights span{padding:5px 11px;border-radius:999px;background:var(--navy);color:#fff;font-size:.78rem;font-weight:700}
+.th-map{display:inline-block;margin-top:20px;padding:12px 18px;border-radius:999px;background:var(--coral);color:#fff;font-weight:800;text-decoration:none}
+.th-signout{padding:9px 14px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--navy);font:700 .85rem var(--font-body);cursor:pointer}
+.th-tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.th-tips article,.th-saved,.th-promo-grid article{padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff}
+.th-tips h3,.th-saved h3,.th-promo-grid h3{margin:0 0 8px;font:800 1.35rem/1 var(--font-display);text-transform:uppercase}
+.th-tips p,.th-saved p,.th-promo-grid p{margin:0;color:var(--muted);font-size:.9rem;line-height:1.55}
+.th-saved{margin-top:14px}
+.th-promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.th-promo-grid small{display:block;margin-bottom:8px;color:var(--coral);font-size:.68rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.th-promo-grid em{color:#17663a;font-style:normal}
+.th-promo-grid span{display:block;margin-top:10px;color:var(--navy2);font-size:.78rem;font-weight:700}
+.th-empty{margin:0;color:var(--muted)}
+.th-suggest{padding-top:0}
+@media (max-width:720px){.th-hero{min-height:0;padding:34px 16px 30px}.th-hero h1{font-size:clamp(2.6rem,13vw,3.6rem)}.th-region{flex-direction:column;align-items:flex-start}.th-notes{padding:12px 16px 0}}

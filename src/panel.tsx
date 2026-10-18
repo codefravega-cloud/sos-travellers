@@ -2,6 +2,8 @@ import type { Session } from "@supabase/supabase-js";
 import qrcode from "qrcode-generator";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase-browser";
+import TravellerHome, { type Promotion as TravellerPromotion } from "./traveller-home";
+import type { RegionId } from "./chile-regions";
 
 // Accounts panel for business owners and the SOS Travellers team. Spanish only, like /equipo.
 // What each role may do is enforced by the /api routes (api/_routes/owner.ts, api/_routes/admin.ts); this file only draws it.
@@ -38,8 +40,9 @@ async function api<T>(token:string,path:string,body?:Record<string,unknown>):Pro
 }
 // /panel?demo=owner (or boss, tourist) draws that role's panel with the sample data in panel-demo.ts, to show the panel
 // to people without an account. It never reads or writes real data, and panel-demo.ts is only downloaded on those addresses.
-const demoNames:Record<Role,string>={tourist:"Emma",owner:"Carolina",boss:"Equipo"};
-const demoAccount=(role:string|null)=>role&&role in demoNames?{id:`demo-${role}`,firstName:demoNames[role as Role],role:role as Role}:null;
+const demoPeople:Record<Role,{firstName:string;country:string}>={tourist:{firstName:"Emma",country:"Francia"},owner:{firstName:"Carolina",country:"Chile"},boss:{firstName:"Equipo",country:"Chile"}};
+const demoAccount=(role:string|null)=>role&&role in demoPeople?{id:`demo-${role}`,...demoPeople[role as Role],role:role as Role}:null;
+const demoPromotions=async(region:RegionId):Promise<TravellerPromotion[]>=>(await import("./panel-demo")).demoPromotions(region);
 const demo=demoAccount(new URLSearchParams(window.location.search).get("demo"));
 // Each demo asks for its own password, shared with the team in a PDF. Only SHA-256 hashes live here because this
 // repository is public. The demo holds sample data only, so this keeps casual visitors out; it does not protect data.
@@ -76,7 +79,7 @@ function useRemote<T>(token:string,path:string){
 export default function Panel(){
   const [ready,setReady]=useState(false);
   const [session,setSession]=useState<Session|null>(null);
-  const [profile,setProfile]=useState<{id:string;firstName:string;role:Role}|null>(null);
+  const [profile,setProfile]=useState<{id:string;firstName:string;country:string;role:Role}|null>(null);
   const [demoReady,setDemoReady]=useState(()=>demo?demoOpen(demo.role):false);
   const userId=session?.user.id;
 
@@ -94,8 +97,8 @@ export default function Panel(){
   useEffect(()=>{
     if(!userId)return;
     let alive=true;
-    void supabase.from("app_users").select("first_name, role").eq("id",userId).maybeSingle()
-      .then(({data})=>{if(alive)setProfile({id:userId,firstName:data?.first_name??"",role:(data?.role??"tourist") as Role})});
+    void supabase.from("app_users").select("first_name, country, role").eq("id",userId).maybeSingle()
+      .then(({data})=>{if(alive)setProfile({id:userId,firstName:data?.first_name??"",country:data?.country??"",role:(data?.role??"tourist") as Role})});
     return()=>{alive=false};
   },[userId]);
 
@@ -105,20 +108,23 @@ export default function Panel(){
   if(!account)return <SignIn/>;
   const mine=demo??(profile?.id===userId?profile:null);
   const token=account.token;
+  const signOut=()=>demo?window.location.assign("/panel"):void supabase.auth.signOut();
+  const demoBanner=demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">dueño de local</a> · <a href="?demo=boss">boss</a> · <a href="?demo=tourist">viajero</a></p>;
+  const trialNote="trial" in account&&account.trial&&<p className="team-empty" style={{marginBottom:16}}>Cuenta de prueba, sin correo ni contraseña: queda guardada en este navegador. Si sales, tendrás que crear otra.</p>;
+
+  // A traveller gets a personal version of the landing instead of the business tools.
+  if(mine?.role==="tourist")return <TravellerHome name={mine.firstName||"viajero"} country={mine.country} onSignOut={signOut}
+    banner={(demoBanner||trialNote)&&<div className="th-notes">{demoBanner}{trialNote}</div>}
+    footer={<div className="team th-suggest"><SuggestionBox token={token}/></div>}
+    loadPromotions={demo?demoPromotions:undefined}/>;
 
   return <main className="team">
     <header className="team-top">
       <div><p className="team-eyebrow">SOS TRAVELLERS · PANEL</p><h1>{mine?`Hola, ${mine.firstName||"bienvenido"}`:"Cargando…"}</h1></div>
-      <div className="team-actions">{mine&&<span className="team-pill ok">{roleNames[mine.role]}</span>}<button type="button" className="team-quiet" onClick={()=>demo?window.location.assign("/panel"):void supabase.auth.signOut()}>Salir</button></div>
+      <div className="team-actions">{mine&&<span className="team-pill ok">{roleNames[mine.role]}</span>}<button type="button" className="team-quiet" onClick={signOut}>Salir</button></div>
     </header>
-    {demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">dueño de local</a> · <a href="?demo=boss">boss</a> · <a href="?demo=tourist">viajero</a></p>}
-    {"trial" in account&&account.trial&&<p className="team-empty" style={{marginBottom:16}}>Cuenta de prueba, sin correo ni contraseña: queda guardada en este navegador. Si sales, tendrás que crear otra.</p>}
-    {mine?.role==="tourist"&&<section className="team-section"><article className="team-agent">
-      <h3>Tu cuenta es de viajero</h3>
-      {account.email
-        ?<p className="team-summary">Este panel es para dueños de local. Si tienes un negocio, <a href="/#negocios">postula en el formulario de negocios</a> y te daremos acceso con este mismo correo: {account.email}</p>
-        :<p className="team-summary">Este panel es para dueños de local y para el equipo. Pide a un boss que cambie tu rol en la pestaña Usuarios. Mientras, puedes ver la demo de <a href="?demo=owner">dueño de local</a> y de <a href="?demo=boss">boss</a>.</p>}
-    </article></section>}
+    {demoBanner}
+    {trialNote}
     {mine?.role==="owner"&&<OwnerPanel token={token}/>}
     {mine?.role==="boss"&&<BossPanel token={token}/>}
     {mine&&<SuggestionBox token={token}/>}
