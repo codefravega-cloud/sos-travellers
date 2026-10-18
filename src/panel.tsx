@@ -88,7 +88,7 @@ export default function Panel(){
     return()=>{alive=false};
   },[userId]);
 
-  const account=demo?{token:demo.id,email:`${demo.firstName.toLowerCase()}@example.com`}:session&&{token:session.access_token,email:session.user.email};
+  const account=demo?{token:demo.id,email:`${demo.firstName.toLowerCase()}@example.com`}:session&&{token:session.access_token,email:session.user.email,trial:Boolean(session.user.is_anonymous)};
   if(!ready&&!demo)return null;
   if(!account)return <SignIn/>;
   const mine=demo??(profile?.id===userId?profile:null);
@@ -100,9 +100,12 @@ export default function Panel(){
       <div className="team-actions">{mine&&<span className="team-pill ok">{roleNames[mine.role]}</span>}<button type="button" className="team-quiet" onClick={()=>demo?window.location.assign("/panel"):void supabase.auth.signOut()}>Salir</button></div>
     </header>
     {demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">dueño de local</a> · <a href="?demo=boss">boss</a> · <a href="?demo=tourist">viajero</a></p>}
+    {"trial" in account&&account.trial&&<p className="team-empty" style={{marginBottom:16}}>Cuenta de prueba, sin correo ni contraseña: queda guardada en este navegador. Si sales, tendrás que crear otra.</p>}
     {mine?.role==="tourist"&&<section className="team-section"><article className="team-agent">
       <h3>Tu cuenta es de viajero</h3>
-      <p className="team-summary">Este panel es para dueños de local. Si tienes un negocio, <a href="/#negocios">postula en el formulario de negocios</a> y te daremos acceso con este mismo correo: {account.email}</p>
+      {account.email
+        ?<p className="team-summary">Este panel es para dueños de local. Si tienes un negocio, <a href="/#negocios">postula en el formulario de negocios</a> y te daremos acceso con este mismo correo: {account.email}</p>
+        :<p className="team-summary">Este panel es para dueños de local y para el equipo. Pide a un boss que cambie tu rol en la pestaña Usuarios. Mientras, puedes ver la demo de <a href="?demo=owner">dueño de local</a> y de <a href="?demo=boss">boss</a>.</p>}
     </article></section>}
     {mine?.role==="owner"&&<OwnerPanel token={token}/>}
     {mine?.role==="boss"&&<BossPanel token={token}/>}
@@ -110,8 +113,10 @@ export default function Panel(){
   </main>;
 }
 
+// For now an account is created with a name and a country only, as a Supabase anonymous user, so the team can try
+// the panel without email or password; it lives in this browser. Accounts with a password still sign in with "in".
 function SignIn(){
-  const [mode,setMode]=useState<"in"|"up"|"reset"|"code">("in");
+  const [mode,setMode]=useState<"in"|"up"|"reset"|"code">("up");
   const [email,setEmail]=useState("");
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
@@ -121,6 +126,18 @@ function SignIn(){
     event.preventDefault();
     const form=event.currentTarget,password=String(new FormData(form).get("password")??"");
     setError("");setNotice("");
+    if(mode==="up"){
+      const firstName=field(form,"firstName"),country=field(form,"country");
+      if(firstName.length<2||country.length<2)return setError("Escribe tu nombre y tu país.");
+      if(!new FormData(form).get("consent"))return setError("Debes aceptar para crear la cuenta.");
+      setBusy(true);
+      try{
+        // The profile row is created from this metadata by a database trigger (see the app_users migration).
+        const {error:failure}=await supabase.auth.signInAnonymously({options:{data:{first_name:firstName,country,preferred_language:"es",preferred_currency:"CLP"}}});
+        if(failure)setError(failure.code==="anonymous_provider_disabled"?"La creación de cuentas todavía no está activada. Intenta más tarde.":"No pudimos crear la cuenta. Intenta nuevamente.");
+      }finally{setBusy(false)}
+      return;
+    }
     if(!isEmail(email.trim()))return setError("Escribe un correo válido.");
     if(mode!=="reset"&&password.length<(mode==="in"?1:MIN_PASSWORD))return setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.`);
     setBusy(true);
@@ -128,14 +145,6 @@ function SignIn(){
       if(mode==="in"){
         const {error:failure}=await supabase.auth.signInWithPassword({email:email.trim(),password});
         if(failure)setError(failure.status===400?"Correo o contraseña incorrectos.":"No pudimos iniciar sesión. Intenta nuevamente.");
-      }else if(mode==="up"){
-        const firstName=field(form,"firstName"),country=field(form,"country");
-        if(firstName.length<2||country.length<2)return setError("Escribe tu nombre y tu país.");
-        if(!new FormData(form).get("consent"))return setError("Debes aceptar para crear la cuenta.");
-        // The profile row is created from this metadata by a database trigger (see the app_users migration).
-        const {data,error:failure}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{first_name:firstName,country,preferred_language:"es",preferred_currency:"CLP"}}});
-        if(failure)setError(failure.message||"No pudimos crear la cuenta.");
-        else if(!data.session){setMode("in");setNotice("Te enviamos un correo para confirmar tu cuenta. Ábrelo y luego inicia sesión.")}
       }else if(mode==="reset"){
         const {error:failure}=await supabase.auth.resetPasswordForEmail(email.trim());
         if(failure)setError("No pudimos enviar el código. Intenta nuevamente.");
@@ -149,22 +158,23 @@ function SignIn(){
   }
 
   const titles={in:"Iniciar sesión",up:"Crear cuenta",reset:"Recuperar contraseña",code:"Nueva contraseña"};
-  const actions={in:"Entrar",up:"Crear cuenta",reset:"Enviar código",code:"Cambiar contraseña"};
+  const actions={in:"Entrar",up:"Crear cuenta y entrar",reset:"Enviar código",code:"Cambiar contraseña"};
   return <main className="team team-gate">
     <form onSubmit={submit} key={mode}>
       <p className="team-eyebrow">SOS TRAVELLERS · PANEL</p>
       <h1>{titles[mode]}</h1>
       {mode==="up"&&<><label htmlFor="panel-name">Nombre</label><input id="panel-name" name="firstName" autoComplete="given-name" maxLength={60}/>
         <label htmlFor="panel-country">País</label><input id="panel-country" name="country" autoComplete="country-name" maxLength={80}/></>}
-      <label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/>
+      {mode!=="up"&&<><label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/></>}
       {mode==="code"&&<><label htmlFor="panel-code">Código del correo</label><input id="panel-code" name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={10}/></>}
-      {mode!=="reset"&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
-      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> Acepto que SOS Travellers guarde mi nombre, correo y país para administrar mi cuenta.</label>}
+      {(mode==="in"||mode==="code")&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
+      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> Acepto que SOS Travellers guarde mi nombre y mi país para administrar mi cuenta.</label>}
+      {mode==="up"&&<p className="team-empty">Sin correo ni contraseña: tu cuenta queda guardada en este navegador.</p>}
       <button type="submit" disabled={busy}>{actions[mode]}</button>
       {error&&<p className="team-error" role="alert">{error}</p>}
       {notice&&<p className="panel-ok">{notice}</p>}
       <p className="panel-links">
-        {mode!=="in"&&<button type="button" className="panel-link" onClick={()=>{setMode("in");setError("")}}>Ya tengo cuenta</button>}
+        {mode!=="in"&&<button type="button" className="panel-link" onClick={()=>{setMode("in");setError("")}}>{mode==="up"?"Entrar con correo y contraseña":"Ya tengo cuenta"}</button>}
         {mode==="in"&&<button type="button" className="panel-link" onClick={()=>{setMode("up");setError("")}}>Crear cuenta</button>}
         {mode==="in"&&<button type="button" className="panel-link" onClick={()=>{setMode("reset");setError("")}}>Olvidé mi contraseña</button>}
       </p>
@@ -365,7 +375,7 @@ function BossPanel({token}:{token:string}){
       <ul className="team-drafts">{data.businesses.map((business)=><li key={business.id} className="panel-stack">
         <div><small>{kindNames[business.kind]??business.kind} · {business.region} · {statusNames[business.status]}{business.active?" · atendiendo ahora":""}</small><b>{business.name}</b></div>
         <form className="panel-form" key={`${business.ownerId}|${business.placeId}`} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"update-business",partnerId:business.id,ownerId:field(form,"ownerId"),placeId:field(form,"placeId")})}}>
-          <label>Dueño<select name="ownerId" defaultValue={business.ownerId??""}><option value="">Sin dueño</option>{owners.map((user)=><option key={user.id} value={user.id}>{user.firstName} · {user.email}</option>)}</select></label>
+          <label>Dueño<select name="ownerId" defaultValue={business.ownerId??""}><option value="">Sin dueño</option>{owners.map((user)=><option key={user.id} value={user.id}>{user.firstName} · {user.email||"cuenta de prueba"}</option>)}</select></label>
           <label>Id de su ficha en el mapa<input name="placeId" defaultValue={business.placeId??""} maxLength={64} placeholder="opcional"/></label>
           <div className="team-actions wide">
             <button type="submit" className="team-quiet" disabled={busy}>Guardar vínculo</button>
@@ -389,7 +399,7 @@ function BossPanel({token}:{token:string}){
 
     {tab==="users"&&<article className="team-agent"><h3>Usuarios</h3>
       <ul className="team-drafts">{data.users.map((user)=><li key={user.id}>
-        <div><small>{user.country} · desde el {when(user.createdAt)}</small><b>{user.firstName}</b><span>{user.email}</span></div>
+        <div><small>{user.country} · desde el {when(user.createdAt)}</small><b>{user.firstName}</b><span>{user.email||"Cuenta de prueba, sin correo"}</span></div>
         <div className="team-actions">{user.id===data.me?<span className="team-pill ok">Tú · Boss</span>
           :<select aria-label={`Rol de ${user.firstName}`} value={user.role} disabled={busy} onChange={(event)=>act({action:"set-role",userId:user.id,role:event.target.value})}>{(Object.keys(roleNames) as Role[]).map((role)=><option key={role} value={role}>{roleNames[role]}</option>)}</select>}</div>
       </li>)}</ul>
