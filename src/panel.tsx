@@ -11,11 +11,11 @@ type Promotion={id:number;title:string;description?:string;validUntil:string;sta
 type Review={id:number;authorName:string;rating:number;comment:string;createdAt:string;status?:"published"|"hidden";placeId?:string};
 type Business={id:number;kind:string;name:string;region:string;phone?:string;whatsapp?:string;url?:string;address?:string;languages:string[];status:"draft"|"published";ownerId?:string;placeId?:string;active:boolean;activeUntil?:string;photos:Photo[];reviewPlaceId:string;promotions?:Promotion[];reviews?:Review[]};
 type Benefit={id:number;title:string;detail?:string|null;rank?:number;status?:"draft"|"published"};
-type OwnerData={businesses:Business[];benefits:Benefit[]};
+export type OwnerData={businesses:Business[];benefits:Benefit[]};
 type Account={id:string;email:string;firstName:string;country:string;role:Role;createdAt:string};
 type Application={id:number;businessName:string;contactName:string;email?:string;phone?:string;category:string;address:string;description:string;website?:string;interest:string;status:"pending"|"approved"|"rejected";createdAt:string};
 type Suggestion={id:number;role:string;message:string;status:"new"|"read"|"done";created_at:string};
-type AdminData={me:string;users:Account[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
+export type AdminData={me:string;users:Account[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
 
 const ZONE="America/Santiago",TEAM_KEY="sos-team-key",MAX_PHOTO_BYTES=5*1024*1024,MIN_PASSWORD=8;
 const kindNames:Record<string,string>={radio_taxi:"Radio taxi",venue:"Local",tour:"Tour",other:"Otro"};
@@ -30,11 +30,18 @@ const isEmail=(value:string)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const field=(form:HTMLFormElement,name:string)=>String(new FormData(form).get(name)??"").trim();
 
 async function api<T>(token:string,path:string,body?:Record<string,unknown>):Promise<T>{
+  if(demo)return (await import("./panel-demo")).demoApi(token,path,body) as Promise<T>;
   const response=await fetch(path,{method:body?"POST":"GET",headers:{Authorization:`Bearer ${token}`,...(body?{"Content-Type":"application/json"}:{})},body:body?JSON.stringify(body):undefined});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||"No pudimos completar la acción.");
   return data as T;
 }
+// /panel?demo=owner (or boss, tourist) draws that role's panel with the sample data in panel-demo.ts, to show the panel
+// to people without an account. It never reads or writes real data, and panel-demo.ts is only downloaded on those addresses.
+const demoNames:Record<Role,string>={tourist:"Emma",owner:"Carolina",boss:"Equipo"};
+const demoAccount=(role:string|null)=>role&&role in demoNames?{id:`demo-${role}`,firstName:demoNames[role as Role],role:role as Role}:null;
+const demo=demoAccount(new URLSearchParams(window.location.search).get("demo"));
+
 const message=(cause:unknown)=>cause instanceof Error&&cause.message?cause.message:"Algo salió mal. Intenta nuevamente.";
 
 // Loads `path` on mount and again after every action; `run` wraps an action with the error and reload handling.
@@ -81,19 +88,21 @@ export default function Panel(){
     return()=>{alive=false};
   },[userId]);
 
-  if(!ready)return null;
-  if(!session)return <SignIn/>;
-  const mine=profile?.id===userId?profile:null;
-  const token=session.access_token;
+  const account=demo?{token:demo.id,email:`${demo.firstName.toLowerCase()}@example.com`}:session&&{token:session.access_token,email:session.user.email};
+  if(!ready&&!demo)return null;
+  if(!account)return <SignIn/>;
+  const mine=demo??(profile?.id===userId?profile:null);
+  const token=account.token;
 
   return <main className="team">
     <header className="team-top">
       <div><p className="team-eyebrow">SOS TRAVELLERS · PANEL</p><h1>{mine?`Hola, ${mine.firstName||"bienvenido"}`:"Cargando…"}</h1></div>
-      <div className="team-actions">{mine&&<span className="team-pill ok">{roleNames[mine.role]}</span>}<button type="button" className="team-quiet" onClick={()=>void supabase.auth.signOut()}>Salir</button></div>
+      <div className="team-actions">{mine&&<span className="team-pill ok">{roleNames[mine.role]}</span>}<button type="button" className="team-quiet" onClick={()=>demo?window.location.assign("/panel"):void supabase.auth.signOut()}>Salir</button></div>
     </header>
+    {demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">dueño de local</a> · <a href="?demo=boss">boss</a> · <a href="?demo=tourist">viajero</a></p>}
     {mine?.role==="tourist"&&<section className="team-section"><article className="team-agent">
       <h3>Tu cuenta es de viajero</h3>
-      <p className="team-summary">Este panel es para dueños de local. Si tienes un negocio, <a href="/#negocios">postula en el formulario de negocios</a> y te daremos acceso con este mismo correo: {session.user.email}</p>
+      <p className="team-summary">Este panel es para dueños de local. Si tienes un negocio, <a href="/#negocios">postula en el formulario de negocios</a> y te daremos acceso con este mismo correo: {account.email}</p>
     </article></section>}
     {mine?.role==="owner"&&<OwnerPanel token={token}/>}
     {mine?.role==="boss"&&<BossPanel token={token}/>}
