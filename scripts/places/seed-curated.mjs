@@ -31,7 +31,7 @@ console.log(`${rows.length} lugares curados cargados en la Región Metropolitana
 
 // Picks outside Santiago are keyed by their OpenStreetMap id: a pick already imported keeps its row (and reviews) and gains the editorial copy.
 const dir = resolve(root, "scripts/places/curated");
-for (const file of readdirSync(dir).filter((name) => name.endsWith(".json"))) {
+for (const file of readdirSync(dir).filter((name) => /^[A-Z]{2}(-[a-z0-9-]+)?\.json$/.test(name))) {
   const region = file.slice(0, 2); // files are named <REGION>.json or <REGION>-<destination>.json
   const { locality, places: picks } = JSON.parse(readFileSync(resolve(dir, file), "utf8"));
   const { data: existing, error: readError } = await supabase.from("places").select("id, osm_id").in("osm_id", picks.map((pick) => pick.osm_id));

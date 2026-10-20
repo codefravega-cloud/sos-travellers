@@ -1,4 +1,6 @@
+import type { RegionId } from "./chile-regions";
 import type { AdminData, OwnerData } from "./panel";
+import type { Promotion } from "./traveller-home";
 
 // The data behind /panel?demo=owner|boss|tourist, kept in memory (a reload starts over), so each role's panel can be
 // shown without an account. Nothing here reaches the API or Supabase. Answers mimic api/_routes/owner.ts and admin.ts.
@@ -120,6 +122,16 @@ function ownerView(me:string):OwnerData{
 function adminView(me:string):AdminData{
   const names=new Map(store.businesses.map((business)=>[business.id,business.name]));
   return{me,...store,promotions:store.promotions.map((promotion)=>({...promotion,business:names.get(promotion.partnerId??0)??""}))};
+}
+
+// What /api/promotions would answer for the traveller demo: approved promotions of published businesses in the region.
+export async function demoPromotions(region:RegionId):Promise<Promotion[]>{
+  await new Promise((done)=>setTimeout(done,200));
+  return store.promotions.flatMap((promotion)=>{
+    const business=store.businesses.find((item)=>item.id===promotion.partnerId);
+    return promotion.status==="published"&&business?.status==="published"&&business.region===region
+      ?[{id:promotion.id,title:promotion.title,description:promotion.description,validUntil:promotion.validUntil,business:{name:business.name,address:business.address,active:business.active}}]:[];
+  });
 }
 
 // `token` is the demo account's id (demo-owner, demo-boss, demo-tourist).
