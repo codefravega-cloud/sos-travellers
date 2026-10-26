@@ -252,3 +252,19 @@ body{background:transparent}.weather-backdrop{position:fixed;inset:0;z-index:-2;
 .panel-inline{display:grid;gap:5px;font-size:.8rem;font-weight:700;max-width:280px}
 .team-drafts li:has(.panel-reason){flex-wrap:wrap}
 .team-drafts li:has(.panel-reason)>.team-actions{flex:1 1 100%}
+
+/* Services that businesses offer (services-board.tsx) */
+.th-service-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+.th-service-filters button{font:inherit;font-weight:700;font-size:.84rem;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--navy);cursor:pointer}
+.th-service-filters button[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.th-service{display:grid;gap:8px;align-content:start}
+.th-service img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px;margin-bottom:4px}
+.th-service small,.th-service h3{margin:0}
+.th-service span{margin-top:0;color:var(--muted);font-size:.84rem;font-weight:600}
+.th-price{color:var(--navy);font-size:.95rem}
+.th-service-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.th-service-actions a{font-weight:800;font-size:.84rem;padding:8px 14px;border-radius:999px;background:var(--navy);color:#fff;text-decoration:none}
+.th-service-actions a+a{background:transparent;color:var(--navy);border:1px solid var(--line)}
+.panel-kind{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.panel-thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.panel-thumbs img{width:96px;height:72px;object-fit:cover;border-radius:8px}

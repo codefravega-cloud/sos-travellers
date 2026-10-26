@@ -1,6 +1,7 @@
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-// Internal tool for the team: Spanish only, behind TEAM_PANEL_KEY (see api/_routes/team.ts).
+// Internal tool for the team: Spanish only, open only to the admin account (see api/_routes/team.ts).
+// It is reached from the "Agentes" button of /panel, which leaves the admin's session token in sessionStorage.
 type Source={name:string;url:string;ok:boolean;note?:string};
 type Run={id:number;agent:string;section:string;status:"ok"|"error";startedAt:string;finishedAt:string;summary?:string;created:number;skipped:number;details:{sources?:Source[];rejected?:{title:string;reason:string}[];duplicates?:number;metrics?:{label:string;value:number;hint?:string}[];attention?:string[]}};
 type Status="draft"|"published"|"hidden";
@@ -48,7 +49,6 @@ async function fetchPanel(secret:string):Promise<Loaded>{
 
 export default function TeamPanel(){
   const [key,setKey]=useState(readKey);
-  const [typed,setTyped]=useState("");
   const [panel,setPanel]=useState<Panel|null>(null);
   const [error,setError]=useState("");
   const [busy,setBusy]=useState<number|null>(null);
@@ -65,7 +65,7 @@ export default function TeamPanel(){
   const apply=useCallback((result:Loaded)=>{
     if(result.state==="denied"){
       try{sessionStorage.removeItem(KEY)}catch{}
-      setKey("");setPanel(null);setError("Clave incorrecta.");
+      setKey("");setPanel(null);setError("Tu sesión venció o no es la cuenta admin.");
     }else if(result.state==="failed")setError(result.message);
     else{setPanel(result.panel);setError("")}
   },[]);
@@ -78,12 +78,6 @@ export default function TeamPanel(){
   },[key,apply]);
 
   const load=async()=>apply(await fetchPanel(key));
-
-  function enter(event:FormEvent){
-    event.preventDefault();
-    if(typed.trim())setKey(typed.trim());
-    setTyped("");
-  }
 
   function leave(){
     try{sessionStorage.removeItem(KEY)}catch{}
@@ -102,14 +96,13 @@ export default function TeamPanel(){
   }
 
   if(!key)return <main className="team team-gate">
-    <form onSubmit={enter}>
+    <div>
       <p className="team-eyebrow">SOS TRAVELLERS · EQUIPO</p>
       <h1>Panel del equipo</h1>
-      <label htmlFor="team-key">Clave del panel</label>
-      <input id="team-key" type="password" autoComplete="current-password" value={typed} onChange={(event)=>setTyped(event.target.value)} autoFocus/>
-      <button type="submit">Entrar</button>
+      <p className="team-empty">Solo la cuenta admin puede entrar. Inicia sesión en el panel y usa el botón «Agentes».</p>
+      <p><a href="/panel">Ir al panel</a></p>
       {error&&<p className="team-error" role="alert">{error}</p>}
-    </form>
+    </div>
   </main>;
 
   return <main className="team">

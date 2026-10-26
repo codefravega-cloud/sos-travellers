@@ -13,6 +13,7 @@ import * as places from "./_routes/places.js";
 import * as promotions from "./_routes/promotions.js";
 import * as rates from "./_routes/rates.js";
 import * as reviews from "./_routes/reviews.js";
+import * as services from "./_routes/services.js";
 import * as suggestions from "./_routes/suggestions.js";
 import * as team from "./_routes/team.js";
 import * as travellerProfiles from "./_routes/traveller-profiles.js";
@@ -24,7 +25,7 @@ type Handler = (request: Request) => Response | Promise<Response>;
 const routes: Record<string, Partial<Record<string, Handler>>> = {
   account, admin, "agent-events": agentEvents, business, "business-applications": businessApplications,
   "cron-summary": cronSummary, events, "guide-leads": guideLeads, owner, "owner-photos": ownerPhotos,
-  partners, places, promotions, rates, reviews, suggestions, team, "traveller-profiles": travellerProfiles, weather,
+  partners, places, promotions, rates, reviews, services, suggestions, team, "traveller-profiles": travellerProfiles, weather,
 };
 
 const dispatch = (method: string) => async (request: Request) => {

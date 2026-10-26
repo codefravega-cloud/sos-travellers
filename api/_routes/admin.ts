@@ -2,11 +2,13 @@ import { requireRole } from "./_auth.js";
 import { businessColumns, kinds, PHOTO_BUCKET, photosOf, toManagedBusiness, type Photo } from "./_business.js";
 import { regionCapitals } from "./_regions.js";
 import { normalizeRut, protectRut, RutError } from "./_rut.js";
+import { serviceColumns, servicePhotos, toManagedService } from "./_services.js";
 import { getSupabase } from "./_supabase.js";
 
 const noStore = { "Cache-Control": "no-store" };
-// Mirror the checks of tbl_usuarios and tbl_niveles in 202610220001_tbl_usuarios.sql.
-const accountTypes = new Set(["cliente", "empresa", "admin"]);
+// Mirror the checks of tbl_usuarios and tbl_niveles in 202610220001_tbl_usuarios.sql. There is only one admin
+// (202610260002_single_admin.sql), so the panel can only move accounts between cliente and empresa.
+const accountTypes = new Set(["cliente", "empresa"]);
 const levels = new Set(["basico", "medio", "alto", "premium"]);
 const text = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 const id = (value: unknown) => { const number = Number(value); return Number.isSafeInteger(number) && number > 0 ? number : null; };
@@ -24,6 +26,7 @@ const deletable: Record<string, { table: string; keep: string }> = {
   application: { table: "business_applications", keep: "business_name, category, interest, status, created_at" },
   promotion: { table: "promotions", keep: "partner_id, title, status, valid_until" },
   business: { table: "partners", keep: "name, kind, region, status, owner_id, place_id" },
+  service: { table: "services", keep: "partner_id, title, category, status" },
 };
 
 // Everything the boss panel shows, in one request: the volumes are small and the panel reloads after each action.
@@ -37,8 +40,8 @@ export async function GET(request: Request) {
 
   try {
     const supabase = getSupabase();
-    const [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits] = await Promise.all([
-      supabase.from("tbl_usuarios").select("id, nombre, pais, tipo_cuenta, nivel, nivel_vence_en, estado, estado_motivo, estado_en, creado_en").order("creado_en", { ascending: false }).limit(500),
+    const [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services] = await Promise.all([
+      supabase.from("tbl_usuarios").select("id, nombre, pais, tipo_cuenta, aprobacion, aprobacion_motivo, nivel, nivel_vence_en, estado, estado_motivo, estado_en, creado_en").order("creado_en", { ascending: false }).limit(500),
       supabase.auth.admin.listUsers({ page: 1, perPage: 500 }),
       supabase.from("tbl_usuarios_privado").select("usuario_id, rut_visible"),
       supabase.from("tbl_niveles").select("codigo, nombre, orden, beneficios_cliente, beneficios_empresa, precio_mensual_clp").order("orden"),
@@ -49,8 +52,9 @@ export async function GET(request: Request) {
       supabase.from("suggestions").select("id, role, message, status, created_at").order("created_at", { ascending: false }).limit(200),
       supabase.from("promotions").select("id, partner_id, title, description, valid_until, status, created_at").order("created_at", { ascending: false }).limit(200),
       supabase.from("owner_benefits").select("id, title, detail, rank, status").order("rank", { ascending: false }).order("id"),
+      supabase.from("services").select(serviceColumns).order("updated_at", { ascending: false }).limit(300),
     ]);
-    for (const result of [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits]) if (result.error) throw result.error;
+    for (const result of [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services]) if (result.error) throw result.error;
 
     const emails = new Map(accounts.data.users.map((account) => [account.id, account.email ?? ""]));
     const rutOf = new Map((ruts.data ?? []).map((row) => [row.usuario_id, row.rut_visible]));
@@ -58,7 +62,8 @@ export async function GET(request: Request) {
     return Response.json({
       me: user.id,
       users: (profiles.data ?? []).map((row) => ({
-        id: row.id, email: emails.get(row.id) ?? "", firstName: row.nombre, country: row.pais, type: row.tipo_cuenta, level: row.nivel,
+        id: row.id, email: emails.get(row.id) ?? "", firstName: row.nombre, country: row.pais, type: row.tipo_cuenta,
+        approval: row.aprobacion, approvalReason: row.aprobacion_motivo ?? undefined, level: row.nivel,
         levelUntil: row.nivel_vence_en ?? undefined, state: row.estado, stateReason: row.estado_motivo ?? undefined, stateAt: row.estado_en ?? undefined,
         rut: rutOf.get(row.id), createdAt: row.creado_en,
       })),
@@ -78,6 +83,7 @@ export async function GET(request: Request) {
       suggestions: suggestions.data ?? [],
       promotions: (promotions.data ?? []).map((row) => ({ id: row.id, partnerId: row.partner_id, business: names.get(row.partner_id) ?? "", title: row.title, description: row.description ?? undefined, validUntil: row.valid_until, status: row.status })),
       benefits: benefits.data ?? [],
+      services: (services.data ?? []).map((row) => ({ ...toManagedService(row), business: names.get(row.partner_id) ?? "" })),
     }, { headers: noStore });
   } catch (error) {
     console.error("Unable to load admin panel", error);
@@ -123,7 +129,7 @@ export async function POST(request: Request) {
     };
 
     // Accounts. An admin never changes their own type or state, nor deletes themself, so the panel always keeps one admin.
-    if (["set-type", "set-state", "delete-user", "edit-user", "set-level", "set-rut", "remove-rut"].includes(action)) {
+    if (["set-type", "set-state", "delete-user", "edit-user", "set-level", "set-rut", "remove-rut", "approve-business", "reject-business"].includes(action)) {
       const userId = uuid(body.userId);
       const target = userId && await account(userId);
       if (!userId || !target) return fail("Usuario inválido.");
@@ -140,11 +146,28 @@ export async function POST(request: Request) {
 
       if (action === "set-type") {
         const tipo = text(body.type, 10);
+        if (tipo === "admin") return fail("Solo puede haber una cuenta admin.");
         if (!accountTypes.has(tipo)) return fail("Tipo de cuenta inválido.");
         if (self) return fail("No puedes cambiar tu propio tipo de cuenta.");
-        const { error } = await supabase.from("tbl_usuarios").update({ tipo_cuenta: tipo }).eq("id", userId);
+        // An account the admin makes empresa is approved by that same decision.
+        const { error } = await supabase.from("tbl_usuarios").update({ tipo_cuenta: tipo, ...(tipo === "empresa" ? { aprobacion: "aprobada", aprobacion_motivo: null } : {}) }).eq("id", userId);
         if (error) throw error;
         await log("cambiar_tipo", "tbl_usuarios", userId, { antes: { tipo_cuenta: target.tipo_cuenta }, despues: { tipo_cuenta: tipo } });
+        return done();
+      }
+
+      // A business account that signed up by itself: approving it publishes its business; rejecting it says why.
+      if (action === "approve-business" || action === "reject-business") {
+        if (target.tipo_cuenta !== "empresa") return fail("Esa cuenta no es de empresa.");
+        const approve = action === "approve-business", motivo = reasonOf(body);
+        if (!approve && !motivo) return fail("Escribe el motivo (al menos 5 letras). La empresa lo verá.");
+        const { error } = await supabase.from("tbl_usuarios").update({ aprobacion: approve ? "aprobada" : "rechazada", aprobacion_motivo: approve ? null : motivo }).eq("id", userId);
+        if (error) throw error;
+        if (approve) {
+          const { error: publishError } = await supabase.from("partners").update({ status: "published" }).eq("owner_id", userId);
+          if (publishError) throw publishError;
+        }
+        await log(approve ? "aprobar_empresa" : "rechazar_empresa", "tbl_usuarios", userId, { motivo });
         return done();
       }
 
@@ -238,11 +261,23 @@ export async function POST(request: Request) {
       const { data: row, error: readError } = await supabase.from(kind.table).select(kind.keep).eq("id", rowId).maybeSingle();
       if (readError) throw readError;
       if (!row) return fail("Ya no existe.");
-      // A business takes its photos and the reviews keyed to it (those of its card in `places` stay with the card).
+      if (kind.table === "services") {
+        const { data: service, error: serviceError } = await supabase.from("services").select("photos").eq("id", rowId).single();
+        if (serviceError) throw serviceError;
+        const paths = servicePhotos(service);
+        if (paths.length) {
+          const { error: photoError } = await supabase.storage.from(PHOTO_BUCKET).remove(paths);
+          if (photoError) throw photoError;
+        }
+      }
+      // A business takes its photos, its services' photos and the reviews keyed to it (those of its card in `places`
+      // stay with the card).
       if (kind.table === "partners") {
         const { data: partner, error: partnerError } = await supabase.from("partners").select("photos, place_id").eq("id", rowId).single();
         if (partnerError) throw partnerError;
-        const paths = photosOf(partner).map((photo) => photo.path);
+        const { data: ownServices, error: servicesError } = await supabase.from("services").select("photos").eq("partner_id", rowId);
+        if (servicesError) throw servicesError;
+        const paths = [...photosOf(partner).map((photo) => photo.path), ...(ownServices ?? []).flatMap(servicePhotos)];
         if (paths.length) {
           const { error: photoError } = await supabase.storage.from(PHOTO_BUCKET).remove(paths);
           if (photoError) throw photoError;
@@ -314,6 +349,17 @@ export async function POST(request: Request) {
       const photos: Photo[] = photosOf(partner).map((photo) => (photo.path === path ? { path, status } : photo));
       const { error } = await supabase.from("partners").update({ photos }).eq("id", partnerId);
       if (error) throw error;
+      return done();
+    }
+
+    // Publishing a service, or rejecting it with a note the business sees. Hiding a published one is a rejection too.
+    if (action === "service-status") {
+      const rowId = id(body.id), status = text(body.status, 10), note = text(body.note, 300);
+      if (!rowId || (status !== "published" && status !== "rejected")) return fail("Servicio o estado inválido.");
+      if (status === "rejected" && note.length < 5) return fail("Escribe el motivo (al menos 5 letras). La empresa lo verá.");
+      const { data, error } = await supabase.from("services").update({ status, review_note: status === "rejected" ? note : null }).eq("id", rowId).select("id");
+      if (error) throw error;
+      if (!data?.length) return fail("Ese servicio ya no existe.");
       return done();
     }
 

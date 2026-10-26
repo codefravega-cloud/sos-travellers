@@ -3,6 +3,7 @@ import qrcode from "qrcode-generator";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase-browser";
 import TravellerHome, { type Promotion as TravellerPromotion } from "./traveller-home";
+import { categoryNames, priceLabel, serviceCategories, type Service } from "./services-board";
 import type { RegionId } from "./chile-regions";
 
 // Accounts panel for business owners and the SOS Travellers team. Spanish only, like /equipo.
@@ -11,20 +12,23 @@ type Role="tourist"|"owner"|"boss";
 type Photo={path:string;status:"pending"|"published"|"rejected";url:string};
 type Promotion={id:number;title:string;description?:string;validUntil:string;status:"pending"|"published"|"rejected";business?:string;partnerId?:number};
 type Review={id:number;authorName:string;rating:number;comment:string;createdAt:string;status?:"published"|"hidden";placeId?:string};
-type Business={id:number;kind:string;name:string;region:string;phone?:string;whatsapp?:string;url?:string;address?:string;languages:string[];status:"draft"|"published";ownerId?:string;placeId?:string;active:boolean;activeUntil?:string;photos:Photo[];reviewPlaceId:string;promotions?:Promotion[];reviews?:Review[]};
+// A service as its business and the admin see it (api/_routes/_services.ts toManagedService).
+export type ManagedService=Omit<Service,"photos"|"business">&{partnerId:number;status:"pending"|"published"|"rejected";reviewNote?:string;photos:{path:string;url:string}[];updatedAt:string;business?:string};
+type Business={id:number;kind:string;name:string;region:string;phone?:string;whatsapp?:string;url?:string;address?:string;languages:string[];status:"draft"|"published";ownerId?:string;placeId?:string;active:boolean;activeUntil?:string;photos:Photo[];reviewPlaceId:string;promotions?:Promotion[];reviews?:Review[];services?:ManagedService[]};
+type Approval="pendiente"|"aprobada"|"rechazada";
 type Benefit={id:number;title:string;detail?:string|null;rank?:number;status?:"draft"|"published"};
-export type OwnerData={businesses:Business[];benefits:Benefit[]};
+export type OwnerData={businesses:Business[];benefits:Benefit[];account?:{approval:Approval;reason?:string}};
 // Account types, levels and states mirror tbl_usuarios and tbl_niveles (202610220001_tbl_usuarios.sql).
 type AccountType="cliente"|"empresa"|"admin";
 type AccountState="activo"|"bloqueado"|"inactivo";
 type LevelCode="basico"|"medio"|"alto"|"premium";
-type Account={id:string;email:string;firstName:string;country:string;type:AccountType;level:LevelCode;levelUntil?:string;state:AccountState;stateReason?:string;stateAt?:string;rut?:string;createdAt:string};
+type Account={id:string;email:string;firstName:string;country:string;type:AccountType;approval:Approval;approvalReason?:string;level:LevelCode;levelUntil?:string;state:AccountState;stateReason?:string;stateAt?:string;rut?:string;createdAt:string};
 type Level={code:LevelCode;name:string;order:number;clientBenefits:string[];businessBenefits:string[];monthlyPrice:number|null};
 type AuditEntry={id:number;actorId?:string;origin:"base"|"admin";action:string;table:string;recordId?:string;before?:Record<string,unknown>;after?:Record<string,unknown>;reason?:string;createdAt:string};
 export type PlaceRow={id:string;name:string;category:string;region:string;locality:string;address?:string|null;rating?:number|null;source:string;status:"published"|"hidden"};
 type Application={id:number;businessName:string;contactName:string;email?:string;phone?:string;category:string;address:string;description:string;website?:string;interest:string;status:"pending"|"approved"|"rejected";createdAt:string};
 type Suggestion={id:number;role:string;message:string;status:"new"|"read"|"done";created_at:string};
-export type AdminData={me:string;users:Account[];levels:Level[];audit:AuditEntry[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
+export type AdminData={me:string;users:Account[];levels:Level[];audit:AuditEntry[];services:ManagedService[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
 
 const ZONE="America/Santiago",TEAM_KEY="sos-team-key",MAX_PHOTO_BYTES=5*1024*1024,MIN_PASSWORD=8;
 const kindNames:Record<string,string>={radio_taxi:"Radio taxi",venue:"Local",tour:"Tour",other:"Otro"};
@@ -53,6 +57,7 @@ async function api<T>(token:string,path:string,body?:Record<string,unknown>):Pro
 const demoPeople:Record<Role,{firstName:string;country:string}>={tourist:{firstName:"Emma",country:"Francia"},owner:{firstName:"Carolina",country:"Chile"},boss:{firstName:"Equipo",country:"Chile"}};
 const demoAccount=(role:string|null)=>role&&role in demoPeople?{id:`demo-${role}`,...demoPeople[role as Role],role:role as Role,state:"activo" as AccountState,stateReason:""}:null;
 const demoPromotions=async(region:RegionId):Promise<TravellerPromotion[]>=>(await import("./panel-demo")).demoPromotions(region);
+const demoServices=async(region:RegionId):Promise<Service[]>=>(await import("./panel-demo")).demoServices(region);
 const demo=demoAccount(new URLSearchParams(window.location.search).get("demo"));
 // Each demo asks for its own password, shared with the team in a PDF. Only SHA-256 hashes live here because this
 // repository is public. The demo holds sample data only, so this keeps casual visitors out; it does not protect data.
@@ -138,7 +143,7 @@ export default function Panel(){
   if(mine?.role==="tourist")return <TravellerHome name={mine.firstName||"viajero"} country={mine.country} onSignOut={signOut}
     banner={(demoBanner||trialNote)&&<div className="th-notes">{demoBanner}{trialNote}</div>}
     footer={<div className="team th-suggest"><SuggestionBox token={token}/></div>}
-    loadPromotions={demo?demoPromotions:undefined}/>;
+    loadPromotions={demo?demoPromotions:undefined} loadServices={demo?demoServices:undefined}/>;
 
   return <main className="team">
     <header className="team-top">
@@ -175,10 +180,12 @@ function DemoGate({role,onOpen}:{role:Role;onOpen:()=>void}){
   </main>;
 }
 
-// For now an account is created with a name and a country only, as a Supabase anonymous user, so the team can try
-// the panel without email or password; it lives in this browser. Accounts with a password still sign in with "in".
+// A traveller account is created with a name and a country only, as a Supabase anonymous user that lives in this
+// browser. A business account needs email and password, since it comes back to manage its services; it starts
+// pending until the admin approves it (202610260003_services.sql). Accounts with a password sign in with "in".
 function SignIn(){
   const [mode,setMode]=useState<"in"|"up"|"reset"|"code">("up");
+  const [kind,setKind]=useState<"viajero"|"empresa">("viajero");
   const [email,setEmail]=useState("");
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
@@ -192,6 +199,20 @@ function SignIn(){
       const firstName=field(form,"firstName"),country=field(form,"country");
       if(firstName.length<2||country.length<2)return setError("Escribe tu nombre y tu país.");
       if(!new FormData(form).get("consent"))return setError("Debes aceptar para crear la cuenta.");
+      if(kind==="empresa"){
+        const businessName=field(form,"businessName");
+        if(businessName.length<2)return setError("Escribe el nombre de tu empresa.");
+        if(!isEmail(email.trim()))return setError("Escribe un correo válido.");
+        if(password.length<MIN_PASSWORD)return setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.`);
+        setBusy(true);
+        try{
+          const {data,error:failure}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{first_name:firstName,country,preferred_language:"es",preferred_currency:"CLP",tipo_cuenta:"empresa",business_name:businessName,business_kind:field(form,"businessKind"),business_region:field(form,"businessRegion")}}});
+          if(failure)setError(failure.status===422?"Ese correo ya tiene una cuenta. Usa «Entrar con correo y contraseña».":"No pudimos crear la cuenta. Intenta nuevamente.");
+          // With email confirmation on there is no session until the link in the email is opened.
+          else if(!data.session){setMode("in");setNotice("Te enviamos un correo para confirmar tu cuenta. Después entra con tu correo y contraseña.")}
+        }finally{setBusy(false)}
+        return;
+      }
       setBusy(true);
       try{
         // The profile row is created from this metadata by a database trigger (see the app_users migration).
@@ -225,13 +246,22 @@ function SignIn(){
     <form onSubmit={submit} key={mode}>
       <p className="team-eyebrow">SOS TRAVELLERS · PANEL</p>
       <h1>{titles[mode]}</h1>
-      {mode==="up"&&<><label htmlFor="panel-name">Nombre</label><input id="panel-name" name="firstName" autoComplete="given-name" maxLength={60}/>
+      {mode==="up"&&<div className="panel-kind" role="radiogroup" aria-label="Tipo de cuenta">
+        <button type="button" role="radio" aria-checked={kind==="viajero"} className={kind==="viajero"?"":"team-quiet"} onClick={()=>setKind("viajero")}>Soy viajero</button>
+        <button type="button" role="radio" aria-checked={kind==="empresa"} className={kind==="empresa"?"":"team-quiet"} onClick={()=>setKind("empresa")}>Ofrezco servicios</button>
+      </div>}
+      {mode==="up"&&<><label htmlFor="panel-name">{kind==="empresa"?"Tu nombre":"Nombre"}</label><input id="panel-name" name="firstName" autoComplete="given-name" maxLength={60}/>
         <label htmlFor="panel-country">País</label><input id="panel-country" name="country" autoComplete="country-name" maxLength={80}/></>}
-      {mode!=="up"&&<><label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/></>}
+      {mode==="up"&&kind==="empresa"&&<>
+        <label htmlFor="panel-business">Nombre de la empresa</label><input id="panel-business" name="businessName" autoComplete="organization" maxLength={100}/>
+        <label htmlFor="panel-business-kind">Rubro</label><select id="panel-business-kind" name="businessKind" defaultValue="tour">{Object.entries(kindNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
+        <label htmlFor="panel-business-region">Región</label><select id="panel-business-region" name="businessRegion" defaultValue="RM">{regions.map((region)=><option key={region}>{region}</option>)}</select>
+      </>}
+      {(mode!=="up"||kind==="empresa")&&<><label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/></>}
       {mode==="code"&&<><label htmlFor="panel-code">Código del correo</label><input id="panel-code" name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={10}/></>}
-      {(mode==="in"||mode==="code")&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
-      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> Acepto que SOS Travellers guarde mi nombre y mi país para administrar mi cuenta.</label>}
-      {mode==="up"&&<p className="team-empty">Sin correo ni contraseña: tu cuenta queda guardada en este navegador.</p>}
+      {(mode==="in"||mode==="code"||(mode==="up"&&kind==="empresa"))&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
+      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> {kind==="empresa"?"Acepto que SOS Travellers guarde mis datos y los de mi empresa para administrar la cuenta y publicar mis servicios.":"Acepto que SOS Travellers guarde mi nombre y mi país para administrar mi cuenta."}</label>}
+      {mode==="up"&&<p className="team-empty">{kind==="empresa"?"Tu empresa queda en revisión hasta que el equipo de SOS Travellers la apruebe. Mientras tanto puedes preparar tus servicios.":"Sin correo ni contraseña: tu cuenta queda guardada en este navegador."}</p>}
       <button type="submit" disabled={busy}>{actions[mode]}</button>
       {error&&<p className="team-error" role="alert">{error}</p>}
       {notice&&<p className="panel-ok">{notice}</p>}
@@ -269,6 +299,8 @@ function OwnerPanel({token}:{token:string}){
   return <>
     {error&&<p className="team-error" role="alert">{error}</p>}
     {!data&&!error&&<p className="team-empty">Cargando…</p>}
+    {data?.account?.approval==="pendiente"&&<p className="panel-ok" style={{marginBottom:16}}>Tu empresa está en revisión. Puedes preparar tus servicios: se publicarán cuando el equipo de SOS Travellers apruebe tu empresa y cada servicio.</p>}
+    {data?.account?.approval==="rechazada"&&<p className="team-error" role="alert">Tu solicitud como empresa fue rechazada{data.account.reason?`: ${data.account.reason}`:"."} Si crees que es un error, escríbenos en Sugerencias.</p>}
     {data&&!data.businesses.length&&<section className="team-section"><article className="team-agent"><h3>Todavía no tienes un negocio asociado</h3><p className="team-summary">El equipo de SOS Travellers debe vincular tu local a esta cuenta. Si ya postulaste, te avisaremos cuando esté listo.</p></article></section>}
     {data?.businesses.map((business)=><BusinessCard key={business.id} business={business} token={token} busy={busy} run={run}/>)}
     {data&&data.benefits.length>0&&<section className="team-section"><div className="team-section-head"><h2>Beneficios SOS</h2><p>Lo que recibes por ser parte de SOS Travellers.</p></div>
@@ -350,6 +382,8 @@ function BusinessCard({business,token,busy,run}:{business:Business;token:string;
         <div className="team-actions wide"><button type="submit" disabled={busy}>Agregar promoción</button><span className="team-empty">Se publica cuando el equipo la aprueba. Se canjea en tu local.</span></div>
       </form>
 
+      <ServicesBlock business={business} token={token} busy={busy} run={run}/>
+
       <h4>Opiniones con NFC</h4>
       <div className="panel-nfc">
         <img src={qr} alt={`Código QR del enlace de opiniones de ${business.name}`} width={132} height={132}/>
@@ -364,7 +398,69 @@ function BusinessCard({business,token,busy,run}:{business:Business;token:string;
   </section>;
 }
 
-type BossTab="approvals"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"levels"|"places"|"benefits"|"audit";
+// The services of one business, as its owner manages them. Saving a service or adding a photo sends it back to the
+// admin for approval (api/_routes/owner.ts, save-service).
+function ServicesBlock({business,token,busy,run}:{business:Business;token:string;busy:boolean;run:(action:()=>Promise<unknown>)=>Promise<void>}){
+  const services=business.services??[];
+  const post=(body:Record<string,unknown>)=>api(token,"/api/owner",{partnerId:business.id,...body});
+  const photo=(body:Record<string,unknown>)=>api<{path:string;token:string}>(token,"/api/owner-photos",{partnerId:business.id,...body});
+  const [fileError,setFileError]=useState("");
+  function upload(serviceId:number,file:File|undefined){
+    setFileError("");
+    if(!file)return;
+    if(file.size>MAX_PHOTO_BYTES)return setFileError("La foto puede pesar hasta 5 MB.");
+    void run(async()=>{
+      const ticket=await photo({action:"request",serviceId,contentType:file.type});
+      const {error}=await supabase.storage.from("business-photos").uploadToSignedUrl(ticket.path,ticket.token,file,{contentType:file.type});
+      if(error)throw new Error("La foto no se pudo subir. Intenta nuevamente.");
+      await photo({action:"confirm",serviceId,path:ticket.path});
+    });
+  }
+  return <>
+    <h4>Servicios que ofreces ({services.length} de 10)</h4>
+    <p className="team-empty">Los viajeros los ven en su región. Cada servicio nuevo o editado lo revisa el equipo antes de publicarse.</p>
+    {!services.length&&<p className="team-empty">Todavía no agregas servicios.</p>}
+    <ul className="team-drafts">{services.map((service)=><li key={service.id} className="panel-stack">
+      <div><small>{categoryNames.es[service.category]} · {statusNames[service.status]} · {priceLabel(service,"es")}{service.duration?` · ${service.duration}`:""}</small><b>{service.title}</b><p>{service.description}</p>
+        {service.status==="rejected"&&service.reviewNote&&<p className="panel-reason-note">Motivo del equipo: {service.reviewNote}</p>}</div>
+      <details className="panel-details"><summary>Editar, fotos o quitar</summary>
+        <ServiceForm service={service} busy={busy} onSave={(fields)=>void run(()=>post({action:"save-service",serviceId:service.id,...fields}))}/>
+        <ul className="panel-photos">{service.photos.map((item)=><li key={item.path}>
+          <img src={item.url} alt={`Foto de ${service.title}`} loading="lazy"/>
+          <button type="button" className="team-quiet" disabled={busy} onClick={()=>void run(()=>photo({action:"remove",serviceId:service.id,path:item.path}))}>Quitar</button>
+        </li>)}</ul>
+        {service.photos.length<3&&<label className="panel-file">Subir foto del servicio ({service.photos.length} de 3; JPG, PNG o WebP, hasta 5 MB)<input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={(event)=>{upload(service.id,event.target.files?.[0]);event.target.value=""}}/></label>}
+        {fileError&&<p className="team-error" role="alert">{fileError}</p>}
+        <div className="team-actions"><button type="button" className="team-quiet" disabled={busy} onClick={()=>void run(()=>post({action:"remove-service",serviceId:service.id}))}>Quitar servicio</button></div>
+      </details>
+    </li>)}</ul>
+    {services.length<10&&<details className="panel-details panel-gap"><summary>Agregar un servicio</summary>
+      <ServiceForm busy={busy} onSave={(fields)=>void run(()=>post({action:"save-service",...fields}))}/>
+      <p className="team-empty">Las fotos se agregan después de guardar el servicio.</p>
+    </details>}
+  </>;
+}
+
+function ServiceForm({service,busy,onSave}:{service?:ManagedService;busy:boolean;onSave:(fields:Record<string,unknown>)=>void}){
+  return <form className="panel-form" key={service?.updatedAt??"new"} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;
+    onSave({category:field(form,"category"),title:field(form,"title"),description:field(form,"description"),priceClp:field(form,"priceClp"),priceFrom:new FormData(form).get("priceFrom")==="on",
+      duration:field(form,"duration"),languages:field(form,"languages").split(/[\s,]+/).filter(Boolean),whatsapp:field(form,"whatsapp"),phone:field(form,"phone"),bookingUrl:field(form,"bookingUrl")});
+    if(!service)form.reset()}}>
+    <label>Tipo<select name="category" defaultValue={service?.category??"tour"}>{serviceCategories.map((id)=><option key={id} value={id}>{categoryNames.es[id]}</option>)}</select></label>
+    <label>Nombre del servicio<input name="title" defaultValue={service?.title} minLength={3} maxLength={80} required placeholder="Tour por Valparaíso"/></label>
+    <label className="wide">Descripción<textarea name="description" defaultValue={service?.description} rows={3} minLength={10} maxLength={600} required placeholder="Qué incluye, punto de encuentro, para quién es."/></label>
+    <label>Precio en pesos (vacío = a convenir)<input name="priceClp" inputMode="numeric" defaultValue={service?.priceClp??""} placeholder="25000"/></label>
+    <label className="panel-check"><input type="checkbox" name="priceFrom" defaultChecked={service?.priceFrom}/> Es un precio «desde»</label>
+    <label>Duración<input name="duration" defaultValue={service?.duration} maxLength={40} placeholder="3 horas"/></label>
+    <label>Idiomas<input name="languages" defaultValue={service?.languages.join(", ")} placeholder="ES, EN, PT"/></label>
+    <label>WhatsApp<input name="whatsapp" defaultValue={service?.whatsapp} maxLength={30} placeholder="+56 9 1234 5678"/></label>
+    <label>Teléfono<input name="phone" defaultValue={service?.phone} maxLength={30} autoComplete="tel"/></label>
+    <label className="wide">Enlace para reservar (opcional)<input name="bookingUrl" defaultValue={service?.bookingUrl} maxLength={300} placeholder="https://"/></label>
+    <div className="team-actions wide"><button type="submit" disabled={busy}>{service?"Guardar y enviar a revisión":"Agregar y enviar a revisión"}</button></div>
+  </form>;
+}
+
+type BossTab="approvals"|"services"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"levels"|"places"|"benefits"|"audit";
 type Act=(body:Record<string,unknown>)=>void;
 
 const levelCodes:LevelCode[]=["basico","medio","alto","premium"];
@@ -397,9 +493,12 @@ function BossPanel({token}:{token:string}){
   const remove=(kind:string,id:number)=>(reason:string)=>act({action:"delete",kind,id,reason});
   const pendingPhotos=data.businesses.flatMap((business)=>business.photos.filter((item)=>item.status==="pending").map((item)=>({business,item})));
   const pendingPromotions=data.promotions.filter((promotion)=>promotion.status==="pending");
+  const pendingCompanies=data.users.filter((user)=>user.type==="empresa"&&user.approval==="pendiente");
+  const pendingServices=data.services.filter((service)=>service.status==="pending");
   const owners=data.users.filter((user)=>user.type!=="admin");
   const tabs:[BossTab,string,number|null][]=[
-    ["approvals","Aprobaciones",pendingPhotos.length+pendingPromotions.length],
+    ["approvals","Aprobaciones",pendingPhotos.length+pendingPromotions.length+pendingCompanies.length+pendingServices.length],
+    ["services","Servicios",data.services.length],
     ["reviews","Opiniones",data.reviews.length],
     ["suggestions","Sugerencias",data.suggestions.filter((item)=>item.status==="new").length],
     ["businesses","Negocios",data.businesses.length],
@@ -421,7 +520,22 @@ function BossPanel({token}:{token:string}){
     {error&&<p className="team-error" role="alert">{error}</p>}
 
     {tab==="approvals"&&<article className="team-agent">
-      <h3>Promociones pendientes</h3>
+      <h3>Empresas por aprobar</h3>
+      {!pendingCompanies.length&&<p className="team-empty">Nada por aprobar.</p>}
+      <ul className="team-drafts">{pendingCompanies.map((user)=><li key={user.id}>
+        <div><small>{user.country} · desde el {when(user.createdAt)}</small><b>{data.businesses.filter((business)=>business.ownerId===user.id).map((business)=>`${business.name} (${kindNames[business.kind]??business.kind}, ${business.region})`).join(" · ")||"Sin negocio"}</b>
+          <span>{user.firstName} · {user.email||"sin correo"}</span></div>
+        <div className="team-actions"><button type="button" disabled={busy} onClick={()=>act({action:"approve-business",userId:user.id})}>Aprobar empresa</button>
+          <ReasonAction label="Rechazar" confirm="Rechazar empresa" placeholder="Motivo (la empresa lo verá)" busy={busy} onConfirm={(reason)=>act({action:"reject-business",userId:user.id,reason})}/></div>
+      </li>)}</ul>
+      <h4>Servicios por aprobar</h4>
+      {!pendingServices.length&&<p className="team-empty">Nada por aprobar.</p>}
+      <ul className="team-drafts">{pendingServices.map((service)=><li key={service.id} className="panel-stack">
+        <ServiceSummary service={service}/>
+        <div className="team-actions"><button type="button" disabled={busy} onClick={()=>act({action:"service-status",id:service.id,status:"published"})}>Aprobar y publicar</button>
+          <ReasonAction label="Rechazar" confirm="Rechazar servicio" placeholder="Qué debe corregir (la empresa lo verá)" busy={busy} onConfirm={(note)=>act({action:"service-status",id:service.id,status:"rejected",note})}/></div>
+      </li>)}</ul>
+      <h4>Promociones pendientes</h4>
       {!pendingPromotions.length&&<p className="team-empty">Nada por aprobar.</p>}
       <ul className="team-drafts">{pendingPromotions.map((promotion)=><li key={promotion.id}>
         <div><small>{promotion.business} · hasta el {day(promotion.validUntil)}</small><b>{promotion.title}</b>{promotion.description&&<p>{promotion.description}</p>}</div>
@@ -439,6 +553,20 @@ function BossPanel({token}:{token:string}){
       <ul className="team-drafts">{data.promotions.map((promotion)=><li key={promotion.id}>
         <div><small>{promotion.business} · {statusNames[promotion.status]} · hasta el {day(promotion.validUntil)}</small><b>{promotion.title}</b></div>
         <div className="team-actions"><DeleteAction what="la promoción" busy={busy} onConfirm={remove("promotion",promotion.id)}/></div>
+      </li>)}</ul>
+    </article>}
+
+    {tab==="services"&&<article className="team-agent"><h3>Servicios de las empresas</h3>
+      <p className="team-empty">Lo que ven los viajeros. Ocultar un servicio lo devuelve a la empresa con tu motivo.</p>
+      {!data.services.length&&<p className="team-empty">Todavía no hay servicios.</p>}
+      <ul className="team-drafts">{data.services.map((service)=><li key={service.id} className="panel-stack">
+        <ServiceSummary service={service}/>
+        <div className="team-actions">
+          {service.status==="published"
+            ?<ReasonAction label="Ocultar" confirm="Ocultar servicio" placeholder="Motivo (la empresa lo verá)" busy={busy} onConfirm={(note)=>act({action:"service-status",id:service.id,status:"rejected",note})}/>
+            :<button type="button" disabled={busy} onClick={()=>act({action:"service-status",id:service.id,status:"published"})}>Publicar</button>}
+          <DeleteAction what="el servicio" busy={busy} onConfirm={remove("service",service.id)}/>
+        </div>
       </li>)}</ul>
     </article>}
 
@@ -515,6 +643,17 @@ function BossPanel({token}:{token:string}){
   </section>;
 }
 
+// A service as the admin reviews it: everything the traveller will see, plus its status.
+function ServiceSummary({service}:{service:ManagedService}){
+  return <div>
+    <small>{service.business} · {categoryNames.es[service.category]} · {statusNames[service.status]} · {priceLabel(service,"es")}{service.duration?` · ${service.duration}`:""}</small>
+    <b>{service.title}</b><p>{service.description}</p>
+    <span>{[service.languages.length?`Idiomas: ${service.languages.join(", ")}`:"",service.whatsapp?`WhatsApp ${service.whatsapp}`:"",service.phone?`Tel. ${service.phone}`:"",service.bookingUrl??""].filter(Boolean).join(" · ")}</span>
+    {service.status==="rejected"&&service.reviewNote&&<p className="panel-reason-note">Motivo: {service.reviewNote}</p>}
+    {service.photos.length>0&&<div className="panel-thumbs">{service.photos.map((item)=><img key={item.path} src={item.url} alt={`Foto de ${service.title}`} loading="lazy"/>)}</div>}
+  </div>;
+}
+
 function UsersTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){
   const [query,setQuery]=useState("");
   const [type,setType]=useState("");
@@ -536,6 +675,7 @@ function UsersTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){
       return <li key={user.id} className="panel-stack">
         <div><small>{typeNames[user.type]} · nivel {levelName.get(user.level)??user.level}{user.levelUntil?` hasta el ${day(isoDay(user.levelUntil))}`:""} · {user.country} · desde el {when(user.createdAt)}</small>
           <b>{user.firstName}{self?" (tú)":""}</b><span>{user.email||"Cuenta de prueba, sin correo"}{user.rut?` · RUT ${user.rut}`:""}</span>
+          {user.type==="empresa"&&user.approval!=="aprobada"&&<p className="panel-reason-note">{user.approval==="pendiente"?"Empresa en revisión: apruébala en Aprobaciones.":`Empresa rechazada${user.approvalReason?` · Motivo: ${user.approvalReason}`:""}`}</p>}
           {user.state!=="activo"&&<p className="panel-reason-note">{stateNames[user.state]}{user.stateAt?` el ${when(user.stateAt)}`:""} · Motivo: {user.stateReason}</p>}</div>
         <details className="panel-details"><summary>Administrar</summary>
           <form className="panel-form" key={`profile|${user.firstName}|${user.country}`} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"edit-user",userId:user.id,firstName:field(form,"firstName"),country:field(form,"country")})}}>
@@ -553,8 +693,9 @@ function UsersTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){
             <div className="team-actions"><button type="submit" className="team-quiet" disabled={busy}>{user.rut?"Cambiar RUT":"Guardar RUT"}</button>
               {user.rut&&<button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"remove-rut",userId:user.id})}>Quitar RUT</button>}</div>
           </form>
-          {self?<p className="team-empty">Tu propio tipo de cuenta y estado los cambia otro admin.</p>:<>
-            <label className="panel-inline">Tipo de cuenta<select value={user.type} disabled={busy} onChange={(event)=>act({action:"set-type",userId:user.id,type:event.target.value})}>{Object.entries(typeNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
+          {self?<p className="team-empty">Esta es la única cuenta admin: su tipo y su estado no se pueden cambiar desde el panel.</p>:<>
+            {/* Only one admin account exists, so another account can only be a client or a business. */}
+            <label className="panel-inline">Tipo de cuenta<select value={user.type} disabled={busy} onChange={(event)=>act({action:"set-type",userId:user.id,type:event.target.value})}><option value="cliente">Cliente</option><option value="empresa">Empresa</option></select></label>
             <div className="team-actions panel-gap">
               {user.state==="activo"?<>
                 <ReasonAction label="Bloquear" confirm="Bloquear cuenta" placeholder="Motivo (el usuario lo verá)" busy={busy} onConfirm={(reason)=>act({action:"set-state",userId:user.id,state:"bloqueado",reason})}/>

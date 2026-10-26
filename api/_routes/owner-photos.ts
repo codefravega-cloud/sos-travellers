@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { requireRole } from "./_auth.js";
 import { MAX_PHOTOS, PHOTO_BUCKET, photosOf, photoUrl, type Photo } from "./_business.js";
+import { MAX_SERVICE_PHOTOS, servicePhotos } from "./_services.js";
 import { getSupabase } from "./_supabase.js";
 
 const noStore = { "Cache-Control": "no-store" };
@@ -22,7 +23,9 @@ export async function POST(request: Request) {
     const { data: partner, error: ownError } = await supabase.from("partners").select("id, photos").eq("id", partnerId).eq("owner_id", user.id).maybeSingle();
     if (ownError) throw ownError;
     if (!partner) return fail("Ese negocio no pertenece a tu cuenta.", 403);
-    const photos = photosOf(partner), bucket = supabase.storage.from(PHOTO_BUCKET);
+    const bucket = supabase.storage.from(PHOTO_BUCKET);
+    if (body.serviceId !== undefined) return servicePhoto(body, partnerId);
+    const photos = photosOf(partner);
 
     if (action === "request") {
       const extension = extensions[String(body.contentType ?? "")];
@@ -62,4 +65,49 @@ export async function POST(request: Request) {
     console.error("Unable to manage business photo", error);
     return fail("No pudimos guardar la foto. Intenta nuevamente.", 503);
   }
+}
+
+// Photos of one service of the business, same three steps. They have no status of their own: adding one sends the
+// service back to pending, so the admin sees it before travellers do.
+async function servicePhoto(body: Record<string, unknown>, partnerId: number) {
+  const action = String(body.action ?? ""), serviceId = Number(body.serviceId);
+  if (!Number.isSafeInteger(serviceId) || serviceId < 1) return fail("Servicio inválido.");
+  const supabase = getSupabase(), bucket = supabase.storage.from(PHOTO_BUCKET);
+  const { data: service, error: readError } = await supabase.from("services").select("id, photos").eq("id", serviceId).eq("partner_id", partnerId).maybeSingle();
+  if (readError) throw readError;
+  if (!service) return fail("Ese servicio no pertenece a tu negocio.", 403);
+  const photos = servicePhotos(service), folder = `services/${serviceId}`;
+
+  if (action === "request") {
+    const extension = extensions[String(body.contentType ?? "")];
+    if (!extension) return fail("Sube una imagen JPG, PNG o WebP.");
+    if (photos.length >= MAX_SERVICE_PHOTOS) return fail(`Cada servicio puede tener hasta ${MAX_SERVICE_PHOTOS} fotos.`);
+    const path = `${folder}/${randomUUID()}.${extension}`;
+    const { data, error } = await bucket.createSignedUploadUrl(path);
+    if (error) throw error;
+    return Response.json({ path, token: data.token }, { headers: noStore });
+  }
+
+  const path = String(body.path ?? "");
+  if (!new RegExp(`^${folder}/[0-9a-f-]{36}\\.(jpg|png|webp)$`).test(path)) return fail("Foto inválida.");
+
+  if (action === "confirm") {
+    if (photos.includes(path)) return Response.json({ ok: true }, { headers: noStore });
+    if (photos.length >= MAX_SERVICE_PHOTOS) return fail(`Cada servicio puede tener hasta ${MAX_SERVICE_PHOTOS} fotos.`);
+    const { data: found, error: listError } = await bucket.list(folder, { search: path.split("/")[2] });
+    if (listError) throw listError;
+    if (!found?.length) return fail("La foto no terminó de subirse. Intenta nuevamente.");
+    const { error } = await supabase.from("services").update({ photos: [...photos, path], status: "pending", review_note: null, updated_at: new Date().toISOString() }).eq("id", serviceId);
+    if (error) throw error;
+    return Response.json({ ok: true, photo: { path, url: photoUrl(path) } }, { status: 201, headers: noStore });
+  }
+
+  if (action === "remove") {
+    const { error } = await supabase.from("services").update({ photos: photos.filter((item) => item !== path) }).eq("id", serviceId);
+    if (error) throw error;
+    await bucket.remove([path]);
+    return Response.json({ ok: true }, { headers: noStore });
+  }
+
+  return fail("Acción inválida.");
 }
