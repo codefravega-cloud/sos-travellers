@@ -1,10 +1,10 @@
 import type { RegionId } from "./chile-regions";
-import type { AdminData, OwnerData } from "./panel";
+import type { AdminData, OwnerData, PlaceRow } from "./panel";
 import type { Promotion } from "./traveller-home";
 
 // The data behind /panel?demo=owner|boss|tourist, kept in memory (a reload starts over), so each role's panel can be
 // shown without an account. Nothing here reaches the API or Supabase. Answers mimic api/_routes/owner.ts and admin.ts.
-type Store=Omit<AdminData,"me">;
+type Store=Omit<AdminData,"me">&{places:PlaceRow[]};
 type Body=Record<string,unknown>;
 
 const HOUR=3600000,now=Date.now();
@@ -14,12 +14,29 @@ let lastId=900;
 
 const store:Store={
   users:[
-    {id:"demo-tourist-3",email:"sofia@example.com",firstName:"Sofía",country:"Argentina",role:"tourist",createdAt:ago(5)},
-    {id:"demo-tourist-2",email:"lucas@example.com",firstName:"Lucas",country:"Brasil",role:"tourist",createdAt:ago(30)},
-    {id:"demo-tourist",email:"emma@example.com",firstName:"Emma",country:"Francia",role:"tourist",createdAt:ago(72)},
-    {id:"demo-owner-2",email:"jorge@example.com",firstName:"Jorge",country:"Chile",role:"owner",createdAt:ago(216)},
-    {id:"demo-owner",email:"carolina@example.com",firstName:"Carolina",country:"Chile",role:"owner",createdAt:ago(288)},
-    {id:"demo-boss",email:"equipo@example.com",firstName:"Equipo",country:"Chile",role:"boss",createdAt:ago(960)},
+    {id:"demo-tourist-3",email:"sofia@example.com",firstName:"Sofía",country:"Argentina",type:"cliente",level:"basico",state:"bloqueado",stateReason:"Publicó opiniones con publicidad de otro sitio.",stateAt:ago(2),createdAt:ago(5)},
+    {id:"demo-tourist-2",email:"lucas@example.com",firstName:"Lucas",country:"Brasil",type:"cliente",level:"medio",levelUntil:new Date(now+30*24*HOUR).toISOString(),state:"activo",createdAt:ago(30)},
+    {id:"demo-tourist",email:"emma@example.com",firstName:"Emma",country:"Francia",type:"cliente",level:"basico",state:"activo",createdAt:ago(72)},
+    {id:"demo-owner-2",email:"jorge@example.com",firstName:"Jorge",country:"Chile",type:"empresa",level:"alto",state:"activo",rut:"••.•••.678-5",createdAt:ago(216)},
+    {id:"demo-owner",email:"carolina@example.com",firstName:"Carolina",country:"Chile",type:"empresa",level:"premium",state:"activo",rut:"••.•••.432-1",createdAt:ago(288)},
+    {id:"demo-boss",email:"equipo@example.com",firstName:"Equipo",country:"Chile",type:"admin",level:"basico",state:"activo",createdAt:ago(960)},
+  ],
+  levels:[
+    {code:"basico",name:"Básico",order:1,clientBenefits:["Mapa y consejos de viaje"],businessBenefits:["Ficha en el mapa"],monthlyPrice:null},
+    {code:"medio",name:"Medio",order:2,clientBenefits:["Guía de Santiago en 3 días"],businessBenefits:["Promociones en la app"],monthlyPrice:null},
+    {code:"alto",name:"Alto",order:3,clientBenefits:["Todas las guías exclusivas"],businessBenefits:["Ficha destacada en su categoría"],monthlyPrice:null},
+    {code:"premium",name:"Premium",order:4,clientBenefits:["Todas las guías","Asistencia por WhatsApp"],businessBenefits:["Ficha destacada","Etiqueta NFC de regalo"],monthlyPrice:null},
+  ],
+  audit:[
+    {id:9003,actorId:"demo-boss",origin:"admin",action:"bloquear",table:"tbl_usuarios",recordId:"demo-tourist-3",before:{estado:"activo"},after:{estado:"bloqueado"},reason:"Publicó opiniones con publicidad de otro sitio.",createdAt:ago(2)},
+    {id:9002,actorId:"demo-boss",origin:"admin",action:"cambiar_nivel",table:"tbl_usuarios",recordId:"demo-owner",before:{nivel:"alto"},after:{nivel:"premium"},createdAt:ago(26)},
+    {id:9001,origin:"base",action:"crear",table:"partners",recordId:"103",createdAt:ago(120)},
+  ],
+  places:[
+    {id:"precolombino",name:"Museo Chileno de Arte Precolombino",category:"museum",region:"RM",locality:"Santiago",address:"Bandera 361, Santiago",rating:4.7,source:"curated",status:"published"},
+    {id:"cerro-santa-lucia",name:"Cerro Santa Lucía",category:"view",region:"RM",locality:"Santiago",address:"Av. Libertador Bernardo O'Higgins",rating:4.6,source:"curated",status:"published"},
+    {id:"demo-cafe-cerrado",name:"Café que ya cerró",category:"coffee",region:"RM",locality:"Providencia",rating:4.3,source:"google",status:"hidden"},
+    {id:"ascensor-reina-victoria",name:"Ascensor Reina Victoria",category:"view",region:"VS",locality:"Valparaíso",rating:4.5,source:"google",status:"published"},
   ],
   businesses:[
     {id:101,kind:"venue",name:"Café La Esquina",region:"RM",phone:"+56 2 2000 0000",whatsapp:"+56 9 1111 2222",url:"https://example.com/cafe-la-esquina",address:"José Victorino Lastarria 300, Santiago",languages:["ES","EN"],status:"published",ownerId:"demo-owner",active:true,activeUntil:new Date(now+7*HOUR).toISOString(),reviewPlaceId:"partner-101",
@@ -59,12 +76,18 @@ const store:Store={
 const text=(body:Body,key:string)=>String(body[key]??"").trim();
 // The panel only sends statuses that exist for the list it acts on.
 const status=(body:Body)=>text(body,"status") as never;
+const roleOfType={cliente:"tourist",empresa:"owner",admin:"boss"} as const;
+// Mimics the rows api/_routes/admin.ts writes to tbl_auditoria.
+const note=(me:string,action:string,table:string,recordId:string|number,extra:{before?:Record<string,unknown>;after?:Record<string,unknown>;reason?:string}={})=>
+  store.audit.unshift({id:++lastId,actorId:me,origin:"admin",action,table,recordId:String(recordId),createdAt:new Date().toISOString(),...extra});
+const reasonOf=(body:Body)=>{const reason=text(body,"reason");if(reason.length<5)throw new Error("Escribe el motivo (al menos 5 letras).");return reason};
 
 function act(path:string,body:Body,me:string){
   const action=text(body,"action"),id=Number(body.id);
   const business=store.businesses.find((item)=>item.id===Number(body.partnerId));
   if(path==="/api/suggestions"){
-    const role=store.users.find((user)=>user.id===me)?.role??"guest";
+    const type=store.users.find((user)=>user.id===me)?.type;
+    const role=type?roleOfType[type]:"guest";
     store.suggestions.unshift({id:++lastId,role,message:text(body,"message"),status:"new",created_at:new Date().toISOString()});
     return;
   }
@@ -81,10 +104,61 @@ function act(path:string,body:Body,me:string){
     return;
   }
   if(path!=="/api/admin")return;
-  if(action==="set-role"){
-    if(text(body,"userId")===me)throw new Error("No puedes cambiar tu propio rol.");
-    const user=store.users.find((item)=>item.id===text(body,"userId"));
-    if(user)user.role=text(body,"role") as typeof user.role;
+  const user=store.users.find((item)=>item.id===text(body,"userId"));
+  if(user){
+    const self=user.id===me;
+    if(action==="edit-user"){Object.assign(user,{firstName:text(body,"firstName"),country:text(body,"country")});note(me,"editar_perfil","tbl_usuarios",user.id)}
+    if(action==="set-type"){
+      if(self)throw new Error("No puedes cambiar tu propio tipo de cuenta.");
+      note(me,"cambiar_tipo","tbl_usuarios",user.id,{before:{tipo_cuenta:user.type},after:{tipo_cuenta:text(body,"type")}});
+      user.type=text(body,"type") as typeof user.type;
+    }
+    if(action==="set-level"){
+      const until=text(body,"until");
+      note(me,"cambiar_nivel","tbl_usuarios",user.id,{before:{nivel:user.level},after:{nivel:text(body,"level")}});
+      Object.assign(user,{level:text(body,"level"),levelUntil:until?new Date(`${until}T23:59:59-03:00`).toISOString():undefined});
+    }
+    if(action==="set-state"){
+      if(self)throw new Error("No puedes cambiar el estado de tu propia cuenta.");
+      const state=text(body,"state") as typeof user.state,reason=state==="activo"?undefined:reasonOf(body);
+      note(me,state==="activo"?"reactivar":state==="bloqueado"?"bloquear":"desactivar","tbl_usuarios",user.id,{before:{estado:user.state},after:{estado:state},reason});
+      Object.assign(user,{state,stateReason:reason,stateAt:new Date().toISOString()});
+      if(state==="inactivo")for(const item of store.businesses)if(item.ownerId===user.id)Object.assign(item,{status:"draft",active:false,activeUntil:undefined});
+    }
+    if(action==="set-rut"){
+      const rut=text(body,"rut").replace(/[.\s-]/g,"").toUpperCase();
+      if(!/^\d{7,8}[\dK]$/.test(rut))throw new Error("El RUT no es válido. Revisa el dígito verificador.");
+      user.rut=`••.•••.${rut.slice(-4,-1)}-${rut.slice(-1)}`;
+      note(me,"cargar_rut","tbl_usuarios_privado",user.id,{after:{rut_visible:user.rut}});
+    }
+    if(action==="remove-rut"){user.rut=undefined;note(me,"quitar_rut","tbl_usuarios_privado",user.id)}
+    if(action==="delete-user"){
+      if(self)throw new Error("No puedes eliminar tu propia cuenta desde aquí.");
+      const reason=reasonOf(body);
+      store.users=store.users.filter((item)=>item!==user);
+      for(const item of store.businesses)if(item.ownerId===user.id)item.ownerId=undefined;
+      note(me,"eliminar_cuenta","tbl_usuarios",user.id,{before:{tipo_cuenta:user.type,nivel:user.level},reason});
+    }
+  }
+  if(action==="save-level"){
+    const level=store.levels.find((item)=>item.code===text(body,"code"));
+    const list=(key:string)=>text(body,key).split("\n").map((item)=>item.trim()).filter(Boolean);
+    if(level){Object.assign(level,{name:text(body,"name"),monthlyPrice:text(body,"monthlyPrice")?Number(text(body,"monthlyPrice")):null,clientBenefits:list("clientBenefits"),businessBenefits:list("businessBenefits")});note(me,"editar_nivel","tbl_niveles",level.code)}
+  }
+  if(action==="place-status"){
+    const place=store.places.find((item)=>item.id===text(body,"placeId"));
+    if(place){place.status=status(body);note(me,place.status==="hidden"?"ocultar_lugar":"publicar_lugar","places",place.id,{reason:text(body,"reason")||undefined})}
+  }
+  if(action==="delete"){
+    const reason=reasonOf(body),kind=text(body,"kind");
+    const lists={review:"reviews",suggestion:"suggestions",application:"applications",promotion:"promotions",business:"businesses"} as const;
+    const tables={review:"reviews",suggestion:"suggestions",application:"business_applications",promotion:"promotions",business:"partners"} as const;
+    const key=kind as keyof typeof lists;
+    if(lists[key]){
+      (store[lists[key]] as {id:number}[])=(store[lists[key]] as {id:number}[]).filter((item)=>item.id!==id);
+      if(key==="business")store.promotions=store.promotions.filter((item)=>item.partnerId!==id);
+      note(me,"borrar",tables[key],id,{reason});
+    }
   }
   if(action==="create-business"){
     const created=++lastId;
@@ -121,7 +195,9 @@ function ownerView(me:string):OwnerData{
 
 function adminView(me:string):AdminData{
   const names=new Map(store.businesses.map((business)=>[business.id,business.name]));
-  return{me,...store,promotions:store.promotions.map((promotion)=>({...promotion,business:names.get(promotion.partnerId??0)??""}))};
+  // Places are searched apart (?places=), like the real route does.
+  const rest:Partial<Store>={...store};delete rest.places;
+  return{me,...rest as Omit<Store,"places">,promotions:store.promotions.map((promotion)=>({...promotion,business:names.get(promotion.partnerId??0)??""}))};
 }
 
 // What /api/promotions would answer for the traveller demo: approved promotions of published businesses in the region.
@@ -137,8 +213,13 @@ export async function demoPromotions(region:RegionId):Promise<Promotion[]>{
 // `token` is the demo account's id (demo-owner, demo-boss, demo-tourist).
 export async function demoApi(token:string,path:string,body?:Body):Promise<unknown>{
   await new Promise((done)=>setTimeout(done,200));
-  const route=path.split("?")[0];
+  const [route,query=""]=path.split("?");
   if(body)act(route,body,token);
+  const params=new URLSearchParams(query);
+  if(route==="/api/admin"&&params.has("places")){
+    const words=(params.get("places")??"").toLowerCase(),region=params.get("region")??"";
+    return structuredClone({places:store.places.filter((place)=>(!words||place.name.toLowerCase().includes(words))&&(!region||place.region===region))});
+  }
   if(route==="/api/owner")return structuredClone(ownerView(token));
   if(route==="/api/admin")return structuredClone(adminView(token));
   return{ok:true};

@@ -238,3 +238,17 @@ body{background:transparent}.weather-backdrop{position:fixed;inset:0;z-index:-2;
 .th-empty{margin:0;color:var(--muted)}
 .th-suggest{padding-top:0}
 @media (max-width:720px){.th-hero{min-height:0;padding:34px 16px 30px}.th-hero h1{font-size:clamp(2.6rem,13vw,3.6rem)}.th-region{flex-direction:column;align-items:flex-start}.th-notes{padding:12px 16px 0}}
+
+/* Boss panel: filters, account management and actions that ask for a reason */
+.panel-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.panel-filters input,.panel-reason input{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--white);color:var(--navy);min-width:0;flex:1 1 220px}
+.panel-reason{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex-basis:100%}
+.team button.panel-danger{background:#a3200d;border-color:#a3200d}
+.panel-reason-note{margin:0;font-size:.88rem;color:#a3200d;font-weight:600}
+.panel-details{border-top:1px solid var(--line);padding-top:10px}
+.panel-details summary{cursor:pointer;font-weight:700;font-size:.88rem;color:var(--navy)}
+.panel-details[open]{display:grid;gap:14px}
+.panel-details .panel-form{margin-top:4px}
+.panel-inline{display:grid;gap:5px;font-size:.8rem;font-weight:700;max-width:280px}
+.team-drafts li:has(.panel-reason){flex-wrap:wrap}
+.team-drafts li:has(.panel-reason)>.team-actions{flex:1 1 100%}

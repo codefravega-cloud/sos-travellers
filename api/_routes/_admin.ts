@@ -12,6 +12,6 @@ export const matchesKey = (given: string, expected: string | undefined, minLengt
 export async function rejectUnlessTeam(request: Request): Promise<Response | null> {
   if (matchesKey(bearer(request), process.env.TEAM_PANEL_KEY, 12)) return null;
   const user = await sessionUser(request).catch(() => null);
-  if (user?.role === "boss") return null;
+  if (user?.role === "boss" && user.state === "activo") return null;
   return Response.json({ error: "Clave incorrecta." }, { status: 401 });
 }
