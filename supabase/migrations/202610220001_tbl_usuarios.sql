@@ -1,0 +1,226 @@
+-- tbl_usuarios: the one table of every registered account, whether a client (traveller), a business
+-- (empresa) or an admin. It replaces app_users and adds account levels, account state (block with a
+-- message, or deactivate a business that closed) and an append-only audit log.
+--
+-- This migration keeps the code already deployed working: app_users stays as a view with the old
+-- column names (see the end of the file) until the site and the app read tbl_usuarios directly.
+
+-- Levels. The four codes are fixed; what each level includes is edited by an admin.
+create table if not exists public.tbl_niveles (
+  codigo text primary key check (codigo in ('basico','medio','alto','premium')),
+  nombre text not null check (char_length(nombre) between 2 and 40),
+  orden smallint not null unique,
+  beneficios_cliente jsonb not null default '[]'::jsonb check (jsonb_typeof(beneficios_cliente) = 'array'),
+  beneficios_empresa jsonb not null default '[]'::jsonb check (jsonb_typeof(beneficios_empresa) = 'array'),
+  -- Null while the level is only assigned by an admin; a price once it can be bought.
+  precio_mensual_clp integer check (precio_mensual_clp >= 0),
+  actualizado_en timestamptz not null default now()
+);
+
+insert into public.tbl_niveles (codigo, nombre, orden) values
+  ('basico', 'Básico', 1), ('medio', 'Medio', 2), ('alto', 'Alto', 3), ('premium', 'Premium', 4)
+on conflict (codigo) do nothing;
+
+-- app_users becomes tbl_usuarios, with its columns in Spanish. Rows, policies and column grants carry over.
+alter table public.app_users rename to tbl_usuarios;
+alter table public.tbl_usuarios rename column first_name to nombre;
+alter table public.tbl_usuarios rename column country to pais;
+alter table public.tbl_usuarios rename column preferred_language to idioma;
+alter table public.tbl_usuarios rename column preferred_currency to moneda;
+alter table public.tbl_usuarios rename column consent_at to consentimiento_en;
+alter table public.tbl_usuarios rename column created_at to creado_en;
+alter table public.tbl_usuarios rename column updated_at to actualizado_en;
+alter policy "app_users_select_own" on public.tbl_usuarios rename to "usuarios_leen_su_fila";
+alter policy "app_users_update_own" on public.tbl_usuarios rename to "usuarios_editan_su_fila";
+
+-- tourist, owner and boss become cliente, empresa and admin.
+alter table public.tbl_usuarios add column tipo_cuenta text;
+update public.tbl_usuarios set tipo_cuenta = case role when 'owner' then 'empresa' when 'boss' then 'admin' else 'cliente' end;
+alter table public.tbl_usuarios
+  alter column tipo_cuenta set not null,
+  alter column tipo_cuenta set default 'cliente',
+  add constraint tbl_usuarios_tipo_cuenta_check check (tipo_cuenta in ('cliente','empresa','admin'));
+alter table public.tbl_usuarios drop column role;
+
+alter table public.tbl_usuarios
+  add column nivel text not null default 'basico' references public.tbl_niveles (codigo) on update cascade,
+  -- Who set the level: an admin, or a paid subscription (which expires at nivel_vence_en).
+  add column nivel_origen text not null default 'admin' check (nivel_origen in ('admin','suscripcion')),
+  add column nivel_vence_en timestamptz,
+  -- activo: normal. bloqueado: an admin cut the access and estado_motivo tells the user why.
+  -- inactivo: a business that no longer operates; its data stays but nothing of it is shown.
+  add column estado text not null default 'activo' check (estado in ('activo','bloqueado','inactivo')),
+  add column estado_motivo text,
+  add column estado_por uuid references auth.users (id) on delete set null,
+  add column estado_en timestamptz,
+  add constraint tbl_usuarios_estado_motivo_check check (estado = 'activo' or char_length(estado_motivo) between 5 and 500);
+
+create index if not exists tbl_usuarios_tipo_estado_idx on public.tbl_usuarios (tipo_cuenta, estado);
+create index if not exists tbl_usuarios_nivel_idx on public.tbl_usuarios (nivel);
+
+-- Sensitive identifiers, apart from the profile and readable only by the server. The RUT is encrypted by
+-- the API with a key that exists only on the server; the database never sees it in clear.
+create table if not exists public.tbl_usuarios_privado (
+  usuario_id uuid primary key references public.tbl_usuarios (id) on delete cascade,
+  rut_cifrado text not null,
+  -- Keyed hash of the normalized RUT: finds duplicates and exact matches without decrypting.
+  rut_huella text not null unique,
+  -- What lists show, e.g. '••.•••.456-K'.
+  rut_visible text not null check (char_length(rut_visible) <= 16),
+  actualizado_en timestamptz not null default now()
+);
+
+-- Append-only log: changes recorded by the triggers below (origen 'base') and the admin's actions written
+-- by the API (origen 'admin', with the reason). actor_id has no foreign key on purpose, so deleting an
+-- account never rewrites the log.
+create table if not exists public.tbl_auditoria (
+  id bigint generated by default as identity primary key,
+  actor_id uuid,
+  origen text not null check (origen in ('base','admin')),
+  accion text not null check (accion ~ '^[a-z_]{3,40}$'),
+  tabla text not null,
+  registro_id text,
+  antes jsonb,
+  despues jsonb,
+  motivo text check (char_length(motivo) <= 500),
+  creado_en timestamptz not null default now()
+);
+create index if not exists tbl_auditoria_registro_idx on public.tbl_auditoria (tabla, registro_id, creado_en desc);
+create index if not exists tbl_auditoria_actor_idx on public.tbl_auditoria (actor_id, creado_en desc);
+
+create or replace function public.auditoria_inmutable() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  raise exception 'La auditoría no se puede modificar ni borrar.';
+end;
+$$;
+create trigger tbl_auditoria_inmutable before update or delete on public.tbl_auditoria
+  for each row execute function public.auditoria_inmutable();
+create trigger tbl_auditoria_sin_truncate before truncate on public.tbl_auditoria
+  for each statement execute function public.auditoria_inmutable();
+
+-- Records each insert, update and delete. Updates keep only the columns that changed. actor_id is the
+-- signed-in user when the change comes straight from them; changes made through the API carry null here,
+-- and the API writes its own 'admin' row with the actor and the reason.
+create or replace function public.registrar_cambio() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  antes jsonb;
+  despues jsonb;
+begin
+  if tg_op = 'INSERT' then
+    despues := to_jsonb(new);
+  elsif tg_op = 'DELETE' then
+    antes := to_jsonb(old);
+    -- A deleted account leaves no personal data behind in the log.
+    if tg_table_name = 'tbl_usuarios' then antes := antes - array['nombre','pais']; end if;
+  else
+    select jsonb_object_agg(o.key, o.value), jsonb_object_agg(o.key, n.value) into antes, despues
+    from jsonb_each(to_jsonb(old)) o
+    join jsonb_each(to_jsonb(new)) n on n.key = o.key
+    where o.value is distinct from n.value and o.key not in ('actualizado_en', 'updated_at');
+    if antes is null then return new; end if;
+  end if;
+  insert into public.tbl_auditoria (actor_id, origen, accion, tabla, registro_id, antes, despues)
+  values (auth.uid(), 'base',
+    case tg_op when 'INSERT' then 'crear' when 'UPDATE' then 'editar' else 'borrar' end,
+    tg_table_name, coalesce(to_jsonb(new), to_jsonb(old))->>'id', antes, despues);
+  return coalesce(new, old);
+end;
+$$;
+revoke execute on function public.registrar_cambio() from public, anon, authenticated;
+
+create trigger tbl_usuarios_auditoria after insert or update or delete on public.tbl_usuarios
+  for each row execute function public.registrar_cambio();
+create trigger partners_auditoria after insert or update or delete on public.partners
+  for each row execute function public.registrar_cambio();
+create trigger promotions_auditoria after insert or update or delete on public.promotions
+  for each row execute function public.registrar_cambio();
+create trigger events_auditoria after insert or update or delete on public.events
+  for each row execute function public.registrar_cambio();
+
+create or replace function public.tocar_actualizado_en() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  new.actualizado_en := now();
+  return new;
+end;
+$$;
+create trigger tbl_usuarios_actualizado_en before update on public.tbl_usuarios
+  for each row execute function public.tocar_actualizado_en();
+
+-- The account row is still created at sign-up from the metadata the client sends. Only 'cliente' or
+-- 'empresa' can be asked for; admin is only ever granted by another admin.
+create or replace function public.handle_new_app_user() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare
+  meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  nombre text := left(btrim(coalesce(meta->>'first_name', '')), 60);
+  pais text := left(btrim(coalesce(meta->>'country', '')), 80);
+  idioma text := meta->>'preferred_language';
+  moneda text := meta->>'preferred_currency';
+begin
+  insert into public.tbl_usuarios (id, nombre, pais, idioma, moneda, tipo_cuenta)
+  values (
+    new.id,
+    case when char_length(nombre) >= 2 then nombre else 'Viajero' end,
+    case when char_length(pais) >= 2 then pais else 'Sin informar' end,
+    case when idioma in ('es','en','pt','fr') then idioma else 'es' end,
+    case when moneda in ('CLP','ARS','BRL','USD','EUR','PEN','COP','UYU','GBP','CAD','MXN','AUD') then moneda else 'CLP' end,
+    case when meta->>'tipo_cuenta' = 'empresa' then 'empresa' else 'cliente' end
+  )
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+-- Server-only tables: no access at all for the browser or the app, whatever the defaults grant.
+alter table public.tbl_niveles enable row level security;
+alter table public.tbl_usuarios_privado enable row level security;
+alter table public.tbl_auditoria enable row level security;
+revoke all on public.tbl_niveles, public.tbl_usuarios_privado, public.tbl_auditoria from anon, authenticated;
+grant select, insert, update on public.tbl_niveles to service_role;
+grant select, insert, update, delete on public.tbl_usuarios_privado to service_role;
+grant select, insert on public.tbl_auditoria to service_role;
+grant usage, select on sequence public.tbl_auditoria_id_seq to service_role;
+-- A signed-in user still reads only their own row of tbl_usuarios (level, state and the block message
+-- included) and edits only nombre, pais, idioma and moneda: the grants of app_users carried over.
+
+-- Compatibility for the code deployed before this migration, which reads and writes app_users with the
+-- old column names. Drop this view and its trigger once the site and the app use tbl_usuarios.
+create view public.app_users with (security_invoker = true) as
+select id, nombre as first_name, pais as country, idioma as preferred_language, moneda as preferred_currency,
+  case tipo_cuenta when 'empresa' then 'owner' when 'admin' then 'boss' else 'tourist' end as role,
+  consentimiento_en as consent_at, creado_en as created_at, actualizado_en as updated_at
+from public.tbl_usuarios;
+
+create or replace function public.app_users_actualizar() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  update public.tbl_usuarios
+  set nombre = new.first_name, pais = new.country, idioma = new.preferred_language, moneda = new.preferred_currency
+  where id = old.id;
+  -- Only the server may change the account type; a signed-in user lacks the privilege, so this fails for them.
+  if new.role is distinct from old.role then
+    update public.tbl_usuarios
+    set tipo_cuenta = case new.role when 'tourist' then 'cliente' when 'owner' then 'empresa' when 'boss' then 'admin' end
+    where id = old.id;
+  end if;
+  return new;
+end;
+$$;
+create trigger app_users_actualizar instead of update on public.app_users
+  for each row execute function public.app_users_actualizar();
+
+revoke all on public.app_users from anon, authenticated;
+grant select on public.app_users to authenticated;
+grant update (first_name, country, preferred_language, preferred_currency, updated_at) on public.app_users to authenticated;
+grant select, update on public.app_users to service_role;
+
+comment on table public.tbl_usuarios is 'Todas las cuentas registradas: clientes, empresas y admins, con su nivel y estado. Cada usuario ve solo su fila y edita solo su perfil.';
+comment on table public.tbl_niveles is 'Niveles de cuenta (básico, medio, alto, premium) y lo que incluye cada uno para clientes y empresas.';
+comment on table public.tbl_usuarios_privado is 'Datos sensibles (RUT cifrado). Solo el servidor tiene acceso.';
+comment on table public.tbl_auditoria is 'Historial de cambios y acciones del admin. No se puede modificar ni borrar.';
+comment on view public.app_users is 'Compatibilidad temporal con el código anterior a tbl_usuarios. Se elimina cuando el sitio y la app usen tbl_usuarios.';
+
+notify pgrst, 'reload schema';

@@ -14,14 +14,24 @@ type Review={id:number;authorName:string;rating:number;comment:string;createdAt:
 type Business={id:number;kind:string;name:string;region:string;phone?:string;whatsapp?:string;url?:string;address?:string;languages:string[];status:"draft"|"published";ownerId?:string;placeId?:string;active:boolean;activeUntil?:string;photos:Photo[];reviewPlaceId:string;promotions?:Promotion[];reviews?:Review[]};
 type Benefit={id:number;title:string;detail?:string|null;rank?:number;status?:"draft"|"published"};
 export type OwnerData={businesses:Business[];benefits:Benefit[]};
-type Account={id:string;email:string;firstName:string;country:string;role:Role;createdAt:string};
+// Account types, levels and states mirror tbl_usuarios and tbl_niveles (202610220001_tbl_usuarios.sql).
+type AccountType="cliente"|"empresa"|"admin";
+type AccountState="activo"|"bloqueado"|"inactivo";
+type LevelCode="basico"|"medio"|"alto"|"premium";
+type Account={id:string;email:string;firstName:string;country:string;type:AccountType;level:LevelCode;levelUntil?:string;state:AccountState;stateReason?:string;stateAt?:string;rut?:string;createdAt:string};
+type Level={code:LevelCode;name:string;order:number;clientBenefits:string[];businessBenefits:string[];monthlyPrice:number|null};
+type AuditEntry={id:number;actorId?:string;origin:"base"|"admin";action:string;table:string;recordId?:string;before?:Record<string,unknown>;after?:Record<string,unknown>;reason?:string;createdAt:string};
+export type PlaceRow={id:string;name:string;category:string;region:string;locality:string;address?:string|null;rating?:number|null;source:string;status:"published"|"hidden"};
 type Application={id:number;businessName:string;contactName:string;email?:string;phone?:string;category:string;address:string;description:string;website?:string;interest:string;status:"pending"|"approved"|"rejected";createdAt:string};
 type Suggestion={id:number;role:string;message:string;status:"new"|"read"|"done";created_at:string};
-export type AdminData={me:string;users:Account[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
+export type AdminData={me:string;users:Account[];levels:Level[];audit:AuditEntry[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
 
 const ZONE="America/Santiago",TEAM_KEY="sos-team-key",MAX_PHOTO_BYTES=5*1024*1024,MIN_PASSWORD=8;
 const kindNames:Record<string,string>={radio_taxi:"Radio taxi",venue:"Local",tour:"Tour",other:"Otro"};
-const roleNames:Record<Role,string>={tourist:"Viajero",owner:"Dueño de local",boss:"Boss"};
+const roleNames:Record<Role,string>={tourist:"Cliente",owner:"Empresa",boss:"Admin"};
+const roleOf:Record<AccountType,Role>={cliente:"tourist",empresa:"owner",admin:"boss"};
+const typeNames:Record<AccountType,string>={cliente:"Cliente",empresa:"Empresa",admin:"Admin"};
+const stateNames:Record<AccountState,string>={activo:"Activa",bloqueado:"Bloqueada",inactivo:"Desactivada"};
 const statusNames:Record<string,string>={pending:"Pendiente",published:"Publicado",rejected:"Rechazado",draft:"En revisión",hidden:"Oculto",approved:"Aprobada",new:"Nueva",read:"Leída",done:"Resuelta"};
 // Mirrors the region check in the SQL migrations and api/_routes/_regions.ts.
 const regions=["AP","TA","AN","AT","CO","VS","RM","LI","ML","NB","BI","AR","LR","LL","AI","MA"];
@@ -41,7 +51,7 @@ async function api<T>(token:string,path:string,body?:Record<string,unknown>):Pro
 // /panel?demo=owner (or boss, tourist) draws that role's panel with the sample data in panel-demo.ts, to show the panel
 // to people without an account. It never reads or writes real data, and panel-demo.ts is only downloaded on those addresses.
 const demoPeople:Record<Role,{firstName:string;country:string}>={tourist:{firstName:"Emma",country:"Francia"},owner:{firstName:"Carolina",country:"Chile"},boss:{firstName:"Equipo",country:"Chile"}};
-const demoAccount=(role:string|null)=>role&&role in demoPeople?{id:`demo-${role}`,...demoPeople[role as Role],role:role as Role}:null;
+const demoAccount=(role:string|null)=>role&&role in demoPeople?{id:`demo-${role}`,...demoPeople[role as Role],role:role as Role,state:"activo" as AccountState,stateReason:""}:null;
 const demoPromotions=async(region:RegionId):Promise<TravellerPromotion[]>=>(await import("./panel-demo")).demoPromotions(region);
 const demo=demoAccount(new URLSearchParams(window.location.search).get("demo"));
 // Each demo asks for its own password, shared with the team in a PDF. Only SHA-256 hashes live here because this
@@ -79,7 +89,7 @@ function useRemote<T>(token:string,path:string){
 export default function Panel(){
   const [ready,setReady]=useState(false);
   const [session,setSession]=useState<Session|null>(null);
-  const [profile,setProfile]=useState<{id:string;firstName:string;country:string;role:Role}|null>(null);
+  const [profile,setProfile]=useState<{id:string;firstName:string;country:string;role:Role;state:AccountState;stateReason:string}|null>(null);
   const [demoReady,setDemoReady]=useState(()=>demo?demoOpen(demo.role):false);
   const userId=session?.user.id;
 
@@ -97,8 +107,9 @@ export default function Panel(){
   useEffect(()=>{
     if(!userId)return;
     let alive=true;
-    void supabase.from("app_users").select("first_name, country, role").eq("id",userId).maybeSingle()
-      .then(({data})=>{if(alive)setProfile({id:userId,firstName:data?.first_name??"",country:data?.country??"",role:(data?.role??"tourist") as Role})});
+    // Each user reads only their own row (RLS); the API checks type and state again on every request.
+    void supabase.from("tbl_usuarios").select("nombre, pais, tipo_cuenta, estado, estado_motivo").eq("id",userId).maybeSingle()
+      .then(({data})=>{if(alive)setProfile({id:userId,firstName:data?.nombre??"",country:data?.pais??"",role:roleOf[data?.tipo_cuenta as AccountType]??"tourist",state:(data?.estado??"activo") as AccountState,stateReason:data?.estado_motivo??""})});
     return()=>{alive=false};
   },[userId]);
 
@@ -109,8 +120,19 @@ export default function Panel(){
   const mine=demo??(profile?.id===userId?profile:null);
   const token=account.token;
   const signOut=()=>demo?window.location.assign("/panel"):void supabase.auth.signOut();
-  const demoBanner=demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">dueño de local</a> · <a href="?demo=boss">boss</a> · <a href="?demo=tourist">viajero</a></p>;
+  const demoBanner=demo&&<p className="panel-ok" style={{marginBottom:16}}>Modo demo: datos de ejemplo, nada se guarda y todo vuelve a empezar al recargar. Ver como <a href="?demo=owner">empresa</a> · <a href="?demo=boss">admin</a> · <a href="?demo=tourist">cliente</a></p>;
   const trialNote="trial" in account&&account.trial&&<p className="team-empty" style={{marginBottom:16}}>Cuenta de prueba, sin correo ni contraseña: queda guardada en este navegador. Si sales, tendrás que crear otra.</p>;
+
+  // A blocked or deactivated account sees why, and can still write to the team.
+  if(mine&&mine.state!=="activo")return <main className="team">
+    <header className="team-top">
+      <div><p className="team-eyebrow">SOS TRAVELLERS · PANEL</p><h1>Tu cuenta está {mine.state==="bloqueado"?"bloqueada":"desactivada"}</h1></div>
+      <div className="team-actions"><button type="button" className="team-quiet" onClick={signOut}>Salir</button></div>
+    </header>
+    <section className="team-section"><article className="team-agent"><h3>Motivo</h3><p className="team-summary">{mine.stateReason}</p>
+      <p className="team-empty panel-gap">Si crees que es un error, escríbenos aquí abajo.</p></article></section>
+    <SuggestionBox token={token}/>
+  </main>;
 
   // A traveller gets a personal version of the landing instead of the business tools.
   if(mine?.role==="tourist")return <TravellerHome name={mine.firstName||"viajero"} country={mine.country} onSignOut={signOut}
@@ -342,32 +364,58 @@ function BusinessCard({business,token,busy,run}:{business:Business;token:string;
   </section>;
 }
 
-type BossTab="approvals"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"benefits";
+type BossTab="approvals"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"levels"|"places"|"benefits"|"audit";
+type Act=(body:Record<string,unknown>)=>void;
+
+const levelCodes:LevelCode[]=["basico","medio","alto","premium"];
+const actionNames:Record<string,string>={crear:"Creó",editar:"Editó",borrar:"Eliminó",cambiar_tipo:"Cambió el tipo de cuenta",cambiar_nivel:"Cambió el nivel",bloquear:"Bloqueó la cuenta",desactivar:"Desactivó la cuenta",reactivar:"Reactivó la cuenta",editar_perfil:"Editó el perfil",cargar_rut:"Cargó el RUT",quitar_rut:"Quitó el RUT",eliminar_cuenta:"Eliminó la cuenta",editar_nivel:"Editó un nivel",ocultar_lugar:"Ocultó un lugar",publicar_lugar:"Publicó un lugar"};
+const tableNames:Record<string,string>={tbl_usuarios:"Usuarios",tbl_usuarios_privado:"Datos privados",tbl_niveles:"Niveles",partners:"Negocios",promotions:"Promociones",events:"Eventos",reviews:"Opiniones",suggestions:"Sugerencias",business_applications:"Solicitudes",places:"Lugares"};
+const isoDay=(iso:string)=>new Intl.DateTimeFormat("en-CA",{timeZone:ZONE}).format(new Date(iso));
+
+// An action that needs a reason (block, delete…): the first click opens a field, the second one confirms.
+function ReasonAction({label,confirm,placeholder,busy,danger,onConfirm}:{label:string;confirm:string;placeholder:string;busy:boolean;danger?:boolean;onConfirm:(reason:string)=>void}){
+  const [open,setOpen]=useState(false);
+  if(!open)return <button type="button" className="team-quiet" disabled={busy} onClick={()=>setOpen(true)}>{label}</button>;
+  return <form className="panel-reason" onSubmit={(event)=>{event.preventDefault();onConfirm(field(event.currentTarget,"reason"));setOpen(false)}}>
+    <input name="reason" minLength={5} maxLength={500} required placeholder={placeholder} aria-label={placeholder} autoFocus/>
+    <button type="submit" className={danger?"panel-danger":""} disabled={busy}>{confirm}</button>
+    <button type="button" className="team-quiet" onClick={()=>setOpen(false)}>Cancelar</button>
+  </form>;
+}
+
+// Deleting is for good; the reason stays in the history.
+function DeleteAction({what,busy,onConfirm}:{what:string;busy:boolean;onConfirm:(reason:string)=>void}){
+  return <ReasonAction label="Eliminar" confirm={`Eliminar ${what} para siempre`} placeholder="Motivo (queda en el historial)" busy={busy} danger onConfirm={onConfirm}/>;
+}
 
 function BossPanel({token}:{token:string}){
   const {data,error,busy,run}=useRemote<AdminData>(token,"/api/admin");
   const [tab,setTab]=useState<BossTab>("approvals");
-  const act=(body:Record<string,unknown>)=>void run(()=>api(token,"/api/admin",body));
+  const act:Act=(body)=>void run(()=>api(token,"/api/admin",body));
   if(!data)return error?<p className="team-error" role="alert">{error}</p>:<p className="team-empty">Cargando…</p>;
 
+  const remove=(kind:string,id:number)=>(reason:string)=>act({action:"delete",kind,id,reason});
   const pendingPhotos=data.businesses.flatMap((business)=>business.photos.filter((item)=>item.status==="pending").map((item)=>({business,item})));
   const pendingPromotions=data.promotions.filter((promotion)=>promotion.status==="pending");
-  const owners=data.users.filter((user)=>user.role!=="boss");
-  const tabs:[BossTab,string,number][]=[
+  const owners=data.users.filter((user)=>user.type!=="admin");
+  const tabs:[BossTab,string,number|null][]=[
     ["approvals","Aprobaciones",pendingPhotos.length+pendingPromotions.length],
     ["reviews","Opiniones",data.reviews.length],
     ["suggestions","Sugerencias",data.suggestions.filter((item)=>item.status==="new").length],
     ["businesses","Negocios",data.businesses.length],
     ["applications","Solicitudes",data.applications.filter((item)=>item.status==="pending").length],
     ["users","Usuarios",data.users.length],
+    ["levels","Niveles",data.levels.length],
+    ["places","Lugares",null],
     ["benefits","Beneficios",data.benefits.length],
+    ["audit","Historial",null],
   ];
   // /equipo reads its key from sessionStorage and sends it as a bearer token; a boss session is accepted there too.
   const openAgents=()=>{try{sessionStorage.setItem(TEAM_KEY,token)}catch{} window.location.href="/equipo"};
 
   return <section className="team-section">
     <div className="team-tabs" role="tablist">
-      {tabs.map(([id,name,count])=><button key={id} type="button" role="tab" aria-selected={tab===id} className={tab===id?"":"team-quiet"} onClick={()=>setTab(id)}>{name} ({count})</button>)}
+      {tabs.map(([id,name,count])=><button key={id} type="button" role="tab" aria-selected={tab===id} className={tab===id?"":"team-quiet"} onClick={()=>setTab(id)}>{name}{count===null?"":` (${count})`}</button>)}
       <button type="button" className="team-quiet" onClick={openAgents}>Agentes ↗</button>
     </div>
     {error&&<p className="team-error" role="alert">{error}</p>}
@@ -386,13 +434,20 @@ function BossPanel({token}:{token:string}){
         <button type="button" disabled={busy} onClick={()=>act({action:"photo-status",partnerId:business.id,path:item.path,status:"published"})}>Aprobar</button>
         <button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"photo-status",partnerId:business.id,path:item.path,status:"rejected"})}>Rechazar</button>
       </li>)}</ul>
+      <h4>Todas las promociones</h4>
+      {!data.promotions.length&&<p className="team-empty">Todavía no hay promociones.</p>}
+      <ul className="team-drafts">{data.promotions.map((promotion)=><li key={promotion.id}>
+        <div><small>{promotion.business} · {statusNames[promotion.status]} · hasta el {day(promotion.validUntil)}</small><b>{promotion.title}</b></div>
+        <div className="team-actions"><DeleteAction what="la promoción" busy={busy} onConfirm={remove("promotion",promotion.id)}/></div>
+      </li>)}</ul>
     </article>}
 
     {tab==="reviews"&&<article className="team-agent"><h3>Opiniones de viajeros</h3>
       {!data.reviews.length&&<p className="team-empty">Todavía no hay opiniones.</p>}
       <ul className="team-drafts">{data.reviews.map((review)=><li key={review.id}>
         <div><small>{"★".repeat(review.rating)}{"☆".repeat(5-review.rating)} · {review.placeId} · {when(review.createdAt)} · {statusNames[review.status??"published"]}</small><b>{review.authorName}</b><p>{review.comment}</p></div>
-        <div className="team-actions"><button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"review-status",id:review.id,status:review.status==="hidden"?"published":"hidden"})}>{review.status==="hidden"?"Volver a publicar":"Ocultar"}</button></div>
+        <div className="team-actions"><button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"review-status",id:review.id,status:review.status==="hidden"?"published":"hidden"})}>{review.status==="hidden"?"Volver a publicar":"Ocultar"}</button>
+          <DeleteAction what="la opinión" busy={busy} onConfirm={remove("review",review.id)}/></div>
       </li>)}</ul>
     </article>}
 
@@ -400,7 +455,8 @@ function BossPanel({token}:{token:string}){
       {!data.suggestions.length&&<p className="team-empty">Todavía no hay sugerencias.</p>}
       <ul className="team-drafts">{data.suggestions.map((item)=><li key={item.id}>
         <div><small>{roleNames[item.role as Role]??"Sin cuenta"} · {when(item.created_at)} · {statusNames[item.status]}</small><p>{item.message}</p></div>
-        <div className="team-actions">{item.status!=="read"&&<button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"suggestion-status",id:item.id,status:"read"})}>Leída</button>}{item.status!=="done"&&<button type="button" disabled={busy} onClick={()=>act({action:"suggestion-status",id:item.id,status:"done"})}>Resuelta</button>}</div>
+        <div className="team-actions">{item.status!=="read"&&<button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"suggestion-status",id:item.id,status:"read"})}>Leída</button>}{item.status!=="done"&&<button type="button" disabled={busy} onClick={()=>act({action:"suggestion-status",id:item.id,status:"done"})}>Resuelta</button>}
+          <DeleteAction what="la sugerencia" busy={busy} onConfirm={remove("suggestion",item.id)}/></div>
       </li>)}</ul>
     </article>}
 
@@ -421,6 +477,7 @@ function BossPanel({token}:{token:string}){
             <button type="submit" className="team-quiet" disabled={busy}>Guardar vínculo</button>
             <button type="button" disabled={busy} onClick={()=>act({action:"update-business",partnerId:business.id,status:business.status==="published"?"draft":"published"})}>{business.status==="published"?"Despublicar":"Publicar"}</button>
             {business.active&&<button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"update-business",partnerId:business.id,deactivate:true})}>Apagar «atendiendo»</button>}
+            <ReasonAction label="Eliminar negocio" confirm="Eliminar con sus fotos y promociones" placeholder="Motivo (queda en el historial)" busy={busy} danger onConfirm={remove("business",business.id)}/>
           </div>
         </form>
       </li>)}</ul>
@@ -430,20 +487,18 @@ function BossPanel({token}:{token:string}){
       {!data.applications.length&&<p className="team-empty">Todavía no hay solicitudes.</p>}
       <ul className="team-drafts">{data.applications.map((item)=><li key={item.id}>
         <div><small>{item.category} · {when(item.createdAt)} · {statusNames[item.status]}</small><b>{item.businessName}</b><span>{item.contactName}{item.email?` · ${item.email}`:""}{item.phone?` · ${item.phone}`:""}</span><p>{item.description}</p><span>{item.address}</span></div>
-        {item.status==="pending"&&<div className="team-actions">
-          <button type="button" disabled={busy} onClick={()=>act({action:"create-business",applicationId:item.id,name:item.businessName,kind:"venue",region:"RM",phone:item.phone,url:item.website,address:item.address})}>Crear negocio</button>
-          <button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"application-status",id:item.id,status:"rejected"})}>Rechazar</button>
-        </div>}
+        <div className="team-actions">
+          {item.status==="pending"&&<><button type="button" disabled={busy} onClick={()=>act({action:"create-business",applicationId:item.id,name:item.businessName,kind:"venue",region:"RM",phone:item.phone,url:item.website,address:item.address})}>Crear negocio</button>
+          <button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"application-status",id:item.id,status:"rejected"})}>Rechazar</button></>}
+          <DeleteAction what="la solicitud" busy={busy} onConfirm={remove("application",item.id)}/>
+        </div>
       </li>)}</ul>
     </article>}
 
-    {tab==="users"&&<article className="team-agent"><h3>Usuarios</h3>
-      <ul className="team-drafts">{data.users.map((user)=><li key={user.id}>
-        <div><small>{user.country} · desde el {when(user.createdAt)}</small><b>{user.firstName}</b><span>{user.email||"Cuenta de prueba, sin correo"}</span></div>
-        <div className="team-actions">{user.id===data.me?<span className="team-pill ok">Tú · Boss</span>
-          :<select aria-label={`Rol de ${user.firstName}`} value={user.role} disabled={busy} onChange={(event)=>act({action:"set-role",userId:user.id,role:event.target.value})}>{(Object.keys(roleNames) as Role[]).map((role)=><option key={role} value={role}>{roleNames[role]}</option>)}</select>}</div>
-      </li>)}</ul>
-    </article>}
+    {tab==="users"&&<UsersTab data={data} busy={busy} act={act}/>}
+    {tab==="levels"&&<LevelsTab data={data} busy={busy} act={act}/>}
+    {tab==="places"&&<PlacesTab token={token} onChange={()=>run(async()=>{})}/>}
+    {tab==="audit"&&<AuditTab data={data}/>}
 
     {tab==="benefits"&&<article className="team-agent"><h3>Beneficios para dueños</h3>
       <form className="panel-form" onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;void run(async()=>{await api(token,"/api/admin",{action:"save-benefit",title:field(form,"title"),detail:field(form,"detail")});form.reset()})}}>
@@ -458,4 +513,146 @@ function BossPanel({token}:{token:string}){
       </li>)}</ul>
     </article>}
   </section>;
+}
+
+function UsersTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){
+  const [query,setQuery]=useState("");
+  const [type,setType]=useState("");
+  const [state,setState]=useState("");
+  const levelName=new Map(data.levels.map((level)=>[level.code,level.name]));
+  const words=query.trim().toLowerCase();
+  const shown=data.users.filter((user)=>(!type||user.type===type)&&(!state||user.state===state)
+    &&(!words||`${user.firstName} ${user.email} ${user.country} ${user.rut??""}`.toLowerCase().includes(words)));
+
+  return <article className="team-agent"><h3>Usuarios</h3>
+    <div className="panel-filters">
+      <input type="search" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Buscar por nombre, correo o país" aria-label="Buscar usuarios"/>
+      <select value={type} onChange={(event)=>setType(event.target.value)} aria-label="Tipo de cuenta"><option value="">Todos los tipos</option>{Object.entries(typeNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
+      <select value={state} onChange={(event)=>setState(event.target.value)} aria-label="Estado"><option value="">Todos los estados</option>{Object.entries(stateNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
+    </div>
+    <p className="team-empty">{shown.length} de {data.users.length} cuentas.</p>
+    <ul className="team-drafts">{shown.map((user)=>{
+      const self=user.id===data.me;
+      return <li key={user.id} className="panel-stack">
+        <div><small>{typeNames[user.type]} · nivel {levelName.get(user.level)??user.level}{user.levelUntil?` hasta el ${day(isoDay(user.levelUntil))}`:""} · {user.country} · desde el {when(user.createdAt)}</small>
+          <b>{user.firstName}{self?" (tú)":""}</b><span>{user.email||"Cuenta de prueba, sin correo"}{user.rut?` · RUT ${user.rut}`:""}</span>
+          {user.state!=="activo"&&<p className="panel-reason-note">{stateNames[user.state]}{user.stateAt?` el ${when(user.stateAt)}`:""} · Motivo: {user.stateReason}</p>}</div>
+        <details className="panel-details"><summary>Administrar</summary>
+          <form className="panel-form" key={`profile|${user.firstName}|${user.country}`} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"edit-user",userId:user.id,firstName:field(form,"firstName"),country:field(form,"country")})}}>
+            <label>Nombre<input name="firstName" defaultValue={user.firstName} minLength={2} maxLength={60} required/></label>
+            <label>País<input name="country" defaultValue={user.country} minLength={2} maxLength={80} required/></label>
+            <div className="team-actions wide"><button type="submit" className="team-quiet" disabled={busy}>Guardar perfil</button></div>
+          </form>
+          <form className="panel-form" key={`level|${user.level}|${user.levelUntil}`} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"set-level",userId:user.id,level:field(form,"level"),until:field(form,"until")})}}>
+            <label>Nivel<select name="level" defaultValue={user.level}>{levelCodes.map((code)=><option key={code} value={code}>{levelName.get(code)??code}</option>)}</select></label>
+            <label>Vence (opcional)<input name="until" type="date" defaultValue={user.levelUntil?isoDay(user.levelUntil):""}/></label>
+            <div className="team-actions wide"><button type="submit" className="team-quiet" disabled={busy}>Guardar nivel</button></div>
+          </form>
+          <form className="panel-form" key={`rut|${user.rut}`} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"set-rut",userId:user.id,rut:field(form,"rut")})}}>
+            <label>RUT, opcional: solo para quien tenga RUT chileno {user.rut?`(guardado: ${user.rut})`:""}<input name="rut" required maxLength={12} placeholder="12.345.678-5" autoComplete="off"/></label>
+            <div className="team-actions"><button type="submit" className="team-quiet" disabled={busy}>{user.rut?"Cambiar RUT":"Guardar RUT"}</button>
+              {user.rut&&<button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"remove-rut",userId:user.id})}>Quitar RUT</button>}</div>
+          </form>
+          {self?<p className="team-empty">Tu propio tipo de cuenta y estado los cambia otro admin.</p>:<>
+            <label className="panel-inline">Tipo de cuenta<select value={user.type} disabled={busy} onChange={(event)=>act({action:"set-type",userId:user.id,type:event.target.value})}>{Object.entries(typeNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
+            <div className="team-actions panel-gap">
+              {user.state==="activo"?<>
+                <ReasonAction label="Bloquear" confirm="Bloquear cuenta" placeholder="Motivo (el usuario lo verá)" busy={busy} onConfirm={(reason)=>act({action:"set-state",userId:user.id,state:"bloqueado",reason})}/>
+                <ReasonAction label="Desactivar" confirm={user.type==="empresa"?"Desactivar y despublicar sus negocios":"Desactivar cuenta"} placeholder="Motivo, por ejemplo: el local cerró" busy={busy} onConfirm={(reason)=>act({action:"set-state",userId:user.id,state:"inactivo",reason})}/>
+              </>:<button type="button" disabled={busy} onClick={()=>act({action:"set-state",userId:user.id,state:"activo"})}>Reactivar</button>}
+              <ReasonAction label="Eliminar cuenta" confirm="Eliminar cuenta para siempre" placeholder="Motivo (queda en el historial)" busy={busy} danger onConfirm={(reason)=>act({action:"delete-user",userId:user.id,reason})}/>
+            </div>
+          </>}
+        </details>
+      </li>;
+    })}</ul>
+  </article>;
+}
+
+function LevelsTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){
+  return <article className="team-agent"><h3>Niveles de cuenta</h3>
+    <p className="team-empty">Qué incluye cada nivel, un beneficio por línea. El nivel de cada cuenta se asigna en Usuarios. El precio queda vacío mientras el nivel no se venda.</p>
+    <ul className="team-drafts">{data.levels.map((level)=>{
+      const count=data.users.filter((user)=>user.level===level.code).length;
+      return <li key={level.code} className="panel-stack">
+        <div><small>{count} {count===1?"cuenta":"cuentas"}{level.monthlyPrice!==null?` · $${level.monthlyPrice.toLocaleString("es-CL")} al mes`:""}</small><b>{level.name}</b></div>
+        <form className="panel-form" key={JSON.stringify(level)} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;act({action:"save-level",code:level.code,name:field(form,"name"),monthlyPrice:field(form,"monthlyPrice"),clientBenefits:field(form,"clientBenefits"),businessBenefits:field(form,"businessBenefits")})}}>
+          <label>Nombre<input name="name" defaultValue={level.name} minLength={2} maxLength={40} required/></label>
+          <label>Precio mensual en CLP (opcional)<input name="monthlyPrice" inputMode="numeric" pattern="[0-9]*" defaultValue={level.monthlyPrice??""}/></label>
+          <label>Para clientes<textarea name="clientBenefits" rows={3} defaultValue={level.clientBenefits.join("\n")}/></label>
+          <label>Para empresas<textarea name="businessBenefits" rows={3} defaultValue={level.businessBenefits.join("\n")}/></label>
+          <div className="team-actions wide"><button type="submit" disabled={busy}>Guardar {level.name}</button></div>
+        </form>
+      </li>;
+    })}</ul>
+  </article>;
+}
+
+// The map has thousands of places, so they are searched on demand instead of coming with the rest of the panel.
+// onChange reloads the rest of the panel, so the history shows the change.
+function PlacesTab({token,onChange}:{token:string;onChange:()=>Promise<void>}){
+  const [places,setPlaces]=useState<PlaceRow[]|null>(null);
+  const [search,setSearch]=useState({query:"",region:""});
+  const [error,setError]=useState("");
+  const [busy,setBusy]=useState(false);
+  async function load(next:{query:string;region:string}){
+    setBusy(true);setError("");
+    try{setPlaces((await api<{places:PlaceRow[]}>(token,`/api/admin?places=${encodeURIComponent(next.query)}&region=${next.region}`)).places);setSearch(next)}
+    catch(cause){setError(message(cause))}
+    finally{setBusy(false)}
+  }
+  async function change(body:Record<string,unknown>){
+    setBusy(true);setError("");
+    try{await api(token,"/api/admin",body);await onChange()}catch(cause){setError(message(cause))}
+    finally{setBusy(false)}
+    await load(search);
+  }
+  return <article className="team-agent"><h3>Lugares del mapa</h3>
+    <p className="team-empty">Un lugar oculto deja de verse en el mapa (puede tardar hasta una hora) y una nueva importación no lo vuelve a mostrar.</p>
+    <form className="panel-filters" onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;void load({query:field(form,"query"),region:field(form,"region")})}}>
+      <input type="search" name="query" placeholder="Nombre del lugar" aria-label="Nombre del lugar" maxLength={60}/>
+      <select name="region" defaultValue="" aria-label="Región"><option value="">Todas las regiones</option>{regions.map((region)=><option key={region}>{region}</option>)}</select>
+      <button type="submit" disabled={busy}>Buscar</button>
+    </form>
+    {error&&<p className="team-error" role="alert">{error}</p>}
+    {places&&!places.length&&<p className="team-empty">No encontramos lugares con esa búsqueda.</p>}
+    {places&&places.length>=60&&<p className="team-empty">Se muestran los primeros 60. Escribe más del nombre para acotar.</p>}
+    <ul className="team-drafts">{places?.map((place)=><li key={place.id}>
+      <div><small>{place.region} · {place.locality} · {place.category}{place.rating?` · ★ ${place.rating}`:""} · {statusNames[place.status]}</small><b>{place.name}</b>{place.address&&<span>{place.address}</span>}</div>
+      <div className="team-actions">{place.status==="published"
+        ?<ReasonAction label="Ocultar" confirm="Ocultar del mapa" placeholder="Motivo, por ejemplo: cerró" busy={busy} onConfirm={(reason)=>void change({action:"place-status",placeId:place.id,status:"hidden",reason})}/>
+        :<button type="button" disabled={busy} onClick={()=>void change({action:"place-status",placeId:place.id,status:"published"})}>Volver a mostrar</button>}</div>
+    </li>)}</ul>
+  </article>;
+}
+
+// What changed, in a line: "campo: antes → después" for edits, the fields kept for deletions.
+const shortValue=(value:unknown)=>{const shown=typeof value==="string"?value:JSON.stringify(value);return shown&&shown.length>40?`${shown.slice(0,40)}…`:String(shown)};
+function changeLine(entry:AuditEntry){
+  if(entry.action==="crear")return "";
+  const keys=Object.keys({...entry.before,...entry.after}).slice(0,5);
+  return keys.map((key)=>entry.before&&entry.after?`${key}: ${shortValue(entry.before[key])} → ${shortValue(entry.after[key])}`:`${key}: ${shortValue((entry.after??entry.before)?.[key])}`).join(" · ");
+}
+
+function AuditTab({data}:{data:AdminData}){
+  const [table,setTable]=useState("");
+  const names=new Map(data.users.map((user)=>[user.id,user.firstName]));
+  const tables=[...new Set(data.audit.map((entry)=>entry.table))];
+  const shown=data.audit.filter((entry)=>!table||entry.table===table);
+  return <article className="team-agent"><h3>Historial de cambios</h3>
+    <p className="team-empty">Las últimas 200 acciones. Nadie puede modificar ni borrar este historial.</p>
+    <div className="panel-filters"><select value={table} onChange={(event)=>setTable(event.target.value)} aria-label="Sección"><option value="">Todas las secciones</option>{tables.map((id)=><option key={id} value={id}>{tableNames[id]??id}</option>)}</select></div>
+    {!shown.length&&<p className="team-empty">Todavía no hay cambios registrados.</p>}
+    <ul className="team-drafts">{shown.map((entry)=>{
+      const who=entry.actorId?names.get(entry.actorId)??"Cuenta eliminada":entry.origin==="base"?"Sistema":"Servidor";
+      const record=entry.recordId&&(names.get(entry.recordId)??(entry.recordId.length>12?entry.recordId.slice(0,8):`#${entry.recordId}`));
+      const line=changeLine(entry);
+      return <li key={entry.id}><div>
+        <small>{when(entry.createdAt)} · {who} · {tableNames[entry.table]??entry.table}</small>
+        <b>{actionNames[entry.action]??entry.action}{record?` · ${record}`:""}</b>
+        {entry.reason&&<p>Motivo: {entry.reason}</p>}
+        {line&&<span>{line}</span>}
+      </div></li>;
+    })}</ul>
+  </article>;
 }

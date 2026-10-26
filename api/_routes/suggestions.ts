@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const message = String(body.message ?? "").trim();
     if (message.length < 5 || message.length > 600) return Response.json({ error: "Escribe entre 5 y 600 caracteres." }, { status: 400 });
 
+    // A blocked account can still write: it is often how they ask about the block.
     const user = await sessionUser(request).catch(() => null);
     const { error } = await getSupabase().from("suggestions").insert({ user_id: user?.id ?? null, role: user?.role ?? "guest", message });
     if (error) throw error;
