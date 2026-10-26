@@ -77,7 +77,7 @@ Las cuentas son de Supabase Auth (correo y contraseña) y el rol vive en `app_us
 
 ## Agentes y panel del equipo
 
-`/equipo` muestra por sección qué hizo cada agente y los eventos que esperan aprobación (Pendientes, Subidos, Descartados). Se entra con `TEAM_PANEL_KEY` (mínimo 12 caracteres) o con la sesión de un boss.
+`/equipo` muestra por sección qué hizo cada agente y los eventos que esperan aprobación (Pendientes, Subidos, Descartados). Solo entra la cuenta admin (hay una sola), desde el botón «Agentes» de `/panel`.
 
 - **Eventos:** el agente busca eventos y los entrega a `POST /api/agent-events`, que valida cada uno, omite los repetidos, los guarda con `status = 'draft'` y registra la corrida en `agent_runs`. La ruta se protege con `AGENT_KEY` (mínimo 24 caracteres), que solo sirve para proponer borradores. Un evento se publica cuando una persona lo aprueba.
 - **Resumen semanal:** `GET /api/cron-summary` cuenta la actividad de los últimos 7 días (solo cantidades) y lista lo que necesita atención. Vercel Cron la llama cada lunes (`vercel.json`) enviando `CRON_SECRET`.

@@ -1,5 +1,6 @@
 import { requireRole } from "./_auth.js";
-import { ACTIVE_HOURS, businessColumns, reviewPlaceId, toManagedBusiness } from "./_business.js";
+import { ACTIVE_HOURS, businessColumns, PHOTO_BUCKET, reviewPlaceId, toManagedBusiness } from "./_business.js";
+import { MAX_SERVICES, readService, serviceColumns, servicePhotos, toManagedService } from "./_services.js";
 import { getSupabase } from "./_supabase.js";
 
 const noStore = { "Cache-Control": "no-store" };
@@ -7,7 +8,14 @@ const HOUR = 3600000, DAY = 86400000, MAX_PROMOTIONS = 5, MAX_PROMOTION_DAYS = 1
 const text = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 const fail = (error: string, status = 400) => Response.json({ error }, { status, headers: noStore });
 
-// The owner's side of the panel and of the app: their businesses, promotions, benefits and the reviews they received.
+// Whether this business account is approved. A rejected one keeps its data but cannot change anything.
+async function approvalOf(userId: string) {
+  const { data, error } = await getSupabase().from("tbl_usuarios").select("aprobacion, aprobacion_motivo").eq("id", userId).maybeSingle();
+  if (error) throw error;
+  return { approval: (data?.aprobacion ?? "aprobada") as "pendiente" | "aprobada" | "rechazada", reason: (data?.aprobacion_motivo ?? undefined) as string | undefined };
+}
+
+// The owner's side of the panel and of the app: their businesses, services, promotions, benefits and the reviews they received.
 export async function GET(request: Request) {
   const user = await requireRole(request, ["owner", "boss"]);
   if (user instanceof Response) return user;
@@ -17,11 +25,14 @@ export async function GET(request: Request) {
     const { data: rows, error } = await supabase.from("partners").select(businessColumns).eq("owner_id", user.id).order("name");
     if (error) throw error;
     const ids = rows.map((row) => row.id), placeIds = rows.map(reviewPlaceId);
-    const [promotions, benefits, reviews] = await Promise.all([
+    const [promotions, benefits, reviews, services, account] = await Promise.all([
       ids.length ? supabase.from("promotions").select("id, partner_id, title, description, valid_until, status").in("partner_id", ids).order("created_at", { ascending: false }) : { data: [], error: null },
       supabase.from("owner_benefits").select("id, title, detail").eq("status", "published").order("rank", { ascending: false }).order("id"),
       placeIds.length ? supabase.from("reviews").select("id, place_id, author_name, rating, comment, created_at").in("place_id", placeIds).eq("status", "published").order("created_at", { ascending: false }).limit(50) : { data: [], error: null },
+      ids.length ? supabase.from("services").select(serviceColumns).in("partner_id", ids).order("created_at") : { data: [], error: null },
+      approvalOf(user.id),
     ]);
+    if (services.error) throw services.error;
     if (promotions.error) throw promotions.error;
     if (benefits.error) throw benefits.error;
     if (reviews.error) throw reviews.error;
@@ -33,8 +44,10 @@ export async function GET(request: Request) {
           .map((promotion) => ({ id: promotion.id, title: promotion.title, description: promotion.description ?? undefined, validUntil: promotion.valid_until, status: promotion.status })),
         reviews: (reviews.data ?? []).filter((review) => review.place_id === reviewPlaceId(row))
           .map((review) => ({ id: review.id, authorName: review.author_name, rating: review.rating, comment: review.comment, createdAt: review.created_at })),
+        services: (services.data ?? []).filter((service) => service.partner_id === row.id).map(toManagedService),
       })),
       benefits: benefits.data ?? [],
+      account,
     }, { headers: noStore });
   } catch (error) {
     console.error("Unable to load owner panel", error);
@@ -50,6 +63,11 @@ export async function POST(request: Request) {
     const body = (await request.json()) as Record<string, unknown>;
     const action = String(body.action ?? "");
     const supabase = getSupabase();
+
+    if (user.role === "owner") {
+      const { approval, reason } = await approvalOf(user.id);
+      if (approval === "rechazada") return fail(`Tu solicitud como empresa fue rechazada${reason ? `: ${reason}` : "."}`, 403);
+    }
 
     // Every action is on one business, and only on a business of this account.
     const partnerId = Number(body.partnerId);
@@ -96,6 +114,36 @@ export async function POST(request: Request) {
       if (!Number.isSafeInteger(promotionId) || promotionId < 1) return fail("Promoción inválida.");
       const { error } = await supabase.from("promotions").delete().eq("id", promotionId).eq("partner_id", partnerId);
       if (error) throw error;
+      return Response.json({ ok: true }, { headers: noStore });
+    }
+
+    // A service, new or edited, always goes back to pending: the admin approves every version before travellers see it.
+    if (action === "save-service") {
+      const read = readService(body);
+      if ("error" in read) return fail(read.error);
+      const serviceId = Number(body.serviceId);
+      const row = { ...read.row, status: "pending", review_note: null, updated_at: new Date().toISOString() };
+      if (serviceId) {
+        const { data, error } = await supabase.from("services").update(row).eq("id", serviceId).eq("partner_id", partnerId).select("id");
+        if (error) throw error;
+        if (!data?.length) return fail("Ese servicio no pertenece a tu negocio.", 403);
+        return Response.json({ ok: true, id: serviceId }, { headers: noStore });
+      }
+      const { count, error: countError } = await supabase.from("services").select("*", { count: "exact", head: true }).eq("partner_id", partnerId);
+      if (countError) throw countError;
+      if ((count ?? 0) >= MAX_SERVICES) return fail(`Puedes tener hasta ${MAX_SERVICES} servicios por negocio.`);
+      const { data, error } = await supabase.from("services").insert({ ...row, partner_id: partnerId }).select("id").single();
+      if (error) throw error;
+      return Response.json({ ok: true, id: data.id }, { status: 201, headers: noStore });
+    }
+
+    if (action === "remove-service") {
+      const serviceId = Number(body.serviceId);
+      if (!Number.isSafeInteger(serviceId) || serviceId < 1) return fail("Servicio inválido.");
+      const { data, error } = await supabase.from("services").delete().eq("id", serviceId).eq("partner_id", partnerId).select("photos");
+      if (error) throw error;
+      const paths = (data ?? []).flatMap(servicePhotos);
+      if (paths.length) await supabase.storage.from(PHOTO_BUCKET).remove(paths);
       return Response.json({ ok: true }, { headers: noStore });
     }
 

@@ -1,5 +1,6 @@
 import type { RegionId } from "./chile-regions";
-import type { AdminData, OwnerData, PlaceRow } from "./panel";
+import type { AdminData, ManagedService, OwnerData, PlaceRow } from "./panel";
+import type { Service } from "./services-board";
 import type { Promotion } from "./traveller-home";
 
 // The data behind /panel?demo=owner|boss|tourist, kept in memory (a reload starts over), so each role's panel can be
@@ -14,12 +15,13 @@ let lastId=900;
 
 const store:Store={
   users:[
-    {id:"demo-tourist-3",email:"sofia@example.com",firstName:"Sofía",country:"Argentina",type:"cliente",level:"basico",state:"bloqueado",stateReason:"Publicó opiniones con publicidad de otro sitio.",stateAt:ago(2),createdAt:ago(5)},
-    {id:"demo-tourist-2",email:"lucas@example.com",firstName:"Lucas",country:"Brasil",type:"cliente",level:"medio",levelUntil:new Date(now+30*24*HOUR).toISOString(),state:"activo",createdAt:ago(30)},
-    {id:"demo-tourist",email:"emma@example.com",firstName:"Emma",country:"Francia",type:"cliente",level:"basico",state:"activo",createdAt:ago(72)},
-    {id:"demo-owner-2",email:"jorge@example.com",firstName:"Jorge",country:"Chile",type:"empresa",level:"alto",state:"activo",rut:"••.•••.678-5",createdAt:ago(216)},
-    {id:"demo-owner",email:"carolina@example.com",firstName:"Carolina",country:"Chile",type:"empresa",level:"premium",state:"activo",rut:"••.•••.432-1",createdAt:ago(288)},
-    {id:"demo-boss",email:"equipo@example.com",firstName:"Equipo",country:"Chile",type:"admin",level:"basico",state:"activo",createdAt:ago(960)},
+    {id:"demo-tourist-3",email:"sofia@example.com",firstName:"Sofía",country:"Argentina",type:"cliente",approval:"aprobada",level:"basico",state:"bloqueado",stateReason:"Publicó opiniones con publicidad de otro sitio.",stateAt:ago(2),createdAt:ago(5)},
+    {id:"demo-tourist-2",email:"lucas@example.com",firstName:"Lucas",country:"Brasil",type:"cliente",approval:"aprobada",level:"medio",levelUntil:new Date(now+30*24*HOUR).toISOString(),state:"activo",createdAt:ago(30)},
+    {id:"demo-tourist",email:"emma@example.com",firstName:"Emma",country:"Francia",type:"cliente",approval:"aprobada",level:"basico",state:"activo",createdAt:ago(72)},
+    {id:"demo-owner-2",email:"jorge@example.com",firstName:"Jorge",country:"Chile",type:"empresa",approval:"aprobada",level:"alto",state:"activo",rut:"••.•••.678-5",createdAt:ago(216)},
+    {id:"demo-owner",email:"carolina@example.com",firstName:"Carolina",country:"Chile",type:"empresa",approval:"aprobada",level:"premium",state:"activo",rut:"••.•••.432-1",createdAt:ago(288)},
+    {id:"demo-owner-3",email:"andes@example.com",firstName:"Matías",country:"Chile",type:"empresa",approval:"pendiente",level:"basico",state:"activo",createdAt:ago(3)},
+    {id:"demo-boss",email:"equipo@example.com",firstName:"Equipo",country:"Chile",type:"admin",approval:"aprobada",level:"basico",state:"activo",createdAt:ago(960)},
   ],
   levels:[
     {code:"basico",name:"Básico",order:1,clientBenefits:["Mapa y consejos de viaje"],businessBenefits:["Ficha en el mapa"],monthlyPrice:null},
@@ -32,6 +34,12 @@ const store:Store={
     {id:9002,actorId:"demo-boss",origin:"admin",action:"cambiar_nivel",table:"tbl_usuarios",recordId:"demo-owner",before:{nivel:"alto"},after:{nivel:"premium"},createdAt:ago(26)},
     {id:9001,origin:"base",action:"crear",table:"partners",recordId:"103",createdAt:ago(120)},
   ],
+  services:[
+    {id:701,partnerId:101,category:"food",title:"Desayuno chileno con café de especialidad",description:"Marraqueta, palta, huevos y café de grano tostado en Santiago. Ideal antes de subir al cerro Santa Lucía.",priceClp:9500,priceFrom:false,duration:"1 hora",languages:["ES","EN"],whatsapp:"+56 9 1111 2222",photos:[{path:"demo/centro.jpg",url:"/images/scenes/centro.jpg"}],status:"published",updatedAt:ago(40)},
+    {id:702,partnerId:102,category:"transfer",title:"Traslado aeropuerto – Santiago centro",description:"Auto con conductor desde el aeropuerto hasta tu alojamiento en Santiago, Providencia o Las Condes. Precio fijo por viaje.",priceClp:28000,priceFrom:true,duration:"40 minutos",languages:["ES"],phone:"+56 2 3000 0000",photos:[],status:"published",updatedAt:ago(60)},
+    {id:703,partnerId:104,category:"tour",title:"Trekking al Cajón del Maipo",description:"Caminata guiada de día completo con almuerzo de montaña y traslado desde Santiago. Nivel intermedio.",priceClp:45000,priceFrom:false,duration:"Día completo",languages:["ES","EN"],whatsapp:"+56 9 7777 8888",bookingUrl:"https://example.com/andes",photos:[{path:"demo/desierto.jpg",url:"/images/scenes/desierto.jpg"}],status:"pending",updatedAt:ago(2)},
+    {id:704,partnerId:103,category:"tour",title:"Noche de estrellas en el Elqui",description:"Observación astronómica con telescopio y guía en cielo oscuro.",priceFrom:false,languages:["ES","EN","PT"],photos:[],status:"rejected",reviewNote:"Agrega el precio o indica que es a convenir, y el punto de encuentro.",updatedAt:ago(30)},
+  ],
   places:[
     {id:"precolombino",name:"Museo Chileno de Arte Precolombino",category:"museum",region:"RM",locality:"Santiago",address:"Bandera 361, Santiago",rating:4.7,source:"curated",status:"published"},
     {id:"cerro-santa-lucia",name:"Cerro Santa Lucía",category:"view",region:"RM",locality:"Santiago",address:"Av. Libertador Bernardo O'Higgins",rating:4.6,source:"curated",status:"published"},
@@ -42,6 +50,7 @@ const store:Store={
     {id:101,kind:"venue",name:"Café La Esquina",region:"RM",phone:"+56 2 2000 0000",whatsapp:"+56 9 1111 2222",url:"https://example.com/cafe-la-esquina",address:"José Victorino Lastarria 300, Santiago",languages:["ES","EN"],status:"published",ownerId:"demo-owner",active:true,activeUntil:new Date(now+7*HOUR).toISOString(),reviewPlaceId:"partner-101",
       photos:[{path:"demo/centro.jpg",status:"published",url:"/images/scenes/centro.jpg"},{path:"demo/mar.jpg",status:"pending",url:"/images/scenes/mar.jpg"}]},
     {id:102,kind:"radio_taxi",name:"Radio Taxi Cordillera",region:"RM",phone:"+56 2 3000 0000",languages:["ES"],status:"published",ownerId:"demo-owner-2",active:false,reviewPlaceId:"partner-102",photos:[]},
+    {id:104,kind:"tour",name:"Andes Trekking",region:"RM",languages:["ES","EN"],status:"draft",ownerId:"demo-owner-3",active:false,reviewPlaceId:"partner-104",photos:[]},
     {id:103,kind:"tour",name:"Tour Cielos del Elqui",region:"CO",url:"https://example.com/cielos-del-elqui",languages:["ES","EN","PT"],status:"draft",active:false,reviewPlaceId:"partner-103",
       photos:[{path:"demo/desierto.jpg",status:"pending",url:"/images/scenes/desierto.jpg"}]},
   ],
@@ -101,6 +110,8 @@ function act(path:string,body:Body,me:string){
     if(action==="update-contact")Object.assign(business,{phone:text(body,"phone")||undefined,whatsapp:text(body,"whatsapp")||undefined,url:text(body,"url")||undefined,address:text(body,"address")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase())});
     if(action==="add-promotion")store.promotions.unshift({id:++lastId,partnerId:business.id,title:text(body,"title"),description:text(body,"description")||undefined,validUntil:text(body,"validUntil"),status:"pending"});
     if(action==="remove-promotion")store.promotions=store.promotions.filter((item)=>item.id!==Number(body.promotionId));
+    if(action==="save-service")saveService(business.id,body);
+    if(action==="remove-service")store.services=store.services.filter((item)=>item.id!==Number(body.serviceId));
     return;
   }
   if(path!=="/api/admin")return;
@@ -110,6 +121,7 @@ function act(path:string,body:Body,me:string){
     if(action==="edit-user"){Object.assign(user,{firstName:text(body,"firstName"),country:text(body,"country")});note(me,"editar_perfil","tbl_usuarios",user.id)}
     if(action==="set-type"){
       if(self)throw new Error("No puedes cambiar tu propio tipo de cuenta.");
+      if(text(body,"type")==="admin")throw new Error("Solo puede haber una cuenta admin.");
       note(me,"cambiar_tipo","tbl_usuarios",user.id,{before:{tipo_cuenta:user.type},after:{tipo_cuenta:text(body,"type")}});
       user.type=text(body,"type") as typeof user.type;
     }
@@ -140,6 +152,17 @@ function act(path:string,body:Body,me:string){
       note(me,"eliminar_cuenta","tbl_usuarios",user.id,{before:{tipo_cuenta:user.type,nivel:user.level},reason});
     }
   }
+  if(user&&(action==="approve-business"||action==="reject-business")){
+    const approve=action==="approve-business",reason=approve?undefined:reasonOf(body);
+    Object.assign(user,{approval:approve?"aprobada":"rechazada",approvalReason:reason});
+    if(approve)for(const item of store.businesses)if(item.ownerId===user.id)item.status="published";
+    note(me,approve?"aprobar_empresa":"rechazar_empresa","tbl_usuarios",user.id,{reason});
+  }
+  if(action==="service-status"){
+    const service=store.services.find((item)=>item.id===id),next=status(body) as ManagedService["status"];
+    if(next==="rejected"&&text(body,"note").length<5)throw new Error("Escribe el motivo (al menos 5 letras). La empresa lo verá.");
+    if(service)Object.assign(service,{status:next,reviewNote:next==="rejected"?text(body,"note"):undefined});
+  }
   if(action==="save-level"){
     const level=store.levels.find((item)=>item.code===text(body,"code"));
     const list=(key:string)=>text(body,key).split("\n").map((item)=>item.trim()).filter(Boolean);
@@ -151,12 +174,12 @@ function act(path:string,body:Body,me:string){
   }
   if(action==="delete"){
     const reason=reasonOf(body),kind=text(body,"kind");
-    const lists={review:"reviews",suggestion:"suggestions",application:"applications",promotion:"promotions",business:"businesses"} as const;
-    const tables={review:"reviews",suggestion:"suggestions",application:"business_applications",promotion:"promotions",business:"partners"} as const;
+    const lists={review:"reviews",suggestion:"suggestions",application:"applications",promotion:"promotions",business:"businesses",service:"services"} as const;
+    const tables={review:"reviews",suggestion:"suggestions",application:"business_applications",promotion:"promotions",business:"partners",service:"services"} as const;
     const key=kind as keyof typeof lists;
     if(lists[key]){
       (store[lists[key]] as {id:number}[])=(store[lists[key]] as {id:number}[]).filter((item)=>item.id!==id);
-      if(key==="business")store.promotions=store.promotions.filter((item)=>item.partnerId!==id);
+      if(key==="business"){store.promotions=store.promotions.filter((item)=>item.partnerId!==id);store.services=store.services.filter((item)=>item.partnerId!==id)}
       note(me,"borrar",tables[key],id,{reason});
     }
   }
@@ -183,12 +206,27 @@ function act(path:string,body:Body,me:string){
   if(action==="remove-benefit")store.benefits=store.benefits.filter((item)=>item.id!==id);
 }
 
+// Mimics save-service in api/_routes/owner.ts: any saved service goes back to pending.
+function saveService(partnerId:number,body:Body){
+  const title=text(body,"title"),description=text(body,"description"),price=text(body,"priceClp").replace(/[.\s$]/g,"");
+  if(title.length<3)throw new Error("Escribe el nombre del servicio (al menos 3 letras).");
+  if(description.length<10)throw new Error("Describe el servicio (al menos 10 letras).");
+  const fields={category:text(body,"category") as ManagedService["category"],title,description,priceClp:price?Number(price):undefined,priceFrom:Boolean(price)&&body.priceFrom===true,
+    duration:text(body,"duration")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase()),whatsapp:text(body,"whatsapp")||undefined,phone:text(body,"phone")||undefined,
+    bookingUrl:text(body,"bookingUrl")||undefined,status:"pending" as const,reviewNote:undefined,updatedAt:new Date().toISOString()};
+  const existing=store.services.find((item)=>item.id===Number(body.serviceId));
+  if(existing)Object.assign(existing,fields);
+  else store.services.push({id:++lastId,partnerId,photos:[],...fields});
+}
+
 function ownerView(me:string):OwnerData{
   return{
     businesses:store.businesses.filter((business)=>business.ownerId===me).map((business)=>({...business,
       promotions:store.promotions.filter((promotion)=>promotion.partnerId===business.id),
       reviews:store.reviews.filter((review)=>review.placeId===business.reviewPlaceId&&review.status==="published"),
+      services:store.services.filter((service)=>service.partnerId===business.id),
     })),
+    account:{approval:store.users.find((user)=>user.id===me)?.approval??"aprobada"},
     benefits:store.benefits.filter((benefit)=>benefit.status==="published"),
   };
 }
@@ -197,7 +235,7 @@ function adminView(me:string):AdminData{
   const names=new Map(store.businesses.map((business)=>[business.id,business.name]));
   // Places are searched apart (?places=), like the real route does.
   const rest:Partial<Store>={...store};delete rest.places;
-  return{me,...rest as Omit<Store,"places">,promotions:store.promotions.map((promotion)=>({...promotion,business:names.get(promotion.partnerId??0)??""}))};
+  return{me,...rest as Omit<Store,"places">,services:store.services.map((service)=>({...service,business:names.get(service.partnerId)??""})),promotions:store.promotions.map((promotion)=>({...promotion,business:names.get(promotion.partnerId??0)??""}))};
 }
 
 // What /api/promotions would answer for the traveller demo: approved promotions of published businesses in the region.
@@ -207,6 +245,17 @@ export async function demoPromotions(region:RegionId):Promise<Promotion[]>{
     const business=store.businesses.find((item)=>item.id===promotion.partnerId);
     return promotion.status==="published"&&business?.status==="published"&&business.region===region
       ?[{id:promotion.id,title:promotion.title,description:promotion.description,validUntil:promotion.validUntil,business:{name:business.name,address:business.address,active:business.active}}]:[];
+  });
+}
+
+// What /api/services would answer for the traveller demo: published services of published businesses in the region.
+export async function demoServices(region:RegionId):Promise<Service[]>{
+  await new Promise((done)=>setTimeout(done,200));
+  return store.services.flatMap((service)=>{
+    const business=store.businesses.find((item)=>item.id===service.partnerId);
+    if(service.status!=="published"||business?.status!=="published"||business.region!==region)return [];
+    const {id,category,title,description,priceClp,priceFrom,duration,languages,whatsapp,phone,bookingUrl}=service;
+    return [{id,category,title,description,priceClp,priceFrom,duration,languages,whatsapp,phone,bookingUrl,photos:service.photos.map((item)=>item.url),business:{id:business.id,name:business.name,address:business.address,active:business.active}}];
   });
 }
 
