@@ -94,7 +94,7 @@ function distanceKm(a:[number,number],b:[number,number]) {
 function displayDistance(km:number) { return km<1?`${Math.max(1,Math.round(km*1000))} m`:`${km.toFixed(1)} km`; }
 
 function isFreePlace(place:Place) {
-  return place.rating==="GRATIS" || Boolean(place.access?.es.toLocaleLowerCase("es").includes("gratuit"));
+  return place.rating==="GRATIS" || Boolean(place.access?.es?.toLocaleLowerCase("es").includes("gratuit"));
 }
 
 // Longitude tells the islands apart from the mainland: Rapa Nui lies near 109°W, Juan Fernández near 79°W.
@@ -490,11 +490,11 @@ export default function MapExplorer() {
             <div className="detail-accent" style={{background:colors[selected.category]}} />
             {selected.photo&&<figure className="detail-photo"><img src={selected.photo.src} alt={selected.photo.alt}/><figcaption>© <a href={selected.photo.url} target="_blank" rel="noreferrer">{selected.photo.credit}</a></figcaption></figure>}
             <div className="detail-head"><p>{categoryName(selected.category)}</p><h2>{selected.name}</h2>{selected.rating!=="—"&&<span className="google-score">{/^\d/.test(selected.rating)?`★ ${selected.rating}${selected.reviews?` · ${selected.reviews}`:""}`:selected.rating}</span>}{selected.tag?<span className="detail-tag">{selected.tag[locale]}</span>:selected.curated&&<span className="detail-tag">{rt.curated}</span>}{badge(selected,true)}</div>
-            <p className="detail-summary">{selected.summary?.[locale]??(selected.source==="osm"?rt.osm:`${rt.imported}${selected.checkedAt?` ${rt.checked} ${new Intl.DateTimeFormat(locale,{dateStyle:"medium"}).format(new Date(selected.checkedAt))}.`:""}`)}</p>
+            <p className="detail-summary">{selected.summary?.[locale]??selected.summary?.es??(selected.source==="osm"?rt.osm:`${rt.imported}${selected.checkedAt?` ${rt.checked} ${new Intl.DateTimeFormat(locale,{dateStyle:"medium"}).format(new Date(selected.checkedAt))}.`:""}`)}</p>
             <button type="button" className={`favorite-button ${favoriteIds.includes(selected.id)?"active":""}`} onClick={()=>toggleFavorite(selected.id)}>{favoriteIds.includes(selected.id)?"♥":"♡"} {favoriteIds.includes(selected.id)?at.saved:at.save}</button>
             {selected.languages&&<div className="language-row"><b>{t.languages}</b>{selected.languages.map((language)=><span key={language}>{language}</span>)}</div>}
             <h3 className="practical-title">{at.practical}</h3>
-            <dl className="facts"><div><dt>{t.neighborhood}</dt><dd>{selected.neighborhood}</dd></div>{selected.address&&<div className="fact-address"><dt>{addressCopy[locale]}</dt><dd>{selected.address}</dd></div>}{selected.visit&&<div><dt>{t.time}</dt><dd>{selected.visit}</dd></div>}{selected.hours&&<div className={selected.hours.length>60?"fact-address":undefined}><dt>{xt.hours}</dt><dd>{selected.hours}</dd></div>}{selected.access&&<div><dt>{xt.access}</dt><dd>{selected.access[locale]}</dd></div>}{selected.rating!=="—"&&<div><dt>{t.googleRating}</dt><dd>{selected.rating}</dd></div>}<div><dt>{t.community}</dt><dd>{summary.average?`★ ${summary.average} · ${summary.count} ${t.reviewsCount}`:`—`}</dd></div></dl>
+            <dl className="facts"><div><dt>{t.neighborhood}</dt><dd>{selected.neighborhood}</dd></div>{selected.address&&<div className="fact-address"><dt>{addressCopy[locale]}</dt><dd>{selected.address}</dd></div>}{selected.visit&&<div><dt>{t.time}</dt><dd>{selected.visit}</dd></div>}{selected.hours&&<div className={selected.hours.length>60?"fact-address":undefined}><dt>{xt.hours}</dt><dd>{selected.hours}</dd></div>}{selected.access?.[locale]&&<div><dt>{xt.access}</dt><dd>{selected.access[locale]}</dd></div>}{selected.rating!=="—"&&<div><dt>{t.googleRating}</dt><dd>{selected.rating}</dd></div>}<div><dt>{t.community}</dt><dd>{summary.average?`★ ${summary.average} · ${summary.count} ${t.reviewsCount}`:`—`}</dd></div></dl>
             <div className="directions"><b>{at.directions}</b><div><a href={directionsUrl(selected,"walking")} target="_blank" rel="noreferrer">🚶 {at.walk}</a><a href={directionsUrl(selected,"transit")} target="_blank" rel="noreferrer">▣ {at.transit}</a><a href={directionsUrl(selected,"driving")} target="_blank" rel="noreferrer">🚗 {at.drive}</a></div></div>
             <a className="maps-link" href={mapsUrl(selected)} target="_blank" rel="noreferrer">{t.google}<span>↗</span></a>
             {selected.officialUrl&&<a className="official-link" href={selected.officialUrl} target="_blank" rel="noreferrer">{t.official}<span>↗</span></a>}

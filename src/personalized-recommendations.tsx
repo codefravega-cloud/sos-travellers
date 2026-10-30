@@ -11,7 +11,7 @@ const copy={
   pt:{eyebrow:"ESCOLHIDO PARA VOCÊ",title:"Seus passeios recomendados",lede:"Ordenamos os lugares conforme seus interesses, orçamento, grupo e ritmo. Você pode mudar as preferências quando quiser.",match:"Combina com sua viagem",free:"Grátis",days:"dias",people:"pessoas",see:"Ver detalhes e rota",privacy:"Estas recomendações são calculadas no seu dispositivo."},
   fr:{eyebrow:"CHOISI POUR VOUS",title:"Vos activités recommandées",lede:"Les lieux sont classés selon vos intérêts, budget, groupe et rythme. Vous pouvez modifier vos préférences à tout moment.",match:"Adapté à votre voyage",free:"Gratuit",days:"jours",people:"personnes",see:"Voir la fiche et l’itinéraire",privacy:"Ces recommandations sont calculées sur votre appareil."}
 };
-const isFree=(place:Place)=>place.rating==="GRATIS"||Boolean(place.access?.es.toLowerCase().includes("gratuit"));
+const isFree=(place:Place)=>place.rating==="GRATIS"||Boolean(place.access?.es?.toLowerCase().includes("gratuit"));
 
 function score(place:Place,profile:TravellerProfile){
   let value=0;
