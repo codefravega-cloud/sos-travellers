@@ -8,7 +8,7 @@ import ExclusiveGuides from "./exclusive-guides";
 import { type Locale, places } from "./places";
 import SafetyHub from "./safety-hub";
 import SceneImage, { sceneFor } from "./scene-image";
-import ServicesBoard, { fetchServices, type Service } from "./services-board";
+import ServicesBoard, { fetchCategories, fetchServices, type Category, type Service } from "./services-board";
 import TransportGuide from "./transport-guide";
 
 // What a signed-in traveller sees in /panel: the landing's sections, around their name and their region. Unlike the rest
@@ -35,7 +35,7 @@ async function fetchPromotions(region:RegionId):Promise<Promotion[]>{
   return ((await response.json()) as {promotions?:Promotion[]}).promotions??[];
 }
 
-export default function TravellerHome({name,country,banner,footer,onSignOut,loadPromotions=fetchPromotions,loadServices=fetchServices}:{name:string;country?:string;banner?:ReactNode;footer?:ReactNode;onSignOut:()=>void;loadPromotions?:(region:RegionId)=>Promise<Promotion[]>;loadServices?:(region:RegionId)=>Promise<Service[]>}){
+export default function TravellerHome({name,country,banner,footer,onSignOut,loadPromotions=fetchPromotions,loadServices=fetchServices,loadCategories=fetchCategories}:{name:string;country?:string;banner?:ReactNode;footer?:ReactNode;onSignOut:()=>void;loadPromotions?:(region:RegionId)=>Promise<Promotion[]>;loadServices?:(region:RegionId)=>Promise<Service[]>;loadCategories?:()=>Promise<Category[]>}){
   const [locale,setLocale]=useState<Locale>(()=>{const value=stored("sos-language");return locales.includes(value as Locale)?value as Locale:"es"});
   const [currency,setCurrency]=useState(()=>stored("sos-currency")??"CLP");
   const [region,setRegion]=useState<RegionId>(()=>{const value=stored("sos-region");return regions.some((item)=>item.id===value)?value as RegionId:"RM"});
@@ -89,7 +89,7 @@ export default function TravellerHome({name,country,banner,footer,onSignOut,load
             :<p>{saved.length?`${saved.length} · `:""}{t.savedEmpty}</p>}</div>
         </section>
 
-        <ServicesBoard locale={locale} region={region} loadServices={loadServices}/>
+        <ServicesBoard locale={locale} region={region} loadServices={loadServices} loadCategories={loadCategories}/>
 
         <EventsToday locale={locale} region={region} now={now}/>
 

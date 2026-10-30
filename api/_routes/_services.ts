@@ -1,10 +1,9 @@
 import { isActive, photoUrl } from "./_business.js";
+import { validCategoryId } from "./_categories.js";
 
 // Shapes and rules shared by the routes that deal with a service (a row of `services`, see 202610260003_services.sql).
 export const MAX_SERVICES = 10;
 export const MAX_SERVICE_PHOTOS = 3;
-// Mirrors the category check in the migration and the lists in src/services.ts and the app.
-export const serviceCategories = new Set(["tour", "transfer", "stay", "food", "experience", "guide", "other"]);
 export const serviceColumns = "id, partner_id, category, title, description, price_clp, price_from, duration, languages, whatsapp, phone, booking_url, photos, status, review_note, updated_at";
 
 type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -45,13 +44,14 @@ export function toManagedService(row: Row) {
 export const publicBusinessOf = (partner: Row) => ({
   id: partner.id as number, name: partner.name as string, kind: partner.kind as string,
   address: (partner.address ?? undefined) as string | undefined, active: isActive(partner),
+  categoryId: (partner.category_id ?? undefined) as string | undefined, lat: (partner.lat ?? undefined) as number | undefined, lng: (partner.lng ?? undefined) as number | undefined,
 });
 
 // Reads the fields a business sends for a service, checked like the SQL constraints. Returns the row or an error message.
 export function readService(body: Record<string, unknown>): { row: Row } | { error: string } {
-  const category = text(body.category, 12), title = text(body.title, 80), description = text(body.description, 600);
+  const category = text(body.category, 40), title = text(body.title, 80), description = text(body.description, 600);
   const price = text(body.priceClp, 9).replace(/[.\s$]/g, ""), bookingUrl = text(body.bookingUrl, 300);
-  if (!serviceCategories.has(category)) return { error: "Elige el tipo de servicio." };
+  if (!validCategoryId(category)) return { error: "Elige el tipo de servicio." };
   if (title.length < 3) return { error: "Escribe el nombre del servicio (al menos 3 letras)." };
   if (description.length < 10) return { error: "Describe el servicio (al menos 10 letras)." };
   if (price && !/^\d{1,9}$/.test(price)) return { error: "El precio va en pesos, solo números." };

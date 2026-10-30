@@ -40,8 +40,12 @@ export function toManagedBusiness(row: Row) {
     ownerId: (row.owner_id ?? undefined) as string | undefined,
     placeId: (row.place_id ?? undefined) as string | undefined,
     activeUntil: isActive(row) ? (row.active_until as string) : undefined,
+    categoryId: (row.category_id ?? "other") as string,
+    proposedCategoryId: (row.proposed_category_id ?? undefined) as string | undefined,
+    lat: (row.lat ?? undefined) as number | undefined,
+    lng: (row.lng ?? undefined) as number | undefined,
     photos: photosOf(row).map((photo) => ({ path: photo.path, status: photo.status, url: photoUrl(photo.path) })),
   };
 }
 
-export const businessColumns = "id, kind, name, phone, whatsapp, url, address, region, languages, note, rank, status, owner_id, place_id, active_until, photos";
+export const businessColumns = "id, kind, name, phone, whatsapp, url, address, region, languages, note, rank, status, owner_id, place_id, active_until, photos, category_id, proposed_category_id, lat, lng";

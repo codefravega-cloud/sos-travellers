@@ -1,5 +1,7 @@
 import { requireRole } from "./_auth.js";
 import { ACTIVE_HOURS, businessColumns, PHOTO_BUCKET, reviewPlaceId, toManagedBusiness } from "./_business.js";
+import { allPublished, MAX_PENDING_CATEGORIES, placement, proposeCategory, publishedKind } from "./_categories.js";
+import { readPoint } from "./_prospects.js";
 import { MAX_SERVICES, readService, serviceColumns, servicePhotos, toManagedService } from "./_services.js";
 import { getSupabase } from "./_supabase.js";
 
@@ -95,6 +97,29 @@ export async function POST(request: Request) {
       return Response.json({ ok: true }, { headers: noStore });
     }
 
+    // Its category and its point on the map. A category that is not on the list goes to the admin as a proposal.
+    if (action === "update-listing") {
+      const point = readPoint(body);
+      if ("error" in point) return fail(point.error);
+      const name = text(body.newCategory, 60), categoryId = text(body.categoryId, 40);
+      let changes: Record<string, unknown>;
+      if (name) {
+        const { count, error: countError } = await supabase.from("business_categories").select("*", { count: "exact", head: true }).eq("proposed_by", user.id).eq("status", "pending");
+        if (countError) throw countError;
+        if ((count ?? 0) >= MAX_PENDING_CATEGORIES) return fail(`Puedes tener hasta ${MAX_PENDING_CATEGORIES} categorías en revisión.`);
+        const proposed = await proposeCategory(supabase, name, user.id);
+        if ("error" in proposed) return fail(proposed.error);
+        changes = placement(proposed, proposed.status === "published" ? await publishedKind(supabase, proposed.id) : null);
+      } else {
+        const kind = await publishedKind(supabase, categoryId);
+        if (!kind) return fail("Elige una categoría de la lista.");
+        changes = placement({ id: categoryId, status: "published" }, kind);
+      }
+      const { error } = await supabase.from("partners").update({ ...changes, ...point }).eq("id", partnerId);
+      if (error) throw error;
+      return Response.json({ ok: true }, { headers: noStore });
+    }
+
     if (action === "add-promotion") {
       const title = text(body.title, 80), description = text(body.description, 300), validUntil = text(body.validUntil, 10);
       if (title.length < 3) return fail("Escribe un título para la promoción.");
@@ -121,6 +146,7 @@ export async function POST(request: Request) {
     if (action === "save-service") {
       const read = readService(body);
       if ("error" in read) return fail(read.error);
+      if (!await allPublished(supabase, [read.row.category])) return fail("Elige el tipo de servicio.");
       const serviceId = Number(body.serviceId);
       const row = { ...read.row, status: "pending", review_note: null, updated_at: new Date().toISOString() };
       if (serviceId) {

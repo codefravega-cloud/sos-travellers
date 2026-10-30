@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: ZONE }).format(new Date());
     const { data, error } = await getSupabase().from("promotions")
-      .select("id, title, description, valid_until, partners!inner(id, name, kind, region, status, address, active_until)")
+      .select("id, title, description, valid_until, partners!inner(id, name, kind, region, status, address, active_until, category_id)")
       .eq("status", "published").gte("valid_until", today)
       .eq("partners.region", region).eq("partners.status", "published")
       .order("valid_until").limit(60);
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       const partner = (Array.isArray(row.partners) ? row.partners[0] : row.partners) as Record<string, unknown>;
       return {
         id: row.id, title: row.title, description: row.description ?? undefined, validUntil: row.valid_until,
-        business: { id: partner.id, name: partner.name, kind: partner.kind, address: partner.address ?? undefined, active: isActive(partner) },
+        business: { id: partner.id, name: partner.name, kind: partner.kind, categoryId: partner.category_id, address: partner.address ?? undefined, active: isActive(partner) },
       };
     });
     return Response.json({ region, promotions }, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900" } });
