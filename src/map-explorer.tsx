@@ -180,6 +180,7 @@ export default function MapExplorer() {
   const watchIdRef=useRef<number|null>(null);
   const pendingLocationRef=useRef<PendingLocation|null>(null);
   const detailRef=useRef<HTMLElement>(null);
+  const localityRef=useRef("");
   const t=copy[locale],lt=locationCopy[locale],xt=extraCopy[locale],at=actionCopy[locale],landing=landingCopy[locale],rt=regionCopy[locale],mc=metroCopy[locale],sc=specialtyCopy[locale];
   const freePlaces=useMemo(()=>places.filter(isFreePlace),[places]);
   const categoryName=(value:Category)=>(value in xt?xt[value as keyof typeof xt]:(t as unknown as Record<string,string>)[value]);
@@ -322,7 +323,14 @@ export default function MapExplorer() {
   // A locality picked in the hero search narrows the list to that city or town.
   function changeRegion(next:RegionId|null,locality="",nextIsland?:string) {
     setRegion(next);setIsland(nextIsland??null);setCategory("all");setComuna("");setQuery(locality);
+    localityRef.current=locality;
   }
+  // A town with no places of its own yet falls back to the whole region instead of an empty list.
+  useEffect(()=>{
+    if(placesLoading||!localityRef.current||query!==localityRef.current) return;
+    localityRef.current="";
+    if(!shown.length) setQuery("");
+  },[placesLoading,shown,query]);
 
   function exploreRegion(next:RegionId) {
     changeRegion(next);
