@@ -11,9 +11,13 @@ type Body=Record<string,unknown>;
 const HOUR=3600000,now=Date.now();
 const ago=(hours:number)=>new Date(now-hours*HOUR).toISOString();
 const inDays=(days:number)=>new Date(now+days*24*HOUR).toISOString().slice(0,10);
-let lastId=900;
+let lastId=900,savedProspect=0;
 
 const store:Store={
+  prospects:[
+    {id:601,contactName:"Paula Rojas",contactEmail:"paula@example.com",contactPhone:"+56 9 3333 4444",businessName:"Kayak Sur",kind:"tour",region:"LL",comuna:"Puerto Varas",whatsapp:"+56 9 3333 4444",languages:["ES","EN"],description:"Salidas en kayak por el lago Llanquihue.",services:[{category:"tour",title:"Kayak al atardecer",description:"Salida guiada de dos horas con equipo incluido.",priceClp:"35000",languages:["ES","EN"]}],notes:"Contactada en la feria de turismo. Responde por WhatsApp.",status:"prospecto",createdAt:ago(52)},
+    {id:602,contactName:"Diego Soto",contactEmail:"diego@example.com",businessName:"Traslados Elqui",kind:"other",region:"CO",comuna:"Vicuña",languages:["ES"],services:[],status:"invitada",invitedAt:ago(20),createdAt:ago(96)},
+  ],
   users:[
     {id:"demo-tourist-3",email:"sofia@example.com",firstName:"Sofía",country:"Argentina",type:"cliente",approval:"aprobada",level:"basico",state:"bloqueado",stateReason:"Publicó opiniones con publicidad de otro sitio.",stateAt:ago(2),createdAt:ago(5)},
     {id:"demo-tourist-2",email:"lucas@example.com",firstName:"Lucas",country:"Brasil",type:"cliente",approval:"aprobada",level:"medio",levelUntil:new Date(now+30*24*HOUR).toISOString(),state:"activo",createdAt:ago(30)},
@@ -174,8 +178,8 @@ function act(path:string,body:Body,me:string){
   }
   if(action==="delete"){
     const reason=reasonOf(body),kind=text(body,"kind");
-    const lists={review:"reviews",suggestion:"suggestions",application:"applications",promotion:"promotions",business:"businesses",service:"services"} as const;
-    const tables={review:"reviews",suggestion:"suggestions",application:"business_applications",promotion:"promotions",business:"partners",service:"services"} as const;
+    const lists={review:"reviews",suggestion:"suggestions",application:"applications",promotion:"promotions",business:"businesses",service:"services",prospect:"prospects"} as const;
+    const tables={review:"reviews",suggestion:"suggestions",application:"business_applications",promotion:"promotions",business:"partners",service:"services",prospect:"company_prospects"} as const;
     const key=kind as keyof typeof lists;
     if(lists[key]){
       (store[lists[key]] as {id:number}[])=(store[lists[key]] as {id:number}[]).filter((item)=>item.id!==id);
@@ -183,6 +187,25 @@ function act(path:string,body:Body,me:string){
       note(me,"borrar",tables[key],id,{reason});
     }
   }
+  const prospect=store.prospects.find((item)=>item.id===id);
+  if(action==="save-prospect"){
+    if(text(body,"businessName").length<2)throw new Error("Escribe el nombre de la empresa.");
+    const fields={contactName:text(body,"contactName"),contactEmail:text(body,"contactEmail"),contactPhone:text(body,"contactPhone")||undefined,businessName:text(body,"businessName"),kind:text(body,"kind"),region:text(body,"region"),comuna:text(body,"comuna")||undefined,address:text(body,"address")||undefined,whatsapp:text(body,"whatsapp")||undefined,url:text(body,"url")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase()),description:text(body,"description")||undefined,services:body.services as Body[],notes:text(body,"notes")||undefined};
+    if(prospect){Object.assign(prospect,fields);savedProspect=prospect.id}
+    else{savedProspect=++lastId;store.prospects.unshift({id:savedProspect,status:"prospecto",createdAt:new Date().toISOString(),...fields});note(me,"crear_prospecto","company_prospects",savedProspect)}
+  }
+  if(action==="invite-company"&&prospect){
+    if(prospect.contactName.length<2)throw new Error("Falta el nombre de la persona de contacto.");
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(prospect.contactEmail))throw new Error("Falta un correo válido para enviar la clave.");
+    const userId=`demo-company-${++lastId}`,created=++lastId,at=new Date().toISOString();
+    store.users.unshift({id:userId,email:prospect.contactEmail,firstName:prospect.contactName,country:"Chile",type:"empresa",approval:"aprobada",level:"basico",state:"activo",createdAt:at});
+    store.businesses.push({id:created,kind:prospect.kind,name:prospect.businessName,region:prospect.region,phone:prospect.contactPhone,whatsapp:prospect.whatsapp,url:prospect.url,address:prospect.address,languages:prospect.languages,status:"published",ownerId:userId,active:false,reviewPlaceId:`partner-${created}`,photos:[]});
+    for(const service of prospect.services)saveService(created,service);
+    Object.assign(prospect,{status:"invitada",partnerId:created,userId,invitedAt:at});
+    note(me,"crear_empresa","tbl_usuarios",userId,{after:{negocio:prospect.businessName}});
+  }
+  if(action==="resend-invite"&&prospect){prospect.invitedAt=new Date().toISOString();note(me,"reenviar_clave","company_prospects",prospect.id)}
+  if(action==="discard-prospect"&&prospect){prospect.status="descartada";note(me,"descartar_prospecto","company_prospects",prospect.id)}
   if(action==="create-business"){
     const created=++lastId;
     store.businesses.push({id:created,kind:text(body,"kind"),name:text(body,"name"),region:text(body,"region"),phone:text(body,"phone")||undefined,url:text(body,"url")||undefined,address:text(body,"address")||undefined,languages:[],status:"draft",active:false,reviewPlaceId:`partner-${created}`,photos:[]});
@@ -212,7 +235,7 @@ function saveService(partnerId:number,body:Body){
   if(title.length<3)throw new Error("Escribe el nombre del servicio (al menos 3 letras).");
   if(description.length<10)throw new Error("Describe el servicio (al menos 10 letras).");
   const fields={category:text(body,"category") as ManagedService["category"],title,description,priceClp:price?Number(price):undefined,priceFrom:Boolean(price)&&body.priceFrom===true,
-    duration:text(body,"duration")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase()),whatsapp:text(body,"whatsapp")||undefined,phone:text(body,"phone")||undefined,
+    duration:text(body,"duration")||undefined,languages:((body.languages??[]) as string[]).map((item)=>item.toUpperCase()),whatsapp:text(body,"whatsapp")||undefined,phone:text(body,"phone")||undefined,
     bookingUrl:text(body,"bookingUrl")||undefined,status:"pending" as const,reviewNote:undefined,updatedAt:new Date().toISOString()};
   const existing=store.services.find((item)=>item.id===Number(body.serviceId));
   if(existing)Object.assign(existing,fields);
@@ -270,6 +293,7 @@ export async function demoApi(token:string,path:string,body?:Body):Promise<unkno
     return structuredClone({places:store.places.filter((place)=>(!words||place.name.toLowerCase().includes(words))&&(!region||place.region===region))});
   }
   if(route==="/api/owner")return structuredClone(ownerView(token));
-  if(route==="/api/admin")return structuredClone(adminView(token));
+  // Besides the whole view, what save-prospect and invite-company answer in the real route.
+  if(route==="/api/admin")return structuredClone({...adminView(token),id:savedProspect,mailed:true});
   return{ok:true};
 }

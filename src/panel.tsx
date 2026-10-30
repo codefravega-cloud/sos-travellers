@@ -28,7 +28,9 @@ type AuditEntry={id:number;actorId?:string;origin:"base"|"admin";action:string;t
 export type PlaceRow={id:string;name:string;category:string;region:string;locality:string;address?:string|null;rating?:number|null;source:string;status:"published"|"hidden"};
 type Application={id:number;businessName:string;contactName:string;email?:string;phone?:string;category:string;address:string;description:string;website?:string;interest:string;status:"pending"|"approved"|"rejected";createdAt:string};
 type Suggestion={id:number;role:string;message:string;status:"new"|"read"|"done";created_at:string};
-export type AdminData={me:string;users:Account[];levels:Level[];audit:AuditEntry[];services:ManagedService[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
+// A company the team is contacting (api/_routes/_prospects.ts toProspect).
+export type Prospect={id:number;contactName:string;contactEmail:string;contactPhone?:string;businessName:string;kind:string;region:string;comuna?:string;address?:string;whatsapp?:string;url?:string;languages:string[];description?:string;services:Record<string,unknown>[];notes?:string;status:"prospecto"|"invitada"|"activa"|"descartada";applicationId?:number;partnerId?:number;userId?:string;invitedAt?:string;createdAt:string};
+export type AdminData={me:string;prospects:Prospect[];users:Account[];levels:Level[];audit:AuditEntry[];services:ManagedService[];businesses:Business[];applications:Application[];reviews:Review[];suggestions:Suggestion[];promotions:Promotion[];benefits:Benefit[]};
 
 const ZONE="America/Santiago",TEAM_KEY="sos-team-key",MAX_PHOTO_BYTES=5*1024*1024,MIN_PASSWORD=8;
 const kindNames:Record<string,string>={radio_taxi:"Radio taxi",venue:"Local",tour:"Tour",other:"Otro"};
@@ -49,7 +51,7 @@ async function api<T>(token:string,path:string,body?:Record<string,unknown>):Pro
   if(demo)return (await import("./panel-demo")).demoApi(token,path,body) as Promise<T>;
   const response=await fetch(path,{method:body?"POST":"GET",headers:{Authorization:`Bearer ${token}`,...(body?{"Content-Type":"application/json"}:{})},body:body?JSON.stringify(body):undefined});
   const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw new Error(data.error||"No pudimos completar la acción.");
+  if(!response.ok)throw Object.assign(new Error(data.error||"No pudimos completar la acción."),{code:data.code as string|undefined});
   return data as T;
 }
 // /panel?demo=owner (or boss, tourist) draws that role's panel with the sample data in panel-demo.ts, to show the panel
@@ -76,10 +78,11 @@ const message=(cause:unknown)=>cause instanceof Error&&cause.message?cause.messa
 function useRemote<T>(token:string,path:string){
   const [data,setData]=useState<T|null>(null);
   const [error,setError]=useState("");
+  const [code,setCode]=useState<string>();
   const [busy,setBusy]=useState(false);
   useEffect(()=>{
     let alive=true;
-    api<T>(token,path).then((loaded)=>{if(alive){setData(loaded);setError("")}}).catch((cause)=>{if(alive)setError(message(cause))});
+    api<T>(token,path).then((loaded)=>{if(alive){setData(loaded);setError("")}}).catch((cause)=>{if(alive){setError(message(cause));setCode((cause as {code?:string}).code)}});
     return()=>{alive=false};
   },[token,path]);
   const run=useCallback(async(action:()=>Promise<unknown>)=>{
@@ -88,7 +91,7 @@ function useRemote<T>(token:string,path:string){
     catch(cause){setError(message(cause))}
     finally{setBusy(false)}
   },[token,path]);
-  return{data,error,busy,run};
+  return{data,error,code,busy,run};
 }
 
 export default function Panel(){
@@ -152,7 +155,7 @@ export default function Panel(){
     </header>
     {demoBanner}
     {trialNote}
-    {mine?.role==="owner"&&<OwnerPanel token={token}/>}
+    {mine?.role==="owner"&&<OwnerPanel token={token} email={account.email??""}/>}
     {mine?.role==="boss"&&<BossPanel token={token}/>}
     {mine&&<SuggestionBox token={token}/>}
   </main>;
@@ -180,12 +183,10 @@ function DemoGate({role,onOpen}:{role:Role;onOpen:()=>void}){
   </main>;
 }
 
-// A traveller account is created with a name and a country only, as a Supabase anonymous user that lives in this
-// browser. A business account needs email and password, since it comes back to manage its services; it starts
-// pending until the admin approves it (202610260003_services.sql). Accounts with a password sign in with "in".
+// Only travellers create their own account here, with a name and a country, as a Supabase anonymous user that lives in
+// this browser. Companies get theirs from the admin ("Empresas" tab) and the admin account is set in Supabase.
 function SignIn(){
   const [mode,setMode]=useState<"in"|"up"|"reset"|"code">("up");
-  const [kind,setKind]=useState<"viajero"|"empresa">("viajero");
   const [email,setEmail]=useState("");
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
@@ -199,20 +200,6 @@ function SignIn(){
       const firstName=field(form,"firstName"),country=field(form,"country");
       if(firstName.length<2||country.length<2)return setError("Escribe tu nombre y tu país.");
       if(!new FormData(form).get("consent"))return setError("Debes aceptar para crear la cuenta.");
-      if(kind==="empresa"){
-        const businessName=field(form,"businessName");
-        if(businessName.length<2)return setError("Escribe el nombre de tu empresa.");
-        if(!isEmail(email.trim()))return setError("Escribe un correo válido.");
-        if(password.length<MIN_PASSWORD)return setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.`);
-        setBusy(true);
-        try{
-          const {data,error:failure}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{first_name:firstName,country,preferred_language:"es",preferred_currency:"CLP",tipo_cuenta:"empresa",business_name:businessName,business_kind:field(form,"businessKind"),business_region:field(form,"businessRegion")}}});
-          if(failure)setError(failure.status===422?"Ese correo ya tiene una cuenta. Usa «Entrar con correo y contraseña».":"No pudimos crear la cuenta. Intenta nuevamente.");
-          // With email confirmation on there is no session until the link in the email is opened.
-          else if(!data.session){setMode("in");setNotice("Te enviamos un correo para confirmar tu cuenta. Después entra con tu correo y contraseña.")}
-        }finally{setBusy(false)}
-        return;
-      }
       setBusy(true);
       try{
         // The profile row is created from this metadata by a database trigger (see the app_users migration).
@@ -246,22 +233,13 @@ function SignIn(){
     <form onSubmit={submit} key={mode}>
       <p className="team-eyebrow">SOS TRAVELLERS · PANEL</p>
       <h1>{titles[mode]}</h1>
-      {mode==="up"&&<div className="panel-kind" role="radiogroup" aria-label="Tipo de cuenta">
-        <button type="button" role="radio" aria-checked={kind==="viajero"} className={kind==="viajero"?"":"team-quiet"} onClick={()=>setKind("viajero")}>Soy viajero</button>
-        <button type="button" role="radio" aria-checked={kind==="empresa"} className={kind==="empresa"?"":"team-quiet"} onClick={()=>setKind("empresa")}>Ofrezco servicios</button>
-      </div>}
-      {mode==="up"&&<><label htmlFor="panel-name">{kind==="empresa"?"Tu nombre":"Nombre"}</label><input id="panel-name" name="firstName" autoComplete="given-name" maxLength={60}/>
+      {mode==="up"&&<><label htmlFor="panel-name">Nombre</label><input id="panel-name" name="firstName" autoComplete="given-name" maxLength={60}/>
         <label htmlFor="panel-country">País</label><input id="panel-country" name="country" autoComplete="country-name" maxLength={80}/></>}
-      {mode==="up"&&kind==="empresa"&&<>
-        <label htmlFor="panel-business">Nombre de la empresa</label><input id="panel-business" name="businessName" autoComplete="organization" maxLength={100}/>
-        <label htmlFor="panel-business-kind">Rubro</label><select id="panel-business-kind" name="businessKind" defaultValue="tour">{Object.entries(kindNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
-        <label htmlFor="panel-business-region">Región</label><select id="panel-business-region" name="businessRegion" defaultValue="RM">{regions.map((region)=><option key={region}>{region}</option>)}</select>
-      </>}
-      {(mode!=="up"||kind==="empresa")&&<><label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/></>}
+      {mode!=="up"&&<><label htmlFor="panel-email">Correo</label><input id="panel-email" type="email" autoComplete="email" value={email} onChange={(event)=>setEmail(event.target.value)} maxLength={160}/></>}
       {mode==="code"&&<><label htmlFor="panel-code">Código del correo</label><input id="panel-code" name="code" inputMode="numeric" autoComplete="one-time-code" maxLength={10}/></>}
-      {(mode==="in"||mode==="code"||(mode==="up"&&kind==="empresa"))&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
-      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> {kind==="empresa"?"Acepto que SOS Travellers guarde mis datos y los de mi empresa para administrar la cuenta y publicar mis servicios.":"Acepto que SOS Travellers guarde mi nombre y mi país para administrar mi cuenta."}</label>}
-      {mode==="up"&&<p className="team-empty">{kind==="empresa"?"Tu empresa queda en revisión hasta que el equipo de SOS Travellers la apruebe. Mientras tanto puedes preparar tus servicios.":"Sin correo ni contraseña: tu cuenta queda guardada en este navegador."}</p>}
+      {(mode==="in"||mode==="code")&&<><label htmlFor="panel-password">{mode==="code"?"Nueva contraseña":"Contraseña"}</label><input id="panel-password" name="password" type="password" autoComplete={mode==="in"?"current-password":"new-password"}/></>}
+      {mode==="up"&&<label className="panel-check"><input type="checkbox" name="consent"/> Acepto que SOS Travellers guarde mi nombre y mi país para administrar mi cuenta.</label>}
+      {mode==="up"&&<p className="team-empty">Sin correo ni contraseña: tu cuenta queda guardada en este navegador. Si tienes una empresa y recibiste tu clave por correo, entra con correo y contraseña.</p>}
       <button type="submit" disabled={busy}>{actions[mode]}</button>
       {error&&<p className="team-error" role="alert">{error}</p>}
       {notice&&<p className="panel-ok">{notice}</p>}
@@ -294,8 +272,39 @@ function SuggestionBox({token}:{token:string}){
   </section>;
 }
 
-function OwnerPanel({token}:{token:string}){
-  const {data,error,busy,run}=useRemote<OwnerData>(token,"/api/owner");
+// A company created by the admin replaces its temporary password here before seeing its panel (api/_routes/account.ts).
+function ChangePassword({token,email}:{token:string;email:string}){
+  const [error,setError]=useState("");
+  const [busy,setBusy]=useState(false);
+  async function submit(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    const form=event.currentTarget,password=String(new FormData(form).get("password")??""),again=String(new FormData(form).get("again")??"");
+    if(password.length<MIN_PASSWORD)return setError(`La contraseña debe tener al menos ${MIN_PASSWORD} caracteres.`);
+    if(password!==again)return setError("Las contraseñas no coinciden.");
+    setBusy(true);setError("");
+    try{
+      const response=await fetch("/api/account",{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({password})});
+      const data=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(data.error||"No pudimos guardar tu contraseña.");
+      // Changing the password ends the current session, so the company signs in again with the new one.
+      await supabase.auth.signInWithPassword({email,password});
+      window.location.reload();
+    }catch(cause){setError(message(cause));setBusy(false)}
+  }
+  return <section className="team-section"><article className="team-agent"><h3>Crea tu contraseña</h3>
+    <p className="team-summary">Entraste con una clave temporal. Antes de seguir, elige una contraseña que solo tú conozcas.</p>
+    <form className="panel-form" onSubmit={submit}>
+      <label>Contraseña nueva<input name="password" type="password" autoComplete="new-password" minLength={MIN_PASSWORD} maxLength={72} required/></label>
+      <label>Repite la contraseña<input name="again" type="password" autoComplete="new-password" minLength={MIN_PASSWORD} maxLength={72} required/></label>
+      <div className="team-actions wide"><button type="submit" disabled={busy}>Guardar contraseña</button></div>
+      {error&&<p className="team-error wide" role="alert">{error}</p>}
+    </form>
+  </article></section>;
+}
+
+function OwnerPanel({token,email}:{token:string;email:string}){
+  const {data,error,code,busy,run}=useRemote<OwnerData>(token,"/api/owner");
+  if(code==="cambiar_clave")return <ChangePassword token={token} email={email}/>;
   return <>
     {error&&<p className="team-error" role="alert">{error}</p>}
     {!data&&!error&&<p className="team-empty">Cargando…</p>}
@@ -441,7 +450,7 @@ function ServicesBlock({business,token,busy,run}:{business:Business;token:string
   </>;
 }
 
-function ServiceForm({service,busy,onSave}:{service?:ManagedService;busy:boolean;onSave:(fields:Record<string,unknown>)=>void}){
+function ServiceForm({service,busy,label,onSave}:{service?:ManagedService;busy:boolean;label?:string;onSave:(fields:Record<string,unknown>)=>void}){
   return <form className="panel-form" key={service?.updatedAt??"new"} onSubmit={(event)=>{event.preventDefault();const form=event.currentTarget;
     onSave({category:field(form,"category"),title:field(form,"title"),description:field(form,"description"),priceClp:field(form,"priceClp"),priceFrom:new FormData(form).get("priceFrom")==="on",
       duration:field(form,"duration"),languages:field(form,"languages").split(/[\s,]+/).filter(Boolean),whatsapp:field(form,"whatsapp"),phone:field(form,"phone"),bookingUrl:field(form,"bookingUrl")});
@@ -456,16 +465,16 @@ function ServiceForm({service,busy,onSave}:{service?:ManagedService;busy:boolean
     <label>WhatsApp<input name="whatsapp" defaultValue={service?.whatsapp} maxLength={30} placeholder="+56 9 1234 5678"/></label>
     <label>Teléfono<input name="phone" defaultValue={service?.phone} maxLength={30} autoComplete="tel"/></label>
     <label className="wide">Enlace para reservar (opcional)<input name="bookingUrl" defaultValue={service?.bookingUrl} maxLength={300} placeholder="https://"/></label>
-    <div className="team-actions wide"><button type="submit" disabled={busy}>{service?"Guardar y enviar a revisión":"Agregar y enviar a revisión"}</button></div>
+    <div className="team-actions wide"><button type="submit" disabled={busy}>{label??(service?"Guardar y enviar a revisión":"Agregar y enviar a revisión")}</button></div>
   </form>;
 }
 
-type BossTab="approvals"|"services"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"levels"|"places"|"benefits"|"audit";
+type BossTab="approvals"|"companies"|"services"|"reviews"|"suggestions"|"businesses"|"applications"|"users"|"levels"|"places"|"benefits"|"audit";
 type Act=(body:Record<string,unknown>)=>void;
 
 const levelCodes:LevelCode[]=["basico","medio","alto","premium"];
-const actionNames:Record<string,string>={crear:"Creó",editar:"Editó",borrar:"Eliminó",cambiar_tipo:"Cambió el tipo de cuenta",cambiar_nivel:"Cambió el nivel",bloquear:"Bloqueó la cuenta",desactivar:"Desactivó la cuenta",reactivar:"Reactivó la cuenta",editar_perfil:"Editó el perfil",cargar_rut:"Cargó el RUT",quitar_rut:"Quitó el RUT",eliminar_cuenta:"Eliminó la cuenta",editar_nivel:"Editó un nivel",ocultar_lugar:"Ocultó un lugar",publicar_lugar:"Publicó un lugar"};
-const tableNames:Record<string,string>={tbl_usuarios:"Usuarios",tbl_usuarios_privado:"Datos privados",tbl_niveles:"Niveles",partners:"Negocios",promotions:"Promociones",events:"Eventos",reviews:"Opiniones",suggestions:"Sugerencias",business_applications:"Solicitudes",places:"Lugares"};
+const actionNames:Record<string,string>={crear_prospecto:"Agregó la ficha",descartar_prospecto:"Descartó la ficha",crear_empresa:"Creó la cuenta de empresa",reenviar_clave:"Reenvió la clave",crear:"Creó",editar:"Editó",borrar:"Eliminó",cambiar_tipo:"Cambió el tipo de cuenta",cambiar_nivel:"Cambió el nivel",bloquear:"Bloqueó la cuenta",desactivar:"Desactivó la cuenta",reactivar:"Reactivó la cuenta",editar_perfil:"Editó el perfil",cargar_rut:"Cargó el RUT",quitar_rut:"Quitó el RUT",eliminar_cuenta:"Eliminó la cuenta",editar_nivel:"Editó un nivel",ocultar_lugar:"Ocultó un lugar",publicar_lugar:"Publicó un lugar"};
+const tableNames:Record<string,string>={company_prospects:"Empresas",tbl_usuarios:"Usuarios",tbl_usuarios_privado:"Datos privados",tbl_niveles:"Niveles",partners:"Negocios",promotions:"Promociones",events:"Eventos",reviews:"Opiniones",suggestions:"Sugerencias",business_applications:"Solicitudes",places:"Lugares"};
 const isoDay=(iso:string)=>new Intl.DateTimeFormat("en-CA",{timeZone:ZONE}).format(new Date(iso));
 
 // An action that needs a reason (block, delete…): the first click opens a field, the second one confirms.
@@ -487,6 +496,8 @@ function DeleteAction({what,busy,onConfirm}:{what:string;busy:boolean;onConfirm:
 function BossPanel({token}:{token:string}){
   const {data,error,busy,run}=useRemote<AdminData>(token,"/api/admin");
   const [tab,setTab]=useState<BossTab>("approvals");
+  // A business application that opens a new company file with what it already says.
+  const [seed,setSeed]=useState<Partial<Prospect>>();
   const act:Act=(body)=>void run(()=>api(token,"/api/admin",body));
   if(!data)return error?<p className="team-error" role="alert">{error}</p>:<p className="team-empty">Cargando…</p>;
 
@@ -498,6 +509,7 @@ function BossPanel({token}:{token:string}){
   const owners=data.users.filter((user)=>user.type!=="admin");
   const tabs:[BossTab,string,number|null][]=[
     ["approvals","Aprobaciones",pendingPhotos.length+pendingPromotions.length+pendingCompanies.length+pendingServices.length],
+    ["companies","Empresas",data.prospects.filter((item)=>item.status==="prospecto"||item.status==="invitada").length],
     ["services","Servicios",data.services.length],
     ["reviews","Opiniones",data.reviews.length],
     ["suggestions","Sugerencias",data.suggestions.filter((item)=>item.status==="new").length],
@@ -616,13 +628,14 @@ function BossPanel({token}:{token:string}){
       <ul className="team-drafts">{data.applications.map((item)=><li key={item.id}>
         <div><small>{item.category} · {when(item.createdAt)} · {statusNames[item.status]}</small><b>{item.businessName}</b><span>{item.contactName}{item.email?` · ${item.email}`:""}{item.phone?` · ${item.phone}`:""}</span><p>{item.description}</p><span>{item.address}</span></div>
         <div className="team-actions">
-          {item.status==="pending"&&<><button type="button" disabled={busy} onClick={()=>act({action:"create-business",applicationId:item.id,name:item.businessName,kind:"venue",region:"RM",phone:item.phone,url:item.website,address:item.address})}>Crear negocio</button>
+          {item.status==="pending"&&<><button type="button" disabled={busy} onClick={()=>{setSeed({applicationId:item.id,businessName:item.businessName,contactName:item.contactName,contactEmail:item.email,contactPhone:item.phone,url:item.website,address:item.address,description:item.description});setTab("companies")}}>Preparar ficha</button>
           <button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"application-status",id:item.id,status:"rejected"})}>Rechazar</button></>}
           <DeleteAction what="la solicitud" busy={busy} onConfirm={remove("application",item.id)}/>
         </div>
       </li>)}</ul>
     </article>}
 
+    {tab==="companies"&&<CompaniesTab data={data} token={token} seed={seed} busy={busy} run={run} act={act} remove={remove}/>}
     {tab==="users"&&<UsersTab data={data} busy={busy} act={act}/>}
     {tab==="levels"&&<LevelsTab data={data} busy={busy} act={act}/>}
     {tab==="places"&&<PlacesTab token={token} onChange={()=>run(async()=>{})}/>}
@@ -652,6 +665,106 @@ function ServiceSummary({service}:{service:ManagedService}){
     {service.status==="rejected"&&service.reviewNote&&<p className="panel-reason-note">Motivo: {service.reviewNote}</p>}
     {service.photos.length>0&&<div className="panel-thumbs">{service.photos.map((item)=><img key={item.path} src={item.url} alt={`Foto de ${service.title}`} loading="lazy"/>)}</div>}
   </div>;
+}
+
+const prospectNames:Record<Prospect["status"],string>={prospecto:"Prospecto",invitada:"Invitada: falta su contraseña",activa:"Activa",descartada:"Descartada"};
+const mailFailed="La cuenta está creada, pero el correo no salió. Revisa la dirección y usa «Reenviar clave».";
+
+// The companies the team is contacting. A file is saved without telling anyone; the account and its email go out only
+// when the admin says so (invite-company in api/_routes/admin.ts).
+function CompaniesTab({data,token,seed,busy,run,act,remove}:{data:AdminData;token:string;seed?:Partial<Prospect>;busy:boolean;run:(action:()=>Promise<unknown>)=>Promise<void>;act:Act;remove:(kind:string,id:number)=>(reason:string)=>void}){
+  const [query,setQuery]=useState("");
+  const [state,setState]=useState("");
+  const [editing,setEditing]=useState<Partial<Prospect>|undefined>(seed);
+  const [formKey,setFormKey]=useState(0);
+  const [notice,setNotice]=useState("");
+  const [warning,setWarning]=useState("");
+  const words=query.trim().toLowerCase();
+  const shown=data.prospects.filter((item)=>(!state||item.status===state)&&(!words||`${item.businessName} ${item.contactName} ${item.contactEmail} ${item.comuna??""}`.toLowerCase().includes(words)));
+  function open(prospect?:Partial<Prospect>){setEditing(prospect);setFormKey((key)=>key+1);setNotice("");setWarning("")}
+  function resend(id:number){
+    setNotice("");setWarning("");
+    void run(async()=>{const result=await api<{mailed:boolean}>(token,"/api/admin",{action:"resend-invite",id});if(result.mailed)setNotice("Enviamos una clave nueva.");else setWarning(mailFailed)});
+  }
+
+  return <article className="team-agent"><h3>Empresas</h3>
+    <p className="team-empty">Reúne aquí los datos de cada empresa. Guardarla no avisa a nadie; al crear la cuenta recibe por correo una clave temporal para entrar.</p>
+    {notice&&<p className="panel-ok" role="status">{notice}</p>}
+    {warning&&<p className="team-error" role="alert">{warning}</p>}
+    <ProspectForm key={formKey} prospect={editing} token={token} busy={busy} run={run} onSaved={(result)=>{open();if(result===null)setNotice("Ficha guardada.");else if(result)setNotice("Cuenta creada. Le enviamos la clave por correo.");else setWarning(mailFailed)}} onCancel={editing?()=>open():undefined}/>
+
+    <h4>Fichas ({shown.length} de {data.prospects.length})</h4>
+    <div className="panel-filters">
+      <input type="search" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Buscar por empresa, contacto o comuna" aria-label="Buscar empresas"/>
+      <select value={state} onChange={(event)=>setState(event.target.value)} aria-label="Estado"><option value="">Todos los estados</option>{Object.entries(prospectNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>
+    </div>
+    {!shown.length&&<p className="team-empty">Todavía no hay fichas.</p>}
+    <ul className="team-drafts">{shown.map((item)=><li key={item.id} className="panel-stack">
+      <div><small>{prospectNames[item.status]} · {kindNames[item.kind]??item.kind} · {item.region}{item.comuna?` · ${item.comuna}`:""}</small><b>{item.businessName}</b>
+        <span>{[item.contactName,item.contactEmail,item.contactPhone].filter(Boolean).join(" · ")||"Sin contacto"}</span>
+        {item.description&&<p>{item.description}</p>}
+        <span>{item.services.length===1?"1 servicio":`${item.services.length} servicios`}{item.invitedAt?` · clave enviada el ${when(item.invitedAt)}`:""}</span>
+        {item.notes&&<p className="panel-reason-note">Notas: {item.notes}</p>}</div>
+      <div className="team-actions">
+        {item.status==="prospecto"&&<><button type="button" className="team-quiet" disabled={busy} onClick={()=>open(item)}>Editar o crear cuenta</button>
+          <button type="button" className="team-quiet" disabled={busy} onClick={()=>act({action:"discard-prospect",id:item.id})}>Descartar</button></>}
+        {item.status==="invitada"&&<button type="button" disabled={busy} onClick={()=>resend(item.id)}>Reenviar clave</button>}
+        {(item.status==="prospecto"||item.status==="descartada")&&<DeleteAction what="la ficha" busy={busy} onConfirm={remove("prospect",item.id)}/>}
+      </div>
+    </li>)}</ul>
+  </article>;
+}
+
+function ProspectForm({prospect,token,busy,run,onSaved,onCancel}:{prospect?:Partial<Prospect>;token:string;busy:boolean;run:(action:()=>Promise<unknown>)=>Promise<void>;onSaved:(mailed:boolean|null)=>void;onCancel?:()=>void}){
+  const [services,setServices]=useState<Record<string,unknown>[]>(prospect?.services??[]);
+  // If the account fails after the file was saved, trying again must not save a second file.
+  const [savedId,setSavedId]=useState(prospect?.id);
+  function submit(event:FormEvent<HTMLFormElement>){
+    event.preventDefault();
+    const form=event.currentTarget,invite=(event.nativeEvent as SubmitEvent).submitter?.getAttribute("value")==="invite";
+    const fields={contactName:field(form,"contactName"),contactEmail:field(form,"contactEmail"),contactPhone:field(form,"contactPhone"),businessName:field(form,"businessName"),kind:field(form,"kind"),region:field(form,"region"),comuna:field(form,"comuna"),address:field(form,"address"),whatsapp:field(form,"whatsapp"),url:field(form,"url"),languages:field(form,"languages").split(/[\s,]+/).filter(Boolean),description:field(form,"description"),notes:field(form,"notes")};
+    void run(async()=>{
+      const saved=await api<{id:number}>(token,"/api/admin",{action:"save-prospect",id:savedId,applicationId:prospect?.applicationId,services,...fields});
+      setSavedId(saved.id);
+      const result=invite?await api<{mailed:boolean}>(token,"/api/admin",{action:"invite-company",id:saved.id}):null;
+      onSaved(result?result.mailed:null);
+    });
+  }
+  return <section className="panel-gap">
+    <h4>{prospect?.id?"Editar ficha":"Nueva empresa"}</h4>
+    <form id="prospect-form" className="panel-form" onSubmit={submit}>
+      <label>Nombre de la empresa<input name="businessName" defaultValue={prospect?.businessName} minLength={2} maxLength={100} required/></label>
+      <label>Rubro<select name="kind" defaultValue={prospect?.kind??"tour"}>{Object.entries(kindNames).map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>
+      <label>Región<select name="region" defaultValue={prospect?.region??"RM"}>{regions.map((region)=><option key={region}>{region}</option>)}</select></label>
+      <label>Comuna<input name="comuna" defaultValue={prospect?.comuna} maxLength={80}/></label>
+      <label className="wide">Dirección<input name="address" defaultValue={prospect?.address} maxLength={200}/></label>
+      <label>Persona de contacto<input name="contactName" defaultValue={prospect?.contactName} maxLength={60}/></label>
+      <label>Correo (aquí llega la clave)<input name="contactEmail" type="email" defaultValue={prospect?.contactEmail} maxLength={160}/></label>
+      <label>Teléfono<input name="contactPhone" defaultValue={prospect?.contactPhone} maxLength={30} autoComplete="off"/></label>
+      <label>WhatsApp<input name="whatsapp" defaultValue={prospect?.whatsapp} maxLength={30} placeholder="+56 9 1234 5678"/></label>
+      <label>Sitio o Instagram<input name="url" defaultValue={prospect?.url} maxLength={300} placeholder="https://"/></label>
+      <label>Idiomas de atención<input name="languages" defaultValue={prospect?.languages?.join(", ")} placeholder="ES, EN, PT"/></label>
+      <label className="wide">Descripción de la empresa<textarea name="description" defaultValue={prospect?.description} rows={3} maxLength={600}/></label>
+      <label className="wide">Notas internas (la empresa no las ve)<textarea name="notes" defaultValue={prospect?.notes} rows={2} maxLength={1000}/></label>
+    </form>
+
+    <h4>Servicios que ofrecerá ({services.length} de 10)</h4>
+    {!services.length&&<p className="team-empty">Todavía no agregas servicios. Puedes hacerlo ahora o dejar que la empresa los cargue.</p>}
+    <ul className="team-drafts">{services.map((service,index)=><li key={index}>
+      <div><small>{categoryNames.es[String(service.category) as Service["category"]]}{service.priceClp?` · $${service.priceClp}`:" · A convenir"}</small><b>{String(service.title)}</b><p>{String(service.description)}</p></div>
+      <div className="team-actions"><button type="button" className="team-quiet" disabled={busy} onClick={()=>setServices(services.filter((_,position)=>position!==index))}>Quitar</button></div>
+    </li>)}</ul>
+    {services.length<10&&<details className="panel-details panel-gap"><summary>Agregar un servicio</summary>
+      <ServiceForm busy={busy} label="Agregar a la ficha" onSave={(fields)=>setServices([...services,fields])}/>
+    </details>}
+    <p className="team-empty panel-gap">Los servicios quedan por aprobar en Aprobaciones; los viajeros los ven cuando los publiques.</p>
+
+    <div className="team-actions panel-gap">
+      <button type="submit" form="prospect-form" name="intent" value="save" className="team-quiet" disabled={busy}>Guardar como prospecto</button>
+      <button type="submit" form="prospect-form" name="intent" value="invite" disabled={busy}>Crear cuenta y enviar correo</button>
+      {onCancel&&<button type="button" className="team-quiet" disabled={busy} onClick={onCancel}>Cancelar</button>}
+    </div>
+  </section>;
 }
 
 function UsersTab({data,busy,act}:{data:AdminData;busy:boolean;act:Act}){

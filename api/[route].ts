@@ -6,6 +6,7 @@ import * as businessApplications from "./_routes/business-applications.js";
 import * as cronSummary from "./_routes/cron-summary.js";
 import * as events from "./_routes/events.js";
 import * as guideLeads from "./_routes/guide-leads.js";
+import * as health from "./_routes/health.js";
 import * as owner from "./_routes/owner.js";
 import * as ownerPhotos from "./_routes/owner-photos.js";
 import * as partners from "./_routes/partners.js";
@@ -24,7 +25,7 @@ import * as weather from "./_routes/weather.js";
 type Handler = (request: Request) => Response | Promise<Response>;
 const routes: Record<string, Partial<Record<string, Handler>>> = {
   account, admin, "agent-events": agentEvents, business, "business-applications": businessApplications,
-  "cron-summary": cronSummary, events, "guide-leads": guideLeads, owner, "owner-photos": ownerPhotos,
+  "cron-summary": cronSummary, events, "guide-leads": guideLeads, health, owner, "owner-photos": ownerPhotos,
   partners, places, promotions, rates, reviews, services, suggestions, team, "traveller-profiles": travellerProfiles, weather,
 };
 
