@@ -3,6 +3,7 @@ import * as admin from "./_routes/admin.js";
 import * as agentEvents from "./_routes/agent-events.js";
 import * as business from "./_routes/business.js";
 import * as businessApplications from "./_routes/business-applications.js";
+import * as categories from "./_routes/categories.js";
 import * as cronSummary from "./_routes/cron-summary.js";
 import * as events from "./_routes/events.js";
 import * as guideLeads from "./_routes/guide-leads.js";
@@ -24,7 +25,7 @@ import * as weather from "./_routes/weather.js";
 // than that. /api/<name> is served by api/_routes/<name>.ts; a new route file must be added to this table.
 type Handler = (request: Request) => Response | Promise<Response>;
 const routes: Record<string, Partial<Record<string, Handler>>> = {
-  account, admin, "agent-events": agentEvents, business, "business-applications": businessApplications,
+  account, admin, "agent-events": agentEvents, business, "business-applications": businessApplications, categories,
   "cron-summary": cronSummary, events, "guide-leads": guideLeads, health, owner, "owner-photos": ownerPhotos,
   partners, places, promotions, rates, reviews, services, suggestions, team, "traveller-profiles": travellerProfiles, weather,
 };

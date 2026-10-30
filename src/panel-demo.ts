@@ -1,6 +1,6 @@
 import type { RegionId } from "./chile-regions";
 import type { AdminData, ManagedService, OwnerData, PlaceRow } from "./panel";
-import type { Service } from "./services-board";
+import { defaultCategories, type Category, type Service } from "./services-board";
 import type { Promotion } from "./traveller-home";
 
 // The data behind /panel?demo=owner|boss|tourist, kept in memory (a reload starts over), so each role's panel can be
@@ -14,6 +14,7 @@ const inDays=(days:number)=>new Date(now+days*24*HOUR).toISOString().slice(0,10)
 let lastId=900,savedProspect=0;
 
 const store:Store={
+  categories:[...defaultCategories.map((item)=>({...item,status:"published"})),{id:"artesania-demo",names:{es:"Artesanía"},status:"pending"}],
   prospects:[
     {id:601,contactName:"Paula Rojas",contactEmail:"paula@example.com",contactPhone:"+56 9 3333 4444",businessName:"Kayak Sur",kind:"tour",region:"LL",comuna:"Puerto Varas",whatsapp:"+56 9 3333 4444",languages:["ES","EN"],description:"Salidas en kayak por el lago Llanquihue.",services:[{category:"tour",title:"Kayak al atardecer",description:"Salida guiada de dos horas con equipo incluido.",priceClp:"35000",languages:["ES","EN"]}],notes:"Contactada en la feria de turismo. Responde por WhatsApp.",status:"prospecto",createdAt:ago(52)},
     {id:602,contactName:"Diego Soto",contactEmail:"diego@example.com",businessName:"Traslados Elqui",kind:"other",region:"CO",comuna:"Vicuña",languages:["ES"],services:[],status:"invitada",invitedAt:ago(20),createdAt:ago(96)},
@@ -114,6 +115,12 @@ function act(path:string,body:Body,me:string){
     if(action==="update-contact")Object.assign(business,{phone:text(body,"phone")||undefined,whatsapp:text(body,"whatsapp")||undefined,url:text(body,"url")||undefined,address:text(body,"address")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase())});
     if(action==="add-promotion")store.promotions.unshift({id:++lastId,partnerId:business.id,title:text(body,"title"),description:text(body,"description")||undefined,validUntil:text(body,"validUntil"),status:"pending"});
     if(action==="remove-promotion")store.promotions=store.promotions.filter((item)=>item.id!==Number(body.promotionId));
+    if(action==="update-listing"){
+      const name=text(body,"newCategory");
+      if(name){const category={id:`demo-${++lastId}`,names:{es:name},status:"pending"};store.categories.push(category);Object.assign(business,{categoryId:"other",proposedCategoryId:category.id})}
+      else Object.assign(business,{categoryId:text(body,"categoryId"),proposedCategoryId:undefined});
+      Object.assign(business,{lat:body.lat===""?undefined:Number(body.lat),lng:body.lng===""?undefined:Number(body.lng)});
+    }
     if(action==="save-service")saveService(business.id,body);
     if(action==="remove-service")store.services=store.services.filter((item)=>item.id!==Number(body.serviceId));
     return;
@@ -188,9 +195,20 @@ function act(path:string,body:Body,me:string){
     }
   }
   const prospect=store.prospects.find((item)=>item.id===id);
+  const category=store.categories.find((item)=>item.id===text(body,"id"));
+  if(action==="save-category"){
+    const names=body.names as Category["names"];
+    if(category)category.names=names;else store.categories.push({id:`demo-${++lastId}`,names,status:"published"});
+  }
+  if(category&&(action==="approve-category"||action==="merge-category"||action==="reject-category")){
+    const target=action==="approve-category"?category.id:action==="merge-category"?text(body,"targetId"):null;
+    for(const item of store.businesses)if(item.proposedCategoryId===category.id)Object.assign(item,{proposedCategoryId:undefined,...(target?{categoryId:target}:{})});
+    if(action==="approve-category")Object.assign(category,{names:body.names,status:"published"});
+    else store.categories=store.categories.filter((item)=>item!==category);
+  }
   if(action==="save-prospect"){
     if(text(body,"businessName").length<2)throw new Error("Escribe el nombre de la empresa.");
-    const fields={contactName:text(body,"contactName"),contactEmail:text(body,"contactEmail"),contactPhone:text(body,"contactPhone")||undefined,businessName:text(body,"businessName"),kind:text(body,"kind"),region:text(body,"region"),comuna:text(body,"comuna")||undefined,address:text(body,"address")||undefined,whatsapp:text(body,"whatsapp")||undefined,url:text(body,"url")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase()),description:text(body,"description")||undefined,services:body.services as Body[],notes:text(body,"notes")||undefined};
+    const fields={categoryId:text(body,"categoryId"),lat:body.lat===""?undefined:Number(body.lat),lng:body.lng===""?undefined:Number(body.lng),contactName:text(body,"contactName"),contactEmail:text(body,"contactEmail"),contactPhone:text(body,"contactPhone")||undefined,businessName:text(body,"businessName"),kind:"other",region:text(body,"region"),comuna:text(body,"comuna")||undefined,address:text(body,"address")||undefined,whatsapp:text(body,"whatsapp")||undefined,url:text(body,"url")||undefined,languages:(body.languages as string[]).map((item)=>item.toUpperCase()),description:text(body,"description")||undefined,services:body.services as Body[],notes:text(body,"notes")||undefined};
     if(prospect){Object.assign(prospect,fields);savedProspect=prospect.id}
     else{savedProspect=++lastId;store.prospects.unshift({id:savedProspect,status:"prospecto",createdAt:new Date().toISOString(),...fields});note(me,"crear_prospecto","company_prospects",savedProspect)}
   }
@@ -272,6 +290,11 @@ export async function demoPromotions(region:RegionId):Promise<Promotion[]>{
 }
 
 // What /api/services would answer for the traveller demo: published services of published businesses in the region.
+// What /api/categories would answer: the published ones.
+export async function demoCategories():Promise<Category[]>{
+  return store.categories.filter((item)=>item.status==="published");
+}
+
 export async function demoServices(region:RegionId):Promise<Service[]>{
   await new Promise((done)=>setTimeout(done,200));
   return store.services.flatMap((service)=>{

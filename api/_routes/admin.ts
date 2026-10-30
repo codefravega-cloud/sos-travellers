@@ -1,5 +1,6 @@
 import { requireRole } from "./_auth.js";
 import { businessColumns, kinds, PHOTO_BUCKET, photosOf, toManagedBusiness, type Photo } from "./_business.js";
+import { allPublished, categoryColumns, partnerKinds, placement, proposeCategory, publishedKind, slugOf, toCategory } from "./_categories.js";
 import { sendCompanyPassword } from "./_email.js";
 import { isEmail, prospectColumns, readProspect, temporaryPassword, temporaryPasswordExpiry, TEMPORARY_PASSWORD_DAYS, toProspect } from "./_prospects.js";
 import { regionCapitals } from "./_regions.js";
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
 
   try {
     const supabase = getSupabase();
-    const [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services, prospects] = await Promise.all([
+    const [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services, prospects, categories] = await Promise.all([
       supabase.from("tbl_usuarios").select("id, nombre, pais, tipo_cuenta, aprobacion, aprobacion_motivo, nivel, nivel_vence_en, estado, estado_motivo, estado_en, creado_en").order("creado_en", { ascending: false }).limit(500),
       supabase.auth.admin.listUsers({ page: 1, perPage: 500 }),
       supabase.from("tbl_usuarios_privado").select("usuario_id, rut_visible"),
@@ -57,8 +58,9 @@ export async function GET(request: Request) {
       supabase.from("owner_benefits").select("id, title, detail, rank, status").order("rank", { ascending: false }).order("id"),
       supabase.from("services").select(serviceColumns).order("updated_at", { ascending: false }).limit(300),
       supabase.from("company_prospects").select(prospectColumns).order("created_at", { ascending: false }).limit(300),
+      supabase.from("business_categories").select(categoryColumns).neq("status", "rejected").order("rank", { ascending: false }).order("id"),
     ]);
-    for (const result of [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services, prospects]) if (result.error) throw result.error;
+    for (const result of [profiles, accounts, ruts, levelRows, audit, partners, applications, reviews, suggestions, promotions, benefits, services, prospects, categories]) if (result.error) throw result.error;
 
     const emails = new Map(accounts.data.users.map((account) => [account.id, account.email ?? ""]));
     const rutOf = new Map((ruts.data ?? []).map((row) => [row.usuario_id, row.rut_visible]));
@@ -89,6 +91,7 @@ export async function GET(request: Request) {
       benefits: benefits.data ?? [],
       services: (services.data ?? []).map((row) => ({ ...toManagedService(row), business: names.get(row.partner_id) ?? "" })),
       prospects: (prospects.data ?? []).map(toProspect),
+      categories: (categories.data ?? []).map(toCategory),
     }, { headers: noStore });
   } catch (error) {
     console.error("Unable to load admin panel", error);
@@ -302,6 +305,15 @@ export async function POST(request: Request) {
     if (action === "save-prospect") {
       const read = readProspect(body);
       if ("error" in read) return fail(read.error);
+      const services = read.row.services as Record<string, unknown>[];
+      if (!await allPublished(supabase, services.map((service) => text(service.category, 40)))) return fail("Un servicio tiene una categoría que no existe.");
+      // A category that is not on the list is created as pending, like a company's proposal.
+      const name = text(body.newCategory, 60);
+      const proposed = name ? await proposeCategory(supabase, name, user.id) : { id: read.row.category_id as string, status: "published" };
+      if ("error" in proposed) return fail(proposed.error);
+      const kind = proposed.status === "published" ? await publishedKind(supabase, proposed.id) : null;
+      if (proposed.status === "published" && !kind) return fail("Elige una categoría de la lista.");
+      Object.assign(read.row, placement(proposed, kind));
       const rowId = id(body.id), applicationId = id(body.applicationId);
       if (rowId) {
         const { data, error } = await supabase.from("company_prospects").update({ ...read.row, updated_at: new Date().toISOString() }).eq("id", rowId).eq("estado", "prospecto").select("id");
@@ -313,6 +325,60 @@ export async function POST(request: Request) {
       if (error) throw error;
       await log("crear_prospecto", "company_prospects", data.id);
       return done({ id: data.id });
+    }
+
+    if (action === "save-category") {
+      const names = Object.fromEntries(["es", "en", "pt", "fr"].map((lang) => [lang, text((body.names as Record<string, unknown> | undefined)?.[lang], 60)]));
+      if (Object.values(names).some((name) => name.length < 2)) return fail("Escribe el nombre en los cuatro idiomas.");
+      const partnerKind = text(body.partnerKind, 12) || "other";
+      if (!partnerKinds.has(partnerKind)) return fail("Tipo inválido.");
+      const categoryId = text(body.id, 40);
+      if (categoryId) {
+        const { data: updated, error } = await supabase.from("business_categories").update({ names, partner_kind: partnerKind }).eq("id", categoryId).select("id, status").maybeSingle();
+        if (error) throw error;
+        if (!updated) return fail("Esa categoría ya no existe.");
+        await log("editar_categoria", "business_categories", categoryId);
+        return done();
+      }
+      const newId = slugOf(names.es);
+      const { error } = await supabase.from("business_categories").insert({ id: newId, names, partner_kind: partnerKind, status: "published" });
+      if (error) return fail(error.code === "23505" ? "Ya existe una categoría con ese nombre." : "No pudimos crear la categoría.");
+      await log("crear_categoria", "business_categories", newId);
+      return done();
+    }
+
+    if (action === "approve-category" || action === "merge-category" || action === "reject-category") {
+      const categoryId = text(body.id, 40);
+      const { data: category, error: readError } = await supabase.from("business_categories").select("id, status").eq("id", categoryId).maybeSingle();
+      if (readError) throw readError;
+      if (!category || category.status !== "pending") return fail("Esa propuesta ya fue revisada.");
+      let target: { id: string; kind: string } | null = null;
+      if (action === "approve-category") {
+        const names = Object.fromEntries(["es", "en", "pt", "fr"].map((lang) => [lang, text((body.names as Record<string, unknown> | undefined)?.[lang], 60)]));
+        if (Object.values(names).some((name) => name.length < 2)) return fail("Escribe el nombre en los cuatro idiomas.");
+        const partnerKind = text(body.partnerKind, 12) || "other";
+        if (!partnerKinds.has(partnerKind)) return fail("Tipo inválido.");
+        const { error } = await supabase.from("business_categories").update({ names, partner_kind: partnerKind, status: "published" }).eq("id", categoryId);
+        if (error) throw error;
+        target = { id: categoryId, kind: partnerKind };
+      } else if (action === "merge-category") {
+        const targetId = text(body.targetId, 40), kind = await publishedKind(supabase, targetId);
+        if (!kind) return fail("Elige una categoría de la lista.");
+        target = { id: targetId, kind };
+      }
+      for (const table of ["partners", "company_prospects"]) {
+        const { error } = await supabase.from(table).update(target ? { category_id: target.id, kind: target.kind, proposed_category_id: null } : { proposed_category_id: null }).eq("proposed_category_id", categoryId);
+        if (error) throw error;
+      }
+      if (action === "merge-category") {
+        const { error } = await supabase.from("business_categories").delete().eq("id", categoryId);
+        if (error) throw error;
+      } else if (action === "reject-category") {
+        const { error } = await supabase.from("business_categories").update({ status: "rejected" }).eq("id", categoryId);
+        if (error) throw error;
+      }
+      await log({ "approve-category": "aprobar_categoria", "merge-category": "unir_categoria", "reject-category": "rechazar_categoria" }[action] as string, "business_categories", categoryId, target ? { despues: { categoria: target.id } } : {});
+      return done();
     }
 
     if (action === "invite-company" || action === "resend-invite" || action === "discard-prospect") {
@@ -355,7 +421,7 @@ export async function POST(request: Request) {
           const { error: markError } = await supabase.from("tbl_usuarios").update({ tipo_cuenta: "empresa", aprobacion: "aprobada", debe_cambiar_clave: true, clave_temporal_vence: until }).eq("id", userId);
           if (markError) throw markError;
           const { data: partner, error: partnerError } = await supabase.from("partners").insert({
-            name: row.business_name, kind: row.kind, region: row.region, phone: row.contact_phone, whatsapp: row.whatsapp, url: row.url,
+            name: row.business_name, kind: row.kind, category_id: row.category_id, proposed_category_id: row.proposed_category_id, lat: row.lat, lng: row.lng, region: row.region, phone: row.contact_phone, whatsapp: row.whatsapp, url: row.url,
             address: [row.address, row.comuna].filter(Boolean).join(", ").slice(0, 200) || null, languages: row.languages, note: row.description, owner_id: userId, status: "published",
           }).select("id").single();
           if (partnerError) throw partnerError;
@@ -412,6 +478,11 @@ export async function POST(request: Request) {
         const ownerId = text(body.ownerId, 36);
         if (ownerId && !/^[0-9a-f-]{36}$/.test(ownerId)) return fail("Dueño inválido.");
         changes.owner_id = ownerId || null;
+      }
+      if ("categoryId" in body) {
+        const categoryId = text(body.categoryId, 40), kind = await publishedKind(supabase, categoryId);
+        if (!kind) return fail("Elige una categoría de la lista.");
+        Object.assign(changes, placement({ id: categoryId, status: "published" }, kind));
       }
       if ("placeId" in body) {
         const placeId = text(body.placeId, 64);

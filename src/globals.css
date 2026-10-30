@@ -267,3 +267,4 @@ body{background:transparent}.weather-backdrop{position:fixed;inset:0;z-index:-2;
 .th-service-actions a+a{background:transparent;color:var(--navy);border:1px solid var(--line)}
 .panel-thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 .panel-thumbs img{width:96px;height:72px;object-fit:cover;border-radius:8px}
+.panel-map-field{display:grid;gap:8px}.panel-map{height:260px;border-radius:10px;border:1px solid var(--line,#d5dde2);overflow:hidden;z-index:0}
