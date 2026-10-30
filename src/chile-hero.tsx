@@ -79,7 +79,15 @@ export default function ChileHero({locale,region,onRegionChange,onExplore,action
     setZoneOnly(nextZone==="islas"?null:nextZone);
     onRegionChange(nextRegion,locality,nextZone==="islas"?island??"all":undefined);
   }
-  function choose(result:Result) { select(result.zone,result.region,result.locality,result.island); setQuery(result.label); setOpen(false); }
+  function goToPlaces() {
+    (document.activeElement as HTMLElement|null)?.blur();
+    setTimeout(()=>document.getElementById("mapa")?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }
+  // A city, town or island goes straight to its places on the map; a zone or region stays here to show its tips.
+  function choose(result:Result) {
+    select(result.zone,result.region,result.locality,result.island); setQuery(result.label); setOpen(false);
+    if(result.kind==="destination") goToPlaces();
+  }
   const pickDestination=(destination:Destination)=>destination.island?select("islas",null,undefined,destination.id):select(regionById(destination.region).zone,destination.region,localityOf(destination));
 
   const zoneInfo=zone?zoneById(zone):null;
@@ -139,7 +147,8 @@ export default function ChileHero({locale,region,onRegionChange,onExplore,action
 
       <div className={`chile-hero-map ${horizontal?"horizontal":""}`}>
         <ChileMap zone={zone} region={region} horizontal={horizontal} islandsLabel={zoneById("islas").name[locale]}
-          onRegion={(id)=>select(regionById(id).zone,id)} onDestination={pickDestination} onIslands={()=>select("islas",null)} onHover={setHovered}/>
+          onRegion={(id)=>{select(regionById(id).zone,id);goToPlaces()}} onDestination={(destination)=>{pickDestination(destination);goToPlaces()}}
+          onIslands={()=>{select("islas",null);goToPlaces()}} onHover={setHovered}/>
         <p className="chile-map-caption" aria-hidden="true">{hovered??heading??t.hint}</p>
       </div>
     </section>

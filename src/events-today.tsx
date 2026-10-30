@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Locale } from "./places";
 import { RegionId } from "./chile-regions";
 
-type EventItem={id:number;title:string;venue:string;category:string;startsAt:string;endsAt?:string;priceLabel?:string;url?:string;summary?:Record<Locale,string>;featured:boolean};
+type EventItem={id:number;title:string;venue:string;category:string;startsAt:string;endsAt?:string;priceLabel?:string;url?:string;summary?:Partial<Record<Locale,string>>;featured:boolean};
 type Range="today"|"tonight"|"week";
 
 const ZONE="America/Santiago",NIGHT_FROM=19;

@@ -26,10 +26,10 @@ export type Place = {
   hours?: string;
   // Weekly opening periods as [open, close] minutes since Sunday 00:00 (see src/open-status.ts).
   openingPeriods?: [number, number][];
-  access?: Record<Locale, string>;
-  tag?: Record<Locale, string>;
+  access?: Partial<Record<Locale, string>>;
+  tag?: Partial<Record<Locale, string>>;
   // Imported places (Google Places) have no editorial copy.
-  summary?: Record<Locale, string>;
+  summary?: Partial<Record<Locale, string>>;
   // Unset on the static list below, which is Santiago only (treated as "RM").
   region?: RegionId;
   curated?: boolean;

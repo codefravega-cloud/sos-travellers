@@ -1,5 +1,6 @@
 import { lazy, StrictMode, Suspense, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import ErrorBoundary from "./error-boundary";
 import MapExplorer from "./map-explorer";
 import "./globals.css";
 
@@ -18,6 +19,6 @@ const page: ReactNode = /^\/equipo\/?$/.test(path) ? <TeamPanel />
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    {page ? <Suspense fallback={null}>{page}</Suspense> : <MapExplorer />}
+    <ErrorBoundary>{page ? <Suspense fallback={null}>{page}</Suspense> : <MapExplorer />}</ErrorBoundary>
   </StrictMode>,
 );

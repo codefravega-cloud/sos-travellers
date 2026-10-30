@@ -768,7 +768,7 @@ function PlacesTab({token,onChange}:{token:string;onChange:()=>Promise<void>}){
 }
 
 // What changed, in a line: "campo: antes → después" for edits, the fields kept for deletions.
-const shortValue=(value:unknown)=>{const shown=typeof value==="string"?value:JSON.stringify(value);return shown&&shown.length>40?`${shown.slice(0,40)}…`:String(shown)};
+const shortValue=(value:unknown)=>{if(value===undefined||value===null)return"—";const shown=typeof value==="string"?value:JSON.stringify(value);return shown&&shown.length>40?`${shown.slice(0,40)}…`:String(shown)};
 function changeLine(entry:AuditEntry){
   if(entry.action==="crear")return "";
   const keys=Object.keys({...entry.before,...entry.after}).slice(0,5);

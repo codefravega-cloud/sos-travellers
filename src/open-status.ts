@@ -23,7 +23,8 @@ const clock = (minute: number) => `${String(Math.floor((minute % 1440) / 60)).pa
 
 // Regular weekly hours only: holidays and one-off closures are not known here.
 export function openStatus(place: Place, now: Date): OpenStatus {
-  const periods = place.openingPeriods;
+  // Hours come from imported data: a malformed period counts as not informed instead of breaking the page.
+  const periods = place.openingPeriods?.filter((period) => Array.isArray(period) && Number.isFinite(period[0]) && Number.isFinite(period[1]));
   if (!periods?.length) return { state: "unknown" };
   if (periods.some(([open, close]) => close - open >= WEEK)) return { state: "open", always: true };
   const minute = minuteOfWeek(now, timeZone(place));
